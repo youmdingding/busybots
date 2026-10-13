@@ -244,71 +244,6 @@
       "gy": 15.959999999999999
     },
     {
-      "type": "city_lamp",
-      "gx": 3.6,
-      "gy": -0.15
-    },
-    {
-      "type": "city_lamp",
-      "gx": 9.6,
-      "gy": -0.15
-    },
-    {
-      "type": "city_lamp",
-      "gx": 15.4,
-      "gy": -0.15
-    },
-    {
-      "type": "city_lamp",
-      "gx": 19.8,
-      "gy": -0.15
-    },
-    {
-      "type": "city_lamp",
-      "gx": -0.15,
-      "gy": 3.2
-    },
-    {
-      "type": "city_lamp",
-      "gx": -0.15,
-      "gy": 8.4
-    },
-    {
-      "type": "city_lamp",
-      "gx": -0.15,
-      "gy": 12.0
-    },
-    {
-      "type": "city_lamp",
-      "gx": 22.0,
-      "gy": 2.6
-    },
-    {
-      "type": "city_lamp",
-      "gx": 22.0,
-      "gy": 7.6
-    },
-    {
-      "type": "city_lamp",
-      "gx": 22.0,
-      "gy": 11.6
-    },
-    {
-      "type": "city_tree_small",
-      "gx": 0.2,
-      "gy": 0.15
-    },
-    {
-      "type": "city_tree_small",
-      "gx": 21.7,
-      "gy": 0.15
-    },
-    {
-      "type": "city_tree_small",
-      "gx": 21.7,
-      "gy": 12.6
-    },
-    {
       "type": "city_traffic_light",
       "gx": 5.0,
       "gy": 15.94,
@@ -337,71 +272,71 @@
     {
       "type": "city_tower_glass",
       "gx": 0.6,
-      "gy": -3.3
+      "gy": -1.1
     },
     {
       "type": "city_tower_deco",
       "gx": 2.9,
-      "gy": -3.3
+      "gy": -1.1
     },
     {
       "type": "city_tower_brick",
       "gx": 5.2,
-      "gy": -3.3
+      "gy": -1.1
     },
     {
       "type": "city_tower_glass",
       "gx": 7.5,
-      "gy": -3.3
+      "gy": -1.1
     },
     {
       "type": "city_tower_deco",
       "gx": 9.8,
-      "gy": -3.3
+      "gy": -1.1
     },
     {
       "type": "city_tower_brick",
       "gx": 12.1,
-      "gy": -3.3
+      "gy": -1.1
     },
     {
       "type": "city_tower_glass",
       "gx": 14.4,
-      "gy": -3.3
+      "gy": -1.1
     },
     {
       "type": "city_tower_deco",
       "gx": 16.7,
-      "gy": -3.3
+      "gy": -1.1
     },
     {
       "type": "city_tower_brick",
       "gx": 19.0,
-      "gy": -3.3
+      "gy": -1.1
     },
     {
       "type": "city_tower_glass",
       "gx": 21.2,
-      "gy": -3.3
+      "gy": -1.1
     },
     {
       "type": "city_tower_deco",
-      "gx": -3.3,
+      "gx": -1.1,
       "gy": 1.6
     },
     {
       "type": "city_tower_brick",
-      "gx": -3.3,
+      "gx": -1.1,
       "gy": 3.9
     },
     {
       "type": "city_tower_glass",
-      "gx": -3.3,
+      "gx": -1.1,
       "gy": 6.2
     },
     {
       "type": "city_tower_deco",
-      "gx": -3.3,
+      "gx": -1.1,
       "gy": 8.5
     }
   ],
@@ -430,13 +365,7 @@
     }
   },
   "ground": {
-    "sprite": "city_ground",
-    "fit": [
-      -1.0,
-      -1.0,
-      22.9,
-      16.3
-    ]
+    "sprite": "city_ground"
   },
   "streets": {
     "hubs": {
@@ -552,88 +481,6 @@
           "taxi",
           "van",
           "sedan_blue"
-        ]
-      },
-      {
-        "axis": "x",
-        "dir": -1,
-        "at": -1.6,
-        "from": -0.4,
-        "to": 22.4,
-        "speed": 1.4,
-        "fade": 1.0,
-        "cars": [
-          "van",
-          "sedan_white",
-          "taxi"
-        ]
-      },
-      {
-        "axis": "x",
-        "dir": 1,
-        "at": -0.7999999999999999,
-        "from": -0.4,
-        "to": 22.4,
-        "speed": 1.6,
-        "fade": 1.0,
-        "cars": [
-          "sedan_blue",
-          "hatch_green",
-          "sedan_red"
-        ]
-      },
-      {
-        "axis": "y",
-        "dir": -1,
-        "at": -1.6,
-        "from": -0.4,
-        "to": 13.4,
-        "speed": 1.3,
-        "fade": 1.0,
-        "cars": [
-          "taxi",
-          "sedan_red"
-        ]
-      },
-      {
-        "axis": "y",
-        "dir": 1,
-        "at": -0.7999999999999999,
-        "from": -0.4,
-        "to": 13.4,
-        "speed": 1.5,
-        "fade": 1.0,
-        "cars": [
-          "sedan_white",
-          "van",
-          "hatch_green"
-        ]
-      },
-      {
-        "axis": "y",
-        "dir": -1,
-        "at": 22.700000000000003,
-        "from": -0.4,
-        "to": 13.4,
-        "speed": 1.4,
-        "fade": 1.0,
-        "cars": [
-          "sedan_blue",
-          "taxi"
-        ]
-      },
-      {
-        "axis": "y",
-        "dir": 1,
-        "at": 23.5,
-        "from": -0.4,
-        "to": 13.4,
-        "speed": 1.6,
-        "fade": 1.0,
-        "cars": [
-          "hatch_green",
-          "van",
-          "sedan_white"
         ]
       }
     ]

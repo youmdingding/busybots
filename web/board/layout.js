@@ -47,18 +47,6 @@ export function fitIslandCamera() {
       maxY = Math.max(maxY, sy + TILE_H + 28);
     }
   }
-  // A theme whose ground reaches past the tiles (City's ring road) names the area to frame
-  const fitArea = Array.isArray(S.activeTheme?.ground?.fit) ? S.activeTheme.ground.fit : null;
-  if (fitArea) {
-    const [gx0, gy0, gx1, gy1] = fitArea;
-    for (const [gx, gy] of [[gx0, gy0], [gx1, gy0], [gx0, gy1], [gx1, gy1]]) {
-      const p = toIso(gx, gy);
-      minX = Math.min(minX, p.sx);
-      maxX = Math.max(maxX, p.sx);
-      minY = Math.min(minY, p.sy - BASE_ELEV - 10);
-      maxY = Math.max(maxY, p.sy - BASE_ELEV + 28);
-    }
-  }
   // Water pad + signs/bots above tiles
   minY -= 18;
   maxY += 48;
@@ -70,7 +58,7 @@ export function fitIslandCamera() {
   const marginY = 40;
   const fit = Math.min((CANVAS_W - 2 * marginX) / bw, (CANVAS_H - 2 * marginY) / bh);
   // Prefer a touch larger when room allows; never overflow
-  S.worldScale = Math.max(fitArea ? 0.75 : 0.95, Math.min(1.14, fit));
+  S.worldScale = Math.max(0.95, Math.min(1.14, fit));
   const cx1 = (minX + maxX) / 2;
   const cy1 = (minY + maxY) / 2;
   S.ORIGIN_X = CANVAS_W / 2 - S.worldScale * cx1;
