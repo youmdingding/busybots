@@ -1,0 +1,39 @@
+{
+  "name": "busybots",
+  "version": "0.1.0",
+  "description": "Watch your coding agents (Claude Code, Codex, Gemini CLI, OpenCode, Cursor, Conductor) bustle around a little pixel-art world.",
+  "type": "module",
+  "bin": {
+    "busybots": "bin/cli.js"
+  },
+  "files": [
+    "bin/",
+    "src/",
+    "web/",
+    "themes/",
+    "tiles/",
+    "icons/",
+    "config.json",
+    "README.md",
+    "LICENSE"
+  ],
+  "engines": {
+    "node": ">=22.5"
+  },
+  "scripts": {
+    "start": "node bin/cli.js",
+    "test": "node --test \"tests/*.test.mjs\""
+  },
+  "keywords": [
+    "claude-code",
+    "codex",
+    "gemini-cli",
+    "opencode",
+    "cursor",
+    "agents",
+    "dashboard",
+    "pixel-art"
+  ],
+  "license": "MIT",
+  "author": "youmdingding"
+}

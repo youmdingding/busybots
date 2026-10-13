@@ -1,0 +1,69 @@
+{
+ "description": "Writing plan.md → Plan",
+ "procs": [
+  "agent"
+ ],
+ "files": [
+  {
+   "path": ".claude/sessions/{{pid:agent}}.json",
+   "json": {
+    "pid": "{{pid:agent}}",
+    "sessionId": "sid-planfile",
+    "cwd": "{{home}}/work/planfile",
+    "status": "busy"
+   }
+  },
+  {
+   "path": "work/planfile/.keep",
+   "text": ""
+  },
+  {
+   "path": ".claude/projects/{{projdir:work/planfile}}/sid-planfile.jsonl",
+   "jsonl": [
+    {
+     "type": "user",
+     "timestamp": "{{t:-60}}",
+     "message": {
+      "role": "user",
+      "content": "write plan"
+     }
+    },
+    {
+     "type": "assistant",
+     "timestamp": "{{t:-3}}",
+     "message": {
+      "content": [
+       {
+        "type": "tool_use",
+        "id": "pf",
+        "name": "Write",
+        "input": {
+         "file_path": "/x/.specify/specs/T-1/plan.md"
+        }
+       }
+      ]
+     }
+    }
+   ],
+   "mtime": -3
+  }
+ ],
+ "expect": [
+  {
+   "brand": "claude",
+   "name": "planfile",
+   "zone": "plan",
+   "state": "active",
+   "phase": "plan",
+   "skill": null,
+   "bubble": "Editing plan.md",
+   "attention": {
+    "needsYou": false,
+    "reason": null,
+    "done": false,
+    "stuck": false,
+    "subagents": 0
+   }
+  }
+ ]
+}

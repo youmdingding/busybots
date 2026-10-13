@@ -1,0 +1,100 @@
+{
+ "description": "Finished turn that edited a file → idle with done badge",
+ "procs": [
+  "agent"
+ ],
+ "files": [
+  {
+   "path": ".claude/sessions/{{pid:agent}}.json",
+   "json": {
+    "pid": "{{pid:agent}}",
+    "sessionId": "sid-done",
+    "cwd": "{{home}}/work/done",
+    "status": "idle"
+   }
+  },
+  {
+   "path": "work/done/.keep",
+   "text": ""
+  },
+  {
+   "path": ".claude/projects/{{projdir:work/done}}/sid-done.jsonl",
+   "jsonl": [
+    {
+     "type": "user",
+     "timestamp": "{{t:-300}}",
+     "message": {
+      "role": "user",
+      "content": "go"
+     }
+    },
+    {
+     "type": "assistant",
+     "timestamp": "{{t:-250}}",
+     "message": {
+      "content": [
+       {
+        "type": "tool_use",
+        "id": "e",
+        "name": "Edit",
+        "input": {
+         "file_path": "/x/a.py"
+        }
+       }
+      ]
+     }
+    },
+    {
+     "type": "user",
+     "timestamp": "{{t:-249}}",
+     "toolUseResult": {},
+     "message": {
+      "content": [
+       {
+        "type": "tool_result",
+        "tool_use_id": "e",
+        "is_error": false
+       }
+      ]
+     }
+    },
+    {
+     "type": "assistant",
+     "timestamp": "{{t:-240}}",
+     "message": {
+      "content": [
+       {
+        "type": "text",
+        "text": "All done — updated a.py."
+       }
+      ]
+     }
+    },
+    {
+     "type": "system",
+     "subtype": "stop_hook_summary",
+     "timestamp": "{{t:-239}}"
+    }
+   ],
+   "mtime": -239
+  }
+ ],
+ "expect": [
+  {
+   "brand": "claude",
+   "name": "done",
+   "zone": "idle",
+   "state": "idle",
+   "phase": "idle",
+   "skill": null,
+   "bubble": null,
+   "attention": {
+    "needsYou": false,
+    "reason": null,
+    "done": true,
+    "stuck": false,
+    "subagents": 0
+   }
+  }
+ ]
+}

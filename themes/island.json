@@ -1,0 +1,343 @@
+{
+  "id": "island",
+  "label": "Island",
+  "ambient": "island",
+  "sky": {
+    "style": "clouds",
+    "alpha": 0.18
+  },
+  "base": {
+    "style": "water",
+    "yOffset": 18
+  },
+  "sign": {
+    "style": "wood"
+  },
+  "pond": true,
+  "art": {},
+  "zones": {},
+  "props": {},
+  "ground": {
+    "sprite": "island_ground",
+    "keepZoneTiles": true
+  },
+  "ambientSpots": [
+    {
+      "type": "city_pine_0",
+      "gx": 2.0,
+      "gy": 12.4,
+      "z": 0.0
+    },
+    {
+      "type": "city_pine_2",
+      "gx": 3.3,
+      "gy": 13.3,
+      "z": 0.0
+    },
+    {
+      "type": "city_pine_1",
+      "gx": 1.0,
+      "gy": 13.6,
+      "z": -1.0
+    },
+    {
+      "type": "city_tree_big",
+      "gx": 10.4,
+      "gy": 13.7,
+      "z": 0.0
+    },
+    {
+      "type": "city_tree_small",
+      "gx": 13.5,
+      "gy": 13.5,
+      "z": 0.0
+    },
+    {
+      "type": "city_tree_small",
+      "gx": 12.2,
+      "gy": 14.4,
+      "z": -0.0
+    },
+    {
+      "type": "city_bush_1",
+      "gx": 8.1,
+      "gy": 12.8,
+      "z": 0.0
+    },
+    {
+      "type": "city_bush_2",
+      "gx": 11.4,
+      "gy": 12.2,
+      "z": 0.0
+    },
+    {
+      "type": "city_bush_0",
+      "gx": 15.6,
+      "gy": 12.1,
+      "z": 0.0
+    },
+    {
+      "type": "city_boulder_big",
+      "gx": 14.6,
+      "gy": 14.2,
+      "z": 0.0
+    },
+    {
+      "type": "city_boulder_small",
+      "gx": 9.2,
+      "gy": 14.3,
+      "z": 0.0
+    },
+    {
+      "type": "city_boulder_small",
+      "gx": 18.6,
+      "gy": 13.8,
+      "z": 0.0
+    },
+    {
+      "type": "city_flower_patch_0",
+      "gx": 7.7,
+      "gy": 13.7,
+      "z": 0.0
+    },
+    {
+      "type": "city_flower_patch_1",
+      "gx": 12.1,
+      "gy": 13.1,
+      "z": 0.0
+    },
+    {
+      "type": "city_flower_patch_0",
+      "gx": 16.0,
+      "gy": 14.0,
+      "z": 0.0
+    },
+    {
+      "type": "city_lantern_post",
+      "gx": 6.15,
+      "gy": 12.8,
+      "z": 0.0
+    },
+    {
+      "type": "city_lantern_post",
+      "gx": 5.35,
+      "gy": 13.9,
+      "z": 0.0
+    },
+    {
+      "type": "city_signpost",
+      "gx": 6.95,
+      "gy": 12.0,
+      "z": 0.0
+    },
+    {
+      "type": "city_bush_1",
+      "gx": 18.2,
+      "gy": 14.2,
+      "z": -1.2
+    },
+    {
+      "type": "city_fence_x",
+      "gx": 14.9,
+      "gy": 12.5,
+      "z": 0.0
+    },
+    {
+      "type": "city_palm_0",
+      "gx": 1.6,
+      "gy": 14.0,
+      "z": -17.1
+    },
+    {
+      "type": "city_palm_1",
+      "gx": 9.6,
+      "gy": 15.05,
+      "z": -8.7
+    },
+    {
+      "type": "city_campfire",
+      "gx": 7.6,
+      "gy": 15.0,
+      "z": -13.7
+    },
+    {
+      "type": "city_dock",
+      "gx": 4.5,
+      "gy": 15.15,
+      "z": -40.0
+    },
+    {
+      "type": "city_rowboat",
+      "gx": 5.6,
+      "gy": 17.1,
+      "z": -40.0
+    },
+    {
+      "type": "city_lighthouse",
+      "gx": 21.6,
+      "gy": 15.55,
+      "z": -16.0
+    },
+    {
+      "type": "city_boulder_big",
+      "gx": 22.3,
+      "gy": 10.2,
+      "z": 0.0
+    },
+    {
+      "type": "city_bush_2",
+      "gx": -0.4,
+      "gy": 11.6,
+      "z": 0.0
+    },
+    {
+      "type": "city_palm_0",
+      "gx": 21.4,
+      "gy": 13.0,
+      "z": 0.0
+    }
+  ],
+  "interiors": {
+    "specs": {
+      "sprite": "island_interior_specs"
+    },
+    "plan": {
+      "sprite": "island_interior_plan"
+    },
+    "build": {
+      "sprite": "island_interior_build"
+    },
+    "review": {
+      "sprite": "island_interior_review"
+    },
+    "idle": {
+      "sprite": "island_interior_idle"
+    },
+    "explore": {
+      "sprite": "island_interior_explore"
+    }
+  },
+  "traffic": {
+    "lanes": [
+      {
+        "prefix": "boat",
+        "z": -40,
+        "bob": true,
+        "wake": true,
+        "fade": 1.5,
+        "axis": "y",
+        "at": -2.6,
+        "dir": 1,
+        "from": -3,
+        "to": 13,
+        "speed": 0.55,
+        "cars": [
+          "sail_white",
+          "fishing"
+        ]
+      },
+      {
+        "prefix": "boat",
+        "z": -40,
+        "bob": true,
+        "wake": true,
+        "fade": 1.5,
+        "axis": "y",
+        "at": -4.4,
+        "dir": -1,
+        "from": -3,
+        "to": 13,
+        "speed": 0.7,
+        "cars": [
+          "catamaran",
+          "speedboat"
+        ]
+      },
+      {
+        "prefix": "boat",
+        "z": -40,
+        "bob": true,
+        "wake": true,
+        "fade": 1.5,
+        "axis": "x",
+        "at": -3.4,
+        "dir": 1,
+        "from": -1,
+        "to": 20,
+        "speed": 0.5,
+        "cars": [
+          "yacht",
+          "sail_red"
+        ]
+      },
+      {
+        "prefix": "boat",
+        "z": -40,
+        "bob": true,
+        "wake": true,
+        "fade": 1.5,
+        "axis": "x",
+        "at": -5.0,
+        "dir": -1,
+        "from": 0,
+        "to": 19,
+        "speed": 0.45,
+        "cars": [
+          "fishing",
+          "catamaran"
+        ]
+      },
+      {
+        "prefix": "boat",
+        "z": -40,
+        "bob": true,
+        "wake": true,
+        "fade": 1.5,
+        "axis": "y",
+        "at": 25.2,
+        "dir": 1,
+        "from": 1,
+        "to": 18,
+        "speed": 0.6,
+        "cars": [
+          "sail_white",
+          "speedboat"
+        ]
+      },
+      {
+        "prefix": "boat",
+        "z": -40,
+        "bob": true,
+        "wake": true,
+        "fade": 1.5,
+        "axis": "x",
+        "at": 19.4,
+        "dir": 1,
+        "from": 4,
+        "to": 24,
+        "speed": 0.5,
+        "cars": [
+          "tour",
+          "sail_red"
+        ]
+      },
+      {
+        "prefix": "boat",
+        "z": -40,
+        "bob": true,
+        "wake": true,
+        "fade": 1.5,
+        "axis": "x",
+        "at": 21.0,
+        "dir": -1,
+        "from": 6,
+        "to": 23,
+        "speed": 0.65,
+        "cars": [
+          "speedboat",
+          "yacht"
+        ]
+      }
+    ]
+  }
+}

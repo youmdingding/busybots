@@ -1,0 +1,62 @@
+{
+ "description": "Claude turned off in settings → nothing shown",
+ "procs": [
+  "agent"
+ ],
+ "files": [
+  {
+   "path": ".claude/sessions/{{pid:agent}}.json",
+   "json": {
+    "pid": "{{pid:agent}}",
+    "sessionId": "sid-claude_off",
+    "cwd": "{{home}}/work/claude_off",
+    "status": "busy"
+   }
+  },
+  {
+   "path": "work/claude_off/.keep",
+   "text": ""
+  },
+  {
+   "path": ".claude/projects/{{projdir:work/claude_off}}/sid-claude_off.jsonl",
+   "jsonl": [
+    {
+     "type": "user",
+     "timestamp": "{{t:-20}}",
+     "message": {
+      "role": "user",
+      "content": "go"
+     }
+    },
+    {
+     "type": "assistant",
+     "timestamp": "{{t:-3}}",
+     "message": {
+      "content": [
+       {
+        "type": "tool_use",
+        "id": "z",
+        "name": "Edit",
+        "input": {
+         "file_path": "/x/b.py"
+        }
+       }
+      ]
+     }
+    }
+   ],
+   "mtime": -3
+  }
+ ],
+ "settings": {
+  "sources": {
+   "claude": {
+    "enabled": false,
+    "paths": [
+     "~/.claude"
+    ]
+   }
+  }
+ },
+ "expect": []
+}

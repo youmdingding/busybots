@@ -1,0 +1,100 @@
+{
+ "description": "Turn just ended (stop marker) → idle immediately, done badge",
+ "procs": [
+  "agent"
+ ],
+ "files": [
+  {
+   "path": ".claude/sessions/{{pid:agent}}.json",
+   "json": {
+    "pid": "{{pid:agent}}",
+    "sessionId": "sid-justdone",
+    "cwd": "{{home}}/work/justdone",
+    "status": "idle"
+   }
+  },
+  {
+   "path": "work/justdone/.keep",
+   "text": ""
+  },
+  {
+   "path": ".claude/projects/{{projdir:work/justdone}}/sid-justdone.jsonl",
+   "jsonl": [
+    {
+     "type": "user",
+     "timestamp": "{{t:-20}}",
+     "message": {
+      "role": "user",
+      "content": "create file"
+     }
+    },
+    {
+     "type": "assistant",
+     "timestamp": "{{t:-15}}",
+     "message": {
+      "content": [
+       {
+        "type": "tool_use",
+        "id": "j1",
+        "name": "Write",
+        "input": {
+         "file_path": "/x/board-test.txt"
+        }
+       }
+      ]
+     }
+    },
+    {
+     "type": "user",
+     "timestamp": "{{t:-6}}",
+     "toolUseResult": {},
+     "message": {
+      "content": [
+       {
+        "type": "tool_result",
+        "tool_use_id": "j1",
+        "is_error": false
+       }
+      ]
+     }
+    },
+    {
+     "type": "assistant",
+     "timestamp": "{{t:-3}}",
+     "message": {
+      "content": [
+       {
+        "type": "text",
+        "text": "Created board-test.txt."
+       }
+      ]
+     }
+    },
+    {
+     "type": "system",
+     "subtype": "stop_hook_summary",
+     "timestamp": "{{t:-2}}"
+    }
+   ],
+   "mtime": -2
+  }
+ ],
+ "expect": [
+  {
+   "brand": "claude",
+   "name": "justdone",
+   "zone": "idle",
+   "state": "idle",
+   "phase": "idle",
+   "skill": null,
+   "bubble": null,
+   "attention": {
+    "needsYou": false,
+    "reason": null,
+    "done": true,
+    "stuck": false,
+    "subagents": 0
+   }
+  }
+ ]
+}

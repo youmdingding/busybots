@@ -1,0 +1,70 @@
+{
+ "description": "Bash call waiting >6 s with no child process → needs permission",
+ "procs": [
+  "agent"
+ ],
+ "files": [
+  {
+   "path": ".claude/sessions/{{pid:agent}}.json",
+   "json": {
+    "pid": "{{pid:agent}}",
+    "sessionId": "sid-permbash",
+    "cwd": "{{home}}/work/permbash",
+    "status": "idle"
+   }
+  },
+  {
+   "path": "work/permbash/.keep",
+   "text": ""
+  },
+  {
+   "path": ".claude/projects/{{projdir:work/permbash}}/sid-permbash.jsonl",
+   "jsonl": [
+    {
+     "type": "user",
+     "timestamp": "{{t:-30}}",
+     "message": {
+      "role": "user",
+      "content": "go"
+     }
+    },
+    {
+     "type": "assistant",
+     "timestamp": "{{t:-15}}",
+     "message": {
+      "content": [
+       {
+        "type": "tool_use",
+        "id": "k",
+        "name": "Bash",
+        "input": {
+         "command": "rm -rf build",
+         "description": "Clean build dir"
+        }
+       }
+      ]
+     }
+    }
+   ],
+   "mtime": -15
+  }
+ ],
+ "expect": [
+  {
+   "brand": "claude",
+   "name": "permbash",
+   "zone": "build",
+   "state": "active",
+   "phase": "build",
+   "skill": null,
+   "bubble": "Approve: Clean build dir",
+   "attention": {
+    "needsYou": true,
+    "reason": "Approve: Clean build dir",
+    "done": false,
+    "stuck": false,
+    "subagents": 0
+   }
+  }
+ ]
+}

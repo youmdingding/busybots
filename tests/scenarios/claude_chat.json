@@ -1,0 +1,70 @@
+{
+ "description": "Finished chat turn without edits → idle, no done badge",
+ "procs": [
+  "agent"
+ ],
+ "files": [
+  {
+   "path": ".claude/sessions/{{pid:agent}}.json",
+   "json": {
+    "pid": "{{pid:agent}}",
+    "sessionId": "sid-chat",
+    "cwd": "{{home}}/work/chat",
+    "status": "idle"
+   }
+  },
+  {
+   "path": "work/chat/.keep",
+   "text": ""
+  },
+  {
+   "path": ".claude/projects/{{projdir:work/chat}}/sid-chat.jsonl",
+   "jsonl": [
+    {
+     "type": "user",
+     "timestamp": "{{t:-300}}",
+     "message": {
+      "role": "user",
+      "content": "what is x?"
+     }
+    },
+    {
+     "type": "assistant",
+     "timestamp": "{{t:-240}}",
+     "message": {
+      "content": [
+       {
+        "type": "text",
+        "text": "x is y."
+       }
+      ]
+     }
+    },
+    {
+     "type": "system",
+     "subtype": "stop_hook_summary",
+     "timestamp": "{{t:-239}}"
+    }
+   ],
+   "mtime": -239
+  }
+ ],
+ "expect": [
+  {
+   "brand": "claude",
+   "name": "chat",
+   "zone": "idle",
+   "state": "idle",
+   "phase": "idle",
+   "skill": null,
+   "bubble": null,
+   "attention": {
+    "needsYou": false,
+    "reason": null,
+    "done": false,
+    "stuck": false,
+    "subagents": 0
+   }
+  }
+ ]
+}

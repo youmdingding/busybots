@@ -1,0 +1,70 @@
+{
+ "description": "Busy session running a command → active, no badge",
+ "procs": [
+  "agent"
+ ],
+ "files": [
+  {
+   "path": ".claude/sessions/{{pid:agent}}.json",
+   "json": {
+    "pid": "{{pid:agent}}",
+    "sessionId": "sid-running",
+    "cwd": "{{home}}/work/running",
+    "status": "busy"
+   }
+  },
+  {
+   "path": "work/running/.keep",
+   "text": ""
+  },
+  {
+   "path": ".claude/projects/{{projdir:work/running}}/sid-running.jsonl",
+   "jsonl": [
+    {
+     "type": "user",
+     "timestamp": "{{t:-20}}",
+     "message": {
+      "role": "user",
+      "content": "go"
+     }
+    },
+    {
+     "type": "assistant",
+     "timestamp": "{{t:-3}}",
+     "message": {
+      "content": [
+       {
+        "type": "tool_use",
+        "id": "d",
+        "name": "Bash",
+        "input": {
+         "command": "sleep 30",
+         "description": "Wait"
+        }
+       }
+      ]
+     }
+    }
+   ],
+   "mtime": -3
+  }
+ ],
+ "expect": [
+  {
+   "brand": "claude",
+   "name": "running",
+   "zone": "build",
+   "state": "active",
+   "phase": "build",
+   "skill": null,
+   "bubble": "Wait",
+   "attention": {
+    "needsYou": false,
+    "reason": null,
+    "done": false,
+    "stuck": false,
+    "subagents": 0
+   }
+  }
+ ]
+}

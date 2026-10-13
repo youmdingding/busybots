@@ -1,0 +1,20 @@
+# Runtime data lives in the per-user state folder (see src/paths.js), not here.
+# Older checkouts wrote these into the repo:
+status.claude.json
+logs/
+.board-api-token
+.watch_claude.pid
+settings.json
+
+# Local backups and old material
+_archive/
+*.bak*
+
+# Tooling
+__pycache__/
+*.pyc
+node_modules/
+test-results/
+screenshots/
+out/
+.DS_Store

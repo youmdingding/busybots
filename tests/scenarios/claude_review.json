@@ -1,0 +1,70 @@
+{
+ "description": "/pr-review keeps the turn in Test & Review",
+ "procs": [
+  "agent"
+ ],
+ "files": [
+  {
+   "path": ".claude/sessions/{{pid:agent}}.json",
+   "json": {
+    "pid": "{{pid:agent}}",
+    "sessionId": "sid-review",
+    "cwd": "{{home}}/work/review",
+    "status": "busy"
+   }
+  },
+  {
+   "path": "work/review/.keep",
+   "text": ""
+  },
+  {
+   "path": ".claude/projects/{{projdir:work/review}}/sid-review.jsonl",
+   "jsonl": [
+    {
+     "type": "user",
+     "timestamp": "{{t:-60}}",
+     "message": {
+      "role": "user",
+      "content": "<command-message>pr-review is running…</command-message>\n<command-name>/pr-review</command-name>\n<command-args>TICKET-1</command-args>"
+     }
+    },
+    {
+     "type": "assistant",
+     "timestamp": "{{t:-3}}",
+     "message": {
+      "content": [
+       {
+        "type": "tool_use",
+        "id": "v1",
+        "name": "Bash",
+        "input": {
+         "command": "gh pr diff 12",
+         "description": "Show PR diff"
+        }
+       }
+      ]
+     }
+    }
+   ],
+   "mtime": -3
+  }
+ ],
+ "expect": [
+  {
+   "brand": "claude",
+   "name": "review",
+   "zone": "review",
+   "state": "active",
+   "phase": "review",
+   "skill": "pr-review",
+   "bubble": "Reviewing · Show PR diff",
+   "attention": {
+    "needsYou": false,
+    "reason": null,
+    "done": false,
+    "stuck": false,
+    "subagents": 0
+   }
+  }
+ ]
+}

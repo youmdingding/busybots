@@ -1,0 +1,53 @@
+{
+ "description": "Cursor CLI running pnpm test (tool call without result) → Test & Review",
+ "files": [
+  {
+   "path": ".cursor/chats/34d6b8b36a06326978d66806fc663b5a/4b1f9c2e-6d3a-4e7f-9a10-2c3d4e5f6a7b/meta.json",
+   "json": {
+    "schemaVersion": 1,
+    "createdAtMs": "{{ms:-300}}",
+    "updatedAtMs": "{{ms:-2}}",
+    "hasConversation": true,
+    "cwd": "/work/shop"
+   },
+   "mtime": -2
+  },
+  {
+   "path": ".cursor/chats/34d6b8b36a06326978d66806fc663b5a/4b1f9c2e-6d3a-4e7f-9a10-2c3d4e5f6a7b/store.db",
+   "sqlite": [
+    "CREATE TABLE blobs (id TEXT PRIMARY KEY, data BLOB)",
+    "CREATE TABLE meta (key TEXT PRIMARY KEY, value TEXT)",
+    "INSERT INTO meta VALUES ('0', '7b226167656e744964223a20226331222c20226e616d65223a2022466978206361727420646973636f756e74222c20226d6f6465223a202264656661756c74227d')",
+    "INSERT INTO blobs VALUES ('8c48a4ee5fd0be351e642acb57c0c5d6e7abd6f085ff7741c2ecbc29cda5ad4a', CAST('{\"role\": \"system\", \"content\": \"You are an AI coding assistant\"}' AS BLOB))",
+    "INSERT INTO blobs VALUES ('4da0bacf54d621ebfbe1654c02d1a719889a0a70158890b9f7e4fa7cf5b64863', CAST('{\"role\": \"user\", \"content\": [{\"type\": \"text\", \"text\": \"<user_info>OS: darwin</user_info>\"}, {\"type\": \"text\", \"text\": \"Fix the discount bug in src/cart.ts\"}]}' AS BLOB))",
+    "INSERT INTO blobs VALUES ('ee81dc5f2d38ce9d8c0cc439ce31dd25299cb3015d5c85437eb69d657a292c98', CAST('{\"role\": \"assistant\", \"content\": [{\"type\": \"reasoning\", \"text\": \"Look at applyDiscount.\"}, {\"type\": \"tool-call\", \"toolCallId\": \"call_1\", \"toolName\": \"Read\", \"args\": {\"path\": \"src/cart.ts\"}}]}' AS BLOB))",
+    "INSERT INTO blobs VALUES ('c77253f4e307dec4fac74a06fc1c6b6cc174fe5e80d84170ecc1b3a7be25be9d', CAST('{\"role\": \"tool\", \"content\": [{\"type\": \"tool-result\", \"toolCallId\": \"call_1\", \"toolName\": \"Read\", \"result\": {\"contents\": \"x\"}}]}' AS BLOB))",
+    "INSERT INTO blobs VALUES ('pb01', X'0A20DEADBEEF')",
+    "INSERT INTO blobs VALUES ('c5610c307e62f9e862ffa7c9b068349048f9d545217eb6794701f547b4bcc9d9', CAST('{\"role\": \"assistant\", \"content\": [{\"type\": \"tool-call\", \"toolCallId\": \"call_2\", \"toolName\": \"StrReplace\", \"args\": {\"path\": \"src/cart.ts\", \"old_string\": \"floor\", \"new_string\": \"round\"}}]}' AS BLOB))",
+    "INSERT INTO blobs VALUES ('dae279df9f5112d0e7d35dd50cbc15d74ddf172fd1f157c38bf3dfbc8490fcdd', CAST('{\"role\": \"tool\", \"content\": [{\"type\": \"tool-result\", \"toolCallId\": \"call_2\", \"toolName\": \"StrReplace\", \"result\": {\"success\": true}}]}' AS BLOB))",
+    "INSERT INTO blobs VALUES ('192e9d8497cdc9454938946316cdb713c88f73d8970029731e1d49a7d4ad6fd7', CAST('{\"role\": \"assistant\", \"content\": [{\"type\": \"text\", \"text\": \"Fixed: applyDiscount now rounds to cents.\"}]}' AS BLOB))",
+    "INSERT INTO blobs VALUES ('681de4a6b41f124c8c40b4b739fbc1bea4369184ae2678d19a4566424385bd33', CAST('{\"role\": \"user\", \"content\": [{\"type\": \"text\", \"text\": \"Run the tests\"}]}' AS BLOB))",
+    "INSERT INTO blobs VALUES ('5c6d614847d1ac526ea3bc520a95a38ad00394946f215cd02354e9d27e206e68', CAST('{\"role\": \"assistant\", \"content\": [{\"type\": \"text\", \"text\": \"Running the tests.\"}, {\"type\": \"tool-call\", \"toolCallId\": \"call_3\", \"toolName\": \"Shell\", \"args\": {\"command\": \"pnpm test --run\"}}]}' AS BLOB))"
+   ],
+   "mtime": -2
+  }
+ ],
+ "expect": [
+  {
+   "brand": "cursor",
+   "name": "shop",
+   "zone": "review",
+   "state": "active",
+   "phase": "test",
+   "skill": null,
+   "bubble": "Running tests",
+   "attention": {
+    "needsYou": false,
+    "reason": null,
+    "done": false,
+    "stuck": false,
+    "subagents": 0
+   }
+  }
+ ]
+}

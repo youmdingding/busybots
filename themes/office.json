@@ -1,0 +1,244 @@
+{
+  "id": "office",
+  "label": "Office",
+  "ambient": "office",
+  "sky": {
+    "style": "office",
+    "alpha": 0.12
+  },
+  "base": {
+    "style": "slab",
+    "yOffset": 14
+  },
+  "sign": {
+    "style": "plaque"
+  },
+  "pond": false,
+  "page": {
+    "bg": "#d8dde4",
+    "accent": "#3a5a7a"
+  },
+  "art": {
+    "skyTop": "#c5d0dc",
+    "skyMid": "#dce3eb",
+    "skyBot": "#e8ecf0",
+    "waterTop": "#a8b0bc",
+    "waterLit": "#c8d0d8",
+    "waterRipple": "#e0e4ea",
+    "waterSide": "#5a6270",
+    "waterSideDark": "#3e4450",
+    "grassA": "#c4b8a0",
+    "grassB": "#b0a48c",
+    "grassC": "#d4c8b0",
+    "grassD": "#9e927c",
+    "grassSpeck": "#8a7e68",
+    "grassHi": "#e0d4bc",
+    "pathA": "#8a9098",
+    "pathB": "#7a8088",
+    "pathC": "#9aa0a8",
+    "dirtLeft": "#6a7078",
+    "dirtLeftMid": "#7a8088",
+    "dirtRight": "#9aa0a8",
+    "dirtRightLit": "#b0b6be",
+    "dirtEdge": "#404850",
+    "labelWood": "#4a5560",
+    "labelText": "#1a2028"
+  },
+  "zones": {
+    "specs": {
+      "a": "#d8e8f0",
+      "b": "#c0d4e0",
+      "c": "#e8f4f8",
+      "d": "#a8c0d0",
+      "floor": "#c8dce8",
+      "floorHi": "#e0f0f6",
+      "wall": "#6a90a8",
+      "wallLit": "#9ab8c8",
+      "edge": "rgba(40,70,90,0.75)",
+      "ring": "rgba(80,130,160,0.45)"
+    },
+    "plan": {
+      "a": "#d0e0f8",
+      "b": "#b8cce8",
+      "c": "#e4ecfc",
+      "d": "#98b4d8",
+      "floor": "#c0d4f0",
+      "floorHi": "#dce8fa",
+      "wall": "#4a70b0",
+      "wallLit": "#7898d0",
+      "edge": "rgba(30,55,100,0.8)",
+      "ring": "rgba(60,110,180,0.45)"
+    },
+    "build": {
+      "a": "#e8d8c8",
+      "b": "#d4c0a8",
+      "c": "#f0e4d4",
+      "d": "#c0a888",
+      "floor": "#dcc8b0",
+      "floorHi": "#f0e0cc",
+      "wall": "#8a6a48",
+      "wallLit": "#b09068",
+      "edge": "rgba(70,50,30,0.8)",
+      "ring": "rgba(160,120,70,0.4)"
+    },
+    "review": {
+      "a": "#e0d8e8",
+      "b": "#c8bcd4",
+      "c": "#ece4f0",
+      "d": "#b0a0c0",
+      "floor": "#d4c8e0",
+      "floorHi": "#e8e0f0",
+      "wall": "#6a5890",
+      "wallLit": "#9880b8",
+      "edge": "rgba(55,40,80,0.8)",
+      "ring": "rgba(120,90,160,0.4)"
+    },
+    "idle": {
+      "a": "#e8e0d4",
+      "b": "#d4cabb",
+      "c": "#f2ebe0",
+      "d": "#c0b4a4",
+      "floor": "#ddd4c6",
+      "floorHi": "#efe8dc",
+      "wall": "#8a8070",
+      "wallLit": "#b0a898",
+      "edge": "rgba(70,65,55,0.55)",
+      "ring": "rgba(140,130,110,0.35)"
+    },
+    "explore": {
+      "a": "#e8e0d4",
+      "b": "#d4cabb",
+      "c": "#f2ebe0",
+      "d": "#c0b4a4",
+      "floor": "#ddd4c6",
+      "floorHi": "#efe8dc",
+      "wall": "#8a8070",
+      "wallLit": "#b0a898",
+      "edge": "rgba(70,65,55,0.55)",
+      "ring": "rgba(140,130,110,0.35)"
+    }
+  },
+  "props": {
+    "specs": {
+      "prop": "proc_whiteboard",
+      "motif": "motif_compass"
+    },
+    "plan": {
+      "prop": "proc_whiteboard",
+      "motif": "motif_gear"
+    },
+    "build": {
+      "prop": "proc_desk",
+      "motif": "motif_tick"
+    },
+    "review": {
+      "prop": "proc_qa",
+      "motif": "motif_tick"
+    },
+    "idle": {
+      "prop": "proc_sofa",
+      "motif": "motif_moon"
+    }
+  },
+  "ambientSpots": [
+    {
+      "type": "city_office_fig_big",
+      "gx": 0.55,
+      "gy": 11.35
+    },
+    {
+      "type": "city_office_cooler",
+      "gx": 0.45,
+      "gy": 10.75
+    },
+    {
+      "type": "city_office_bench",
+      "gx": 3.4,
+      "gy": 14.0
+    },
+    {
+      "type": "city_office_fig_big",
+      "gx": 2.9,
+      "gy": 12.35
+    },
+    {
+      "type": "city_office_reception",
+      "gx": 9.2,
+      "gy": 14.6
+    },
+    {
+      "type": "city_office_fig_small",
+      "gx": 11.4,
+      "gy": 14.2
+    },
+    {
+      "type": "city_office_copier",
+      "gx": 4.6,
+      "gy": 12.55
+    },
+    {
+      "type": "city_office_whiteboard",
+      "gx": 7.5,
+      "gy": 12.6
+    },
+    {
+      "type": "city_office_vending",
+      "gx": 10.9,
+      "gy": 12.45
+    },
+    {
+      "type": "city_office_bins",
+      "gx": 12.35,
+      "gy": 11.9
+    },
+    {
+      "type": "city_office_coffee_bar",
+      "gx": 14.0,
+      "gy": 12.5
+    },
+    {
+      "type": "city_office_lounge",
+      "gx": 17.4,
+      "gy": 14.2
+    },
+    {
+      "type": "city_office_floor_lamp",
+      "gx": 19.9,
+      "gy": 13.2
+    },
+    {
+      "type": "city_office_fig_small",
+      "gx": 15.4,
+      "gy": 15.7
+    },
+    {
+      "type": "city_office_phone_booth",
+      "gx": 21.3,
+      "gy": 15.3
+    }
+  ],
+  "ground": {
+    "sprite": "office_ground",
+    "keepZoneTiles": true
+  },
+  "interiors": {
+    "specs": {
+      "sprite": "office_interior_specs"
+    },
+    "plan": {
+      "sprite": "office_interior_plan"
+    },
+    "build": {
+      "sprite": "office_interior_build"
+    },
+    "review": {
+      "sprite": "office_interior_review"
+    },
+    "idle": {
+      "sprite": "office_interior_idle"
+    },
+    "explore": {
+      "sprite": "office_interior_explore"
+    }
+  }
+}

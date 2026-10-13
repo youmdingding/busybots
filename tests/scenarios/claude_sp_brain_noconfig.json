@@ -1,0 +1,103 @@
+{
+ "description": "Same skill without a config mapping → generic behaviour (Explore, no label)",
+ "procs": [
+  "agent"
+ ],
+ "files": [
+  {
+   "path": ".claude/sessions/{{pid:agent}}.json",
+   "json": {
+    "pid": "{{pid:agent}}",
+    "sessionId": "sid-sp_brain_noconfig",
+    "cwd": "{{home}}/work/sp_brain_noconfig",
+    "status": "busy"
+   }
+  },
+  {
+   "path": "work/sp_brain_noconfig/.keep",
+   "text": ""
+  },
+  {
+   "path": ".claude/projects/{{projdir:work/sp_brain_noconfig}}/sid-sp_brain_noconfig.jsonl",
+   "jsonl": [
+    {
+     "type": "assistant",
+     "timestamp": "{{t:-100}}",
+     "message": {
+      "content": [
+       {
+        "type": "tool_use",
+        "id": "b1",
+        "name": "Skill",
+        "input": {
+         "skill": "superpowers:brainstorming"
+        }
+       }
+      ]
+     }
+    },
+    {
+     "type": "user",
+     "timestamp": "{{t:-99}}",
+     "toolUseResult": {},
+     "message": {
+      "content": [
+       {
+        "type": "tool_result",
+        "tool_use_id": "b1",
+        "is_error": false
+       }
+      ]
+     }
+    },
+    {
+     "type": "user",
+     "timestamp": "{{t:-40}}",
+     "message": {
+      "role": "user",
+      "content": "Yes I mean (a)."
+     }
+    },
+    {
+     "type": "assistant",
+     "timestamp": "{{t:-3}}",
+     "message": {
+      "content": [
+       {
+        "type": "tool_use",
+        "id": "b2",
+        "name": "Read",
+        "input": {
+         "file_path": "/x/README.md"
+        }
+       }
+      ]
+     }
+    }
+   ],
+   "mtime": -3
+  }
+ ],
+ "config": {
+  "skillAreas": {},
+  "skillLabels": {}
+ },
+ "expect": [
+  {
+   "brand": "claude",
+   "name": "sp_brain_noconfig",
+   "zone": "explore",
+   "state": "active",
+   "phase": "explore",
+   "skill": "superpowers:brainstorming",
+   "bubble": "Reading README.md",
+   "attention": {
+    "needsYou": false,
+    "reason": null,
+    "done": false,
+    "stuck": false,
+    "subagents": 0
+   }
+  }
+ ]
+}

@@ -1,0 +1,75 @@
+{
+ "description": "Notification hook marker newer than the transcript → needs you with the hook's message",
+ "procs": [
+  "agent"
+ ],
+ "files": [
+  {
+   "path": ".claude/sessions/{{pid:agent}}.json",
+   "json": {
+    "pid": "{{pid:agent}}",
+    "sessionId": "sid-hooked",
+    "cwd": "{{home}}/work/hooked",
+    "status": "idle"
+   }
+  },
+  {
+   "path": "work/hooked/.keep",
+   "text": ""
+  },
+  {
+   "path": ".claude/projects/{{projdir:work/hooked}}/sid-hooked.jsonl",
+   "jsonl": [
+    {
+     "type": "user",
+     "timestamp": "{{t:-30}}",
+     "message": {
+      "role": "user",
+      "content": "go"
+     }
+    },
+    {
+     "type": "assistant",
+     "timestamp": "{{t:-2}}",
+     "message": {
+      "content": [
+       {
+        "type": "tool_use",
+        "id": "m",
+        "name": "Bash",
+        "input": {
+         "command": "git push"
+        }
+       }
+      ]
+     }
+    }
+   ],
+   "mtime": -2
+  },
+  {
+   "path": "attention/sid-hooked.json",
+   "json": {
+    "message": "Claude needs your permission to use Bash"
+   }
+  }
+ ],
+ "expect": [
+  {
+   "brand": "claude",
+   "name": "hooked",
+   "zone": "build",
+   "state": "active",
+   "phase": "build",
+   "skill": null,
+   "bubble": "Claude needs your permission to use Bash",
+   "attention": {
+    "needsYou": true,
+    "reason": "Claude needs your permission to use Bash",
+    "done": false,
+    "stuck": false,
+    "subagents": 0
+   }
+  }
+ ]
+}

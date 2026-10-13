@@ -1,0 +1,40 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    name: Node ${{ matrix.node }} on ${{ matrix.os }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, macos-latest, windows-latest]
+        node: [22, 24]
+    # Windows support is best-effort until it has been tried on a real machine
+    continue-on-error: ${{ matrix.os == 'windows-latest' }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node }}
+      - name: Syntax check (board modules and settings page)
+        shell: bash
+        run: |
+          for f in web/board/*.js; do node --input-type=module --check < "$f"; done
+          node --check web/admin.js
+      - name: Tests
+        run: npm test
+      - name: CLI smoke test
+        shell: bash
+        run: |
+          export BUSYBOTS_STATE="$RUNNER_TEMP/state"
+          node bin/cli.js --help
+          node bin/cli.js status > /dev/null
+          node bin/cli.js doctor || true   # no agents installed on CI: reports, doesn't fail the build

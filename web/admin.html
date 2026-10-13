@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Settings — Busybots</title>
+  <link rel="icon" href="icons/claude-00.png">
+  <link rel="stylesheet" href="style.css" />
+  <style>
+    #admin { width: 860px; max-width: 100%; display: flex; flex-direction: column; gap: 18px; padding-bottom: 90px; }
+    .admin-head { display: flex; justify-content: space-between; align-items: flex-end; gap: 12px;
+      border-bottom: 2px solid rgba(58, 122, 92, 0.45); padding-bottom: 10px; }
+    .admin-head a { color: var(--accent); font-weight: 700; font-size: 13px; text-decoration: none; }
+    .admin-head a:hover { text-decoration: underline; }
+    .section-title { font-size: 11px; text-transform: uppercase; letter-spacing: 0.08em; color: var(--muted); font-weight: 700; }
+    .card { background: rgba(247, 250, 248, 0.96); border: 3px solid rgba(58, 122, 92, 0.55); border-radius: 2px;
+      box-shadow: 0 0 0 1px rgba(255,255,255,0.5), 5px 6px 0 rgba(40, 70, 60, 0.14); padding: 14px 16px; }
+    .card + .card { margin-top: 12px; }
+    .card-head { display: flex; justify-content: space-between; align-items: center; gap: 12px; }
+    .card-head h2 { font-size: 16px; color: var(--accent); }
+    .beta { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em; color: #a0661a;
+      border: 1.5px solid #d9b07a; border-radius: 2px; padding: 1px 5px; margin-left: 8px; vertical-align: 2px; }
+    .hint { font-size: 12px; color: var(--muted); margin: 4px 0 10px; line-height: 1.45; }
+    .card.off .rows, .card.off .extra { opacity: 0.45; pointer-events: none; }
+    .rows { display: flex; flex-direction: column; gap: 8px; }
+    .row { display: grid; grid-template-columns: 1fr auto; gap: 6px 8px; align-items: center; }
+    .row label.lbl { grid-column: 1 / -1; font-size: 11px; font-weight: 700; color: var(--muted); }
+    input[type="text"], input[type="number"] { width: 100%; font: 500 13px ui-monospace, SFMono-Regular, Menlo, monospace;
+      padding: 7px 9px; border: 2px solid rgba(58, 122, 92, 0.4); border-radius: 2px; background: #fff; color: var(--text); }
+    input[type="number"] { width: 80px; font-family: inherit; }
+    input:focus { outline: 2px solid var(--accent); outline-offset: 1px; }
+    .status { grid-column: 1 / -1; font-size: 12px; min-height: 16px; }
+    .status.ok { color: #1f7a52; }
+    .status.bad { color: #b4442c; }
+    .status::before { font-weight: 700; margin-right: 5px; }
+    .status.ok::before { content: "✓"; }
+    .status.muted { color: var(--muted); }
+    .status.bad::before { content: "✕"; }
+    .icon-btn { appearance: none; border: 2px solid rgba(58, 122, 92, 0.45); background: #fff; width: 32px; height: 32px;
+      font-size: 17px; line-height: 1; cursor: pointer; color: var(--accent); border-radius: 2px; }
+    .icon-btn:hover, .panel-btn:hover { background: rgba(45, 138, 122, 0.08); }
+    .panel-btn.primary:hover { background: #267566; }
+    .link-btn { appearance: none; border: none; background: none; color: var(--accent); font: 700 12px system-ui, sans-serif;
+      cursor: pointer; padding: 4px 0; align-self: flex-start; }
+    .link-btn:hover { text-decoration: underline; }
+    .extra { display: flex; align-items: center; gap: 8px; font-size: 13px; margin-top: 10px; flex-wrap: wrap; }
+    .switch { display: inline-flex; align-items: center; gap: 8px; font-size: 12px; font-weight: 700; color: var(--muted); cursor: pointer; }
+    .switch input { appearance: none; width: 38px; height: 22px; border: 2px solid rgba(58, 122, 92, 0.55); border-radius: 2px;
+      background: #fff; position: relative; cursor: pointer; margin: 0; }
+    .switch input::after { content: ""; position: absolute; top: 2px; left: 2px; width: 14px; height: 14px; background: var(--idle); transition: left 0.12s; }
+    .switch input:checked { background: var(--accent); }
+    .switch input:checked::after { left: 18px; background: #fff; }
+    .note { font-size: 12px; color: var(--muted); line-height: 1.5; }
+    .note code { font-size: 11px; background: rgba(255,255,255,0.7); padding: 1px 4px; }
+    .savebar { position: fixed; left: 0; right: 0; bottom: 0; display: flex; justify-content: center;
+      background: rgba(232, 244, 240, 0.96); border-top: 2px solid rgba(58, 122, 92, 0.35); padding: 10px 12px; z-index: 10; }
+    .savebar-inner { width: 860px; max-width: 100%; display: flex; align-items: center; gap: 10px; }
+    #save-msg { flex: 1; font-size: 13px; color: var(--muted); }
+    #save-msg.ok { color: #1f7a52; } #save-msg.bad { color: #b4442c; } #save-msg.dirty { color: #a0661a; }
+    .board-grid { display: grid; grid-template-columns: 200px 1fr; gap: 14px 12px; align-items: center; font-size: 13px; }
+    .board-grid .filter-chips { margin-top: 0; justify-self: start; }
+    @media (max-width: 600px) { .board-grid { grid-template-columns: 1fr; } }
+  </style>
+</head>
+<body>
+  <div id="app">
+    <main id="admin">
+      <header class="admin-head">
+        <div>
+          <h1>Settings</h1>
+          <span class="sub">Where your agents keep their sessions, and how the board looks.</span>
+        </div>
+        <a href="/">← Back to board</a>
+      </header>
+
+      <section>
+        <div class="section-title">Agents</div>
+        <div id="agents" style="margin-top:8px"></div>
+        <p class="note" style="margin-top:12px">
+          Each agent stores sessions its own way, so each needs a small reader (see <code>src/readers/</code>).
+          Missing yours? Open an issue.
+        </p>
+      </section>
+
+      <section>
+        <div class="section-title">Board</div>
+        <div class="card" style="margin-top:8px">
+          <div class="board-grid">
+            <span>Default theme</span>
+            <div id="theme-pick" class="filter-chips" role="group" aria-label="Default theme"></div>
+            <span>Bubbles for idle agents</span>
+            <label class="switch"><input type="checkbox" id="idle-bubbles" /> <span>Show their last message</span></label>
+            <span>Privacy mode</span>
+            <label class="switch"><input type="checkbox" id="privacy" /> <span>Hide project names, file names and what agents say (for screen sharing)</span></label>
+            <span>Update every</span>
+            <span><input type="number" id="poll" min="1" max="30" step="1" /> seconds</span>
+          </div>
+        </div>
+      </section>
+
+      <p class="note" id="file-note"></p>
+    </main>
+  </div>
+
+  <div class="savebar">
+    <div class="savebar-inner">
+      <span id="save-msg">Loading…</span>
+      <button type="button" class="panel-btn" id="reset">Reset to defaults</button>
+      <button type="button" class="panel-btn primary" id="save" disabled>Save</button>
+    </div>
+  </div>
+  <script src="admin.js"></script>
+</body>
+</html>

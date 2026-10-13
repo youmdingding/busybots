@@ -1,0 +1,113 @@
+{
+ "description": "Agent call with a live sub-agent transcript → delegating",
+ "procs": [
+  "agent"
+ ],
+ "files": [
+  {
+   "path": ".claude/sessions/{{pid:agent}}.json",
+   "json": {
+    "pid": "{{pid:agent}}",
+    "sessionId": "sid-deleg",
+    "cwd": "{{home}}/work/deleg",
+    "status": "busy"
+   }
+  },
+  {
+   "path": "work/deleg/.keep",
+   "text": ""
+  },
+  {
+   "path": ".claude/projects/{{projdir:work/deleg}}/sid-deleg.jsonl",
+   "jsonl": [
+    {
+     "type": "user",
+     "timestamp": "{{t:-60}}",
+     "message": {
+      "role": "user",
+      "content": "go"
+     }
+    },
+    {
+     "type": "assistant",
+     "timestamp": "{{t:-30}}",
+     "message": {
+      "content": [
+       {
+        "type": "tool_use",
+        "id": "g",
+        "name": "Agent",
+        "input": {
+         "description": "explore repo"
+        }
+       }
+      ]
+     }
+    }
+   ],
+   "mtime": -30
+  },
+  {
+   "path": ".claude/projects/{{projdir:work/deleg}}/sid-deleg/subagents/a1.jsonl",
+   "jsonl": [
+    {
+     "type": "user",
+     "timestamp": "{{t:-29}}",
+     "message": {
+      "role": "user",
+      "content": "explore"
+     }
+    },
+    {
+     "type": "assistant",
+     "timestamp": "{{t:-3}}",
+     "message": {
+      "content": [
+       {
+        "type": "tool_use",
+        "id": "h",
+        "name": "Grep",
+        "input": {
+         "pattern": "foo"
+        }
+       }
+      ]
+     }
+    },
+    {
+     "type": "user",
+     "timestamp": "{{t:-2}}",
+     "toolUseResult": {},
+     "message": {
+      "content": [
+       {
+        "type": "tool_result",
+        "tool_use_id": "h",
+        "is_error": false
+       }
+      ]
+     }
+    }
+   ],
+   "mtime": -2
+  }
+ ],
+ "expect": [
+  {
+   "brand": "claude",
+   "name": "deleg",
+   "zone": "explore",
+   "state": "active",
+   "phase": "explore",
+   "skill": null,
+   "bubble": "Searching with Grep",
+   "attention": {
+    "needsYou": false,
+    "reason": null,
+    "done": false,
+    "stuck": false,
+    "subagents": 1
+   }
+  }
+ ]
+}

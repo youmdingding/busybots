@@ -1,0 +1,99 @@
+{
+ "description": "Skill tool with skill=plan keeps the turn in Plan",
+ "procs": [
+  "agent"
+ ],
+ "files": [
+  {
+   "path": ".claude/sessions/{{pid:agent}}.json",
+   "json": {
+    "pid": "{{pid:agent}}",
+    "sessionId": "sid-skilltool",
+    "cwd": "{{home}}/work/skilltool",
+    "status": "busy"
+   }
+  },
+  {
+   "path": "work/skilltool/.keep",
+   "text": ""
+  },
+  {
+   "path": ".claude/projects/{{projdir:work/skilltool}}/sid-skilltool.jsonl",
+   "jsonl": [
+    {
+     "type": "user",
+     "timestamp": "{{t:-60}}",
+     "message": {
+      "role": "user",
+      "content": "plan TICKET-9 please"
+     }
+    },
+    {
+     "type": "assistant",
+     "timestamp": "{{t:-50}}",
+     "message": {
+      "content": [
+       {
+        "type": "tool_use",
+        "id": "q1",
+        "name": "Skill",
+        "input": {
+         "skill": "plan"
+        }
+       }
+      ]
+     }
+    },
+    {
+     "type": "user",
+     "timestamp": "{{t:-49}}",
+     "toolUseResult": {},
+     "message": {
+      "content": [
+       {
+        "type": "tool_result",
+        "tool_use_id": "q1",
+        "is_error": false
+       }
+      ]
+     }
+    },
+    {
+     "type": "assistant",
+     "timestamp": "{{t:-4}}",
+     "message": {
+      "content": [
+       {
+        "type": "tool_use",
+        "id": "q2",
+        "name": "Agent",
+        "input": {
+         "description": "explore"
+        }
+       }
+      ]
+     }
+    }
+   ],
+   "mtime": -4
+  }
+ ],
+ "expect": [
+  {
+   "brand": "claude",
+   "name": "skilltool",
+   "zone": "plan",
+   "state": "active",
+   "phase": "plan",
+   "skill": "plan",
+   "bubble": "Planning · Delegating work",
+   "attention": {
+    "needsYou": false,
+    "reason": null,
+    "done": false,
+    "stuck": false,
+    "subagents": 1
+   }
+  }
+ ]
+}

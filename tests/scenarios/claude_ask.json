@@ -1,0 +1,69 @@
+{
+ "description": "AskUserQuestion pending → needs you",
+ "procs": [
+  "agent"
+ ],
+ "files": [
+  {
+   "path": ".claude/sessions/{{pid:agent}}.json",
+   "json": {
+    "pid": "{{pid:agent}}",
+    "sessionId": "sid-ask",
+    "cwd": "{{home}}/work/ask",
+    "status": "idle"
+   }
+  },
+  {
+   "path": "work/ask/.keep",
+   "text": ""
+  },
+  {
+   "path": ".claude/projects/{{projdir:work/ask}}/sid-ask.jsonl",
+   "jsonl": [
+    {
+     "type": "user",
+     "timestamp": "{{t:-20}}",
+     "message": {
+      "role": "user",
+      "content": "go"
+     }
+    },
+    {
+     "type": "assistant",
+     "timestamp": "{{t:-2}}",
+     "message": {
+      "content": [
+       {
+        "type": "tool_use",
+        "id": "c",
+        "name": "AskUserQuestion",
+        "input": {
+         "questions": []
+        }
+       }
+      ]
+     }
+    }
+   ],
+   "mtime": -2
+  }
+ ],
+ "expect": [
+  {
+   "brand": "claude",
+   "name": "ask",
+   "zone": "build",
+   "state": "active",
+   "phase": "build",
+   "skill": null,
+   "bubble": "Has a question for you",
+   "attention": {
+    "needsYou": true,
+    "reason": "Has a question for you",
+    "done": false,
+    "stuck": false,
+    "subagents": 0
+   }
+  }
+ ]
+}

@@ -1,0 +1,58 @@
+{
+ "description": "Codex applying a patch → Build",
+ "files": [
+  {
+   "path": ".codex/sessions/{{today:/}}/rollout-x-patch.jsonl",
+   "jsonl": [
+    {
+     "timestamp": "{{t:-120}}",
+     "type": "session_meta",
+     "payload": {
+      "id": "cx-patch",
+      "cwd": "/work/web",
+      "originator": "codex-tui",
+      "source": "cli",
+      "git": {
+       "branch": "me/feature-x"
+      }
+     }
+    },
+    {
+     "timestamp": "{{t:-60}}",
+     "type": "event_msg",
+     "payload": {
+      "type": "task_started"
+     }
+    },
+    {
+     "timestamp": "{{t:-30}}",
+     "type": "response_item",
+     "payload": {
+      "type": "custom_tool_call",
+      "name": "apply_patch",
+      "call_id": "c2",
+      "input": "*** Begin Patch\n*** Update File: src/a.ts\n"
+     }
+    }
+   ]
+  }
+ ],
+ "expect": [
+  {
+   "brand": "codex",
+   "name": "work",
+   "zone": "build",
+   "state": "active",
+   "phase": "build",
+   "skill": null,
+   "bubble": "Editing a.ts",
+   "attention": {
+    "needsYou": false,
+    "reason": null,
+    "done": false,
+    "stuck": false,
+    "subagents": 0
+   }
+  }
+ ]
+}

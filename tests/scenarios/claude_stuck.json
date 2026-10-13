@@ -1,0 +1,173 @@
+{
+ "description": "Four failing test runs in a row → stuck badge",
+ "procs": [
+  "agent"
+ ],
+ "files": [
+  {
+   "path": ".claude/sessions/{{pid:agent}}.json",
+   "json": {
+    "pid": "{{pid:agent}}",
+    "sessionId": "sid-stuck",
+    "cwd": "{{home}}/work/stuck",
+    "status": "busy"
+   }
+  },
+  {
+   "path": "work/stuck/.keep",
+   "text": ""
+  },
+  {
+   "path": ".claude/projects/{{projdir:work/stuck}}/sid-stuck.jsonl",
+   "jsonl": [
+    {
+     "type": "user",
+     "timestamp": "{{t:-60}}",
+     "message": {
+      "role": "user",
+      "content": "go"
+     }
+    },
+    {
+     "type": "assistant",
+     "timestamp": "{{t:-40}}",
+     "message": {
+      "content": [
+       {
+        "type": "tool_use",
+        "id": "s0",
+        "name": "Bash",
+        "input": {
+         "command": "pytest"
+        }
+       }
+      ]
+     }
+    },
+    {
+     "type": "user",
+     "timestamp": "{{t:-38}}",
+     "toolUseResult": {},
+     "message": {
+      "content": [
+       {
+        "type": "tool_result",
+        "tool_use_id": "s0",
+        "is_error": true
+       }
+      ]
+     }
+    },
+    {
+     "type": "assistant",
+     "timestamp": "{{t:-35}}",
+     "message": {
+      "content": [
+       {
+        "type": "tool_use",
+        "id": "s1",
+        "name": "Bash",
+        "input": {
+         "command": "pytest"
+        }
+       }
+      ]
+     }
+    },
+    {
+     "type": "user",
+     "timestamp": "{{t:-33}}",
+     "toolUseResult": {},
+     "message": {
+      "content": [
+       {
+        "type": "tool_result",
+        "tool_use_id": "s1",
+        "is_error": true
+       }
+      ]
+     }
+    },
+    {
+     "type": "assistant",
+     "timestamp": "{{t:-30}}",
+     "message": {
+      "content": [
+       {
+        "type": "tool_use",
+        "id": "s2",
+        "name": "Bash",
+        "input": {
+         "command": "pytest"
+        }
+       }
+      ]
+     }
+    },
+    {
+     "type": "user",
+     "timestamp": "{{t:-28}}",
+     "toolUseResult": {},
+     "message": {
+      "content": [
+       {
+        "type": "tool_result",
+        "tool_use_id": "s2",
+        "is_error": true
+       }
+      ]
+     }
+    },
+    {
+     "type": "assistant",
+     "timestamp": "{{t:-25}}",
+     "message": {
+      "content": [
+       {
+        "type": "tool_use",
+        "id": "s3",
+        "name": "Bash",
+        "input": {
+         "command": "pytest"
+        }
+       }
+      ]
+     }
+    },
+    {
+     "type": "user",
+     "timestamp": "{{t:-23}}",
+     "toolUseResult": {},
+     "message": {
+      "content": [
+       {
+        "type": "tool_result",
+        "tool_use_id": "s3",
+        "is_error": true
+       }
+      ]
+     }
+    }
+   ],
+   "mtime": -23
+  }
+ ],
+ "expect": [
+  {
+   "brand": "claude",
+   "name": "stuck",
+   "zone": "review",
+   "state": "active",
+   "phase": "test",
+   "skill": null,
+   "bubble": "Running tests",
+   "attention": {
+    "needsYou": false,
+    "reason": null,
+    "done": false,
+    "stuck": true,
+    "subagents": 0
+   }
+  }
+ ]
+}

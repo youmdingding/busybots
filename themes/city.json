@@ -1,0 +1,488 @@
+{
+  "id": "city",
+  "label": "City",
+  "ambient": "city",
+  "sky": {
+    "style": "dusk",
+    "alpha": 0.22
+  },
+  "base": {
+    "style": "street",
+    "yOffset": 16
+  },
+  "sign": {
+    "style": "street"
+  },
+  "pond": false,
+  "roads": {
+    "laneMarkings": true,
+    "crosswalks": true,
+    "pathWidth": 3
+  },
+  "page": {
+    "bg": "#b8c4d4",
+    "accent": "#3a5a8a"
+  },
+  "art": {
+    "skyTop": "#4a5a88",
+    "skyMid": "#8a7aaa",
+    "skyBot": "#e8a878",
+    "waterTop": "#3a3e48",
+    "waterLit": "#5a5e68",
+    "waterRipple": "#7a7e88",
+    "waterSide": "#1a1e28",
+    "waterSideDark": "#0e1218",
+    "grassA": "#7a8088",
+    "grassB": "#6a7078",
+    "grassC": "#8a9098",
+    "grassD": "#5a6068",
+    "grassSpeck": "#4a5058",
+    "grassHi": "#9aa0a8",
+    "pathA": "#242830",
+    "pathB": "#1c2028",
+    "pathC": "#2c3038",
+    "dirtLeft": "#3a3e46",
+    "dirtLeftMid": "#4a4e56",
+    "dirtRight": "#5a5e66",
+    "dirtRightLit": "#6a6e76",
+    "dirtEdge": "#12161c",
+    "stoneLeft": "#1a1e26",
+    "stoneRight": "#3a3e46",
+    "labelWood": "#2a3040",
+    "labelText": "#f0f4f8"
+  },
+  "zones": {
+    "specs": {
+      "a": "#3ec8c0",
+      "b": "#2aa8a0",
+      "c": "#58e0d8",
+      "d": "#1e8880",
+      "floor": "#34b8b0",
+      "floorHi": "#50d8d0",
+      "wall": "#0e5858",
+      "wallLit": "#1a8880",
+      "edge": "rgba(8,50,50,0.9)",
+      "ring": "rgba(40,180,170,0.5)"
+    },
+    "plan": {
+      "a": "#4a8ae8",
+      "b": "#3870d0",
+      "c": "#68a8f8",
+      "d": "#2858b0",
+      "floor": "#407ce0",
+      "floorHi": "#60a0f0",
+      "wall": "#1e4080",
+      "wallLit": "#3868c0",
+      "edge": "rgba(16,40,90,0.9)",
+      "ring": "rgba(60,120,220,0.5)"
+    },
+    "build": {
+      "a": "#e87830",
+      "b": "#d06018",
+      "c": "#f89850",
+      "d": "#b04810",
+      "floor": "#e07028",
+      "floorHi": "#f89048",
+      "wall": "#803010",
+      "wallLit": "#b05020",
+      "edge": "rgba(70,30,8,0.9)",
+      "ring": "rgba(220,110,40,0.5)"
+    },
+    "review": {
+      "a": "#a070e8",
+      "b": "#8858d0",
+      "c": "#b890f8",
+      "d": "#7040b8",
+      "floor": "#9868e0",
+      "floorHi": "#b088f0",
+      "wall": "#482878",
+      "wallLit": "#7048b0",
+      "edge": "rgba(48,24,80,0.9)",
+      "ring": "rgba(140,90,220,0.5)"
+    },
+    "idle": {
+      "a": "#58a858",
+      "b": "#448844",
+      "c": "#70c070",
+      "d": "#347034",
+      "floor": "#50a050",
+      "floorHi": "#68b868",
+      "wall": "#2a5a2a",
+      "wallLit": "#4a8a4a",
+      "edge": "rgba(30,50,30,0.7)",
+      "ring": "rgba(80,140,80,0.4)"
+    },
+    "explore": {
+      "a": "#58a858",
+      "b": "#448844",
+      "c": "#70c070",
+      "d": "#347034",
+      "floor": "#50a050",
+      "floorHi": "#68b868",
+      "wall": "#2a5a2a",
+      "wallLit": "#4a8a4a",
+      "edge": "rgba(30,50,30,0.7)",
+      "ring": "rgba(80,140,80,0.4)"
+    }
+  },
+  "props": {
+    "specs": {
+      "prop": null,
+      "motif": "motif_compass"
+    },
+    "plan": {
+      "prop": null,
+      "motif": "motif_gear"
+    },
+    "build": {
+      "prop": null,
+      "motif": "motif_tick"
+    },
+    "review": {
+      "prop": null,
+      "motif": "motif_tick"
+    },
+    "idle": {
+      "prop": null,
+      "motif": "motif_moon"
+    }
+  },
+  "ambientSpots": [
+    {
+      "type": "city_tree_small",
+      "gx": 0.7,
+      "gy": 13.3
+    },
+    {
+      "type": "city_tree_small",
+      "gx": 7.4,
+      "gy": 13.3
+    },
+    {
+      "type": "city_tree_small",
+      "gx": 14.8,
+      "gy": 13.3
+    },
+    {
+      "type": "city_tree_big",
+      "gx": 18.9,
+      "gy": 13.3
+    },
+    {
+      "type": "city_tree_small",
+      "gx": 21.4,
+      "gy": 13.3
+    },
+    {
+      "type": "city_shop1_bakery",
+      "gx": 2.15,
+      "gy": 12.95
+    },
+    {
+      "type": "city_shop1_books",
+      "gx": 4.1,
+      "gy": 12.95
+    },
+    {
+      "type": "city_shop1_flowers",
+      "gx": 8.85,
+      "gy": 12.95
+    },
+    {
+      "type": "city_shop1_cafe",
+      "gx": 10.95,
+      "gy": 12.95
+    },
+    {
+      "type": "city_lamp",
+      "gx": 14.5,
+      "gy": 13.3
+    },
+    {
+      "type": "city_bus_stop",
+      "gx": 16.3,
+      "gy": 12.95
+    },
+    {
+      "type": "city_bench",
+      "gx": 17.85,
+      "gy": 13.0
+    },
+    {
+      "type": "city_newsstand",
+      "gx": 20.1,
+      "gy": 12.95
+    },
+    {
+      "type": "city_lamp",
+      "gx": 11.95,
+      "gy": 13.35
+    },
+    {
+      "type": "city_lamp",
+      "gx": 2.6,
+      "gy": 15.94
+    },
+    {
+      "type": "city_lamp",
+      "gx": 9.6,
+      "gy": 15.94
+    },
+    {
+      "type": "city_lamp",
+      "gx": 16.4,
+      "gy": 15.94
+    },
+    {
+      "type": "city_lamp",
+      "gx": 20.4,
+      "gy": 15.94
+    },
+    {
+      "type": "city_hydrant",
+      "gx": 11.4,
+      "gy": 15.959999999999999
+    },
+    {
+      "type": "city_traffic_light",
+      "gx": 5.0,
+      "gy": 15.94,
+      "signal": 0
+    },
+    {
+      "type": "city_traffic_light",
+      "gx": 5.05,
+      "gy": 13.35,
+      "signal": 0
+    },
+    {
+      "type": "city_traffic_light",
+      "gx": 13.9,
+      "gy": 15.94,
+      "signal": 1
+    },
+    {
+      "type": "city_traffic_light",
+      "gx": 13.8,
+      "gy": 13.35,
+      "signal": 1
+    }
+  ],
+  "skyline": [
+    {
+      "type": "city_tower_glass",
+      "gx": 0.6,
+      "gy": -1.1
+    },
+    {
+      "type": "city_tower_deco",
+      "gx": 2.9,
+      "gy": -1.1
+    },
+    {
+      "type": "city_tower_brick",
+      "gx": 5.2,
+      "gy": -1.1
+    },
+    {
+      "type": "city_tower_glass",
+      "gx": 7.5,
+      "gy": -1.1
+    },
+    {
+      "type": "city_tower_deco",
+      "gx": 9.8,
+      "gy": -1.1
+    },
+    {
+      "type": "city_tower_brick",
+      "gx": 12.1,
+      "gy": -1.1
+    },
+    {
+      "type": "city_tower_glass",
+      "gx": 14.4,
+      "gy": -1.1
+    },
+    {
+      "type": "city_tower_deco",
+      "gx": 16.7,
+      "gy": -1.1
+    },
+    {
+      "type": "city_tower_brick",
+      "gx": 19.0,
+      "gy": -1.1
+    },
+    {
+      "type": "city_tower_glass",
+      "gx": 21.2,
+      "gy": -1.1
+    },
+    {
+      "type": "city_tower_deco",
+      "gx": -1.1,
+      "gy": 1.6
+    },
+    {
+      "type": "city_tower_brick",
+      "gx": -1.1,
+      "gy": 3.9
+    },
+    {
+      "type": "city_tower_glass",
+      "gx": -1.1,
+      "gy": 6.2
+    },
+    {
+      "type": "city_tower_deco",
+      "gx": -1.1,
+      "gy": 8.5
+    }
+  ],
+  "skylineHaze": {
+    "color": "#8a7aaa",
+    "alpha": 0.16
+  },
+  "interiors": {
+    "specs": {
+      "sprite": "interior_specs"
+    },
+    "build": {
+      "sprite": "interior_build"
+    },
+    "plan": {
+      "sprite": "interior_plan"
+    },
+    "review": {
+      "sprite": "interior_review"
+    },
+    "idle": {
+      "sprite": "interior_idle"
+    },
+    "explore": {
+      "sprite": "interior_explore"
+    }
+  },
+  "ground": {
+    "sprite": "city_ground"
+  },
+  "streets": {
+    "hubs": {
+      "gateA": [
+        3.5,
+        5.65
+      ],
+      "mid": [
+        6.5,
+        5.65
+      ],
+      "gateB": [
+        9.5,
+        5.65
+      ],
+      "east": [
+        12.4,
+        5.65
+      ],
+      "exploreGate": [
+        16.9,
+        5.65
+      ],
+      "idleGate": [
+        12.4,
+        8.7
+      ]
+    },
+    "edges": [
+      [
+        "gateA",
+        "mid"
+      ],
+      [
+        "mid",
+        "gateB"
+      ],
+      [
+        "gateB",
+        "east"
+      ],
+      [
+        "east",
+        "exploreGate"
+      ],
+      [
+        "east",
+        "idleGate"
+      ]
+    ],
+    "zoneHubs": {
+      "specs": "gateA",
+      "build": "gateA",
+      "plan": "gateB",
+      "review": "gateB",
+      "explore": "exploreGate",
+      "idle": "idleGate"
+    }
+  },
+  "traffic": {
+    "cycle": 15,
+    "green": 8,
+    "amber": 1.6,
+    "signals": [
+      {
+        "id": 0,
+        "axis": "x",
+        "at": [
+          5.25,
+          5.85
+        ],
+        "offset": 0
+      },
+      {
+        "id": 1,
+        "axis": "x",
+        "at": [
+          13.0,
+          13.6
+        ],
+        "offset": 7.5
+      }
+    ],
+    "lanes": [
+      {
+        "axis": "x",
+        "dir": -1,
+        "at": 14.1,
+        "from": 0.2,
+        "to": 21.8,
+        "speed": 1.5,
+        "fade": 1.0,
+        "signals": true,
+        "cars": [
+          "taxi",
+          "sedan_blue",
+          "van",
+          "sedan_white"
+        ]
+      },
+      {
+        "axis": "x",
+        "dir": 1,
+        "at": 15.1,
+        "from": 0.2,
+        "to": 21.8,
+        "speed": 1.7,
+        "fade": 1.0,
+        "signals": true,
+        "cars": [
+          "sedan_red",
+          "hatch_green",
+          "taxi",
+          "van",
+          "sedan_blue"
+        ]
+      }
+    ]
+  }
+}

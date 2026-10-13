@@ -1,0 +1,83 @@
+{
+ "description": "Searching code → Explore",
+ "procs": [
+  "agent"
+ ],
+ "files": [
+  {
+   "path": ".claude/sessions/{{pid:agent}}.json",
+   "json": {
+    "pid": "{{pid:agent}}",
+    "sessionId": "sid-explore",
+    "cwd": "{{home}}/work/explore",
+    "status": "busy"
+   }
+  },
+  {
+   "path": "work/explore/.keep",
+   "text": ""
+  },
+  {
+   "path": ".claude/projects/{{projdir:work/explore}}/sid-explore.jsonl",
+   "jsonl": [
+    {
+     "type": "user",
+     "timestamp": "{{t:-20}}",
+     "message": {
+      "role": "user",
+      "content": "go"
+     }
+    },
+    {
+     "type": "assistant",
+     "timestamp": "{{t:-3}}",
+     "message": {
+      "content": [
+       {
+        "type": "tool_use",
+        "id": "i",
+        "name": "Grep",
+        "input": {
+         "pattern": "foo"
+        }
+       }
+      ]
+     }
+    },
+    {
+     "type": "user",
+     "timestamp": "{{t:-2}}",
+     "toolUseResult": {},
+     "message": {
+      "content": [
+       {
+        "type": "tool_result",
+        "tool_use_id": "i",
+        "is_error": false
+       }
+      ]
+     }
+    }
+   ],
+   "mtime": -2
+  }
+ ],
+ "expect": [
+  {
+   "brand": "claude",
+   "name": "explore",
+   "zone": "explore",
+   "state": "active",
+   "phase": "explore",
+   "skill": null,
+   "bubble": "Searching with Grep",
+   "attention": {
+    "needsYou": false,
+    "reason": null,
+    "done": false,
+    "stuck": false,
+    "subagents": 0
+   }
+  }
+ ]
+}

@@ -1,0 +1,351 @@
+{
+  "id": "space",
+  "label": "Space",
+  "ambient": "space",
+  "sky": {
+    "style": "stars",
+    "alpha": 1,
+    "planet": true,
+    "planetX": 1220,
+    "planetY": 130,
+    "planetR": 110
+  },
+  "base": {
+    "style": "void",
+    "yOffset": 20
+  },
+  "sign": {
+    "style": "holo"
+  },
+  "pond": false,
+  "page": {
+    "bg": "#0e1420",
+    "accent": "#3ec8e0"
+  },
+  "art": {
+    "skyTop": "#050810",
+    "skyMid": "#0a1220",
+    "skyBot": "#121a30",
+    "waterTop": "#101828",
+    "waterLit": "#1a2840",
+    "waterRipple": "#2a4060",
+    "waterSide": "#081018",
+    "waterSideDark": "#04080e",
+    "grassA": "#3a4558",
+    "grassB": "#2e3848",
+    "grassC": "#4a5568",
+    "grassD": "#242e3c",
+    "grassSpeck": "#1a2230",
+    "grassHi": "#5a6880",
+    "pathA": "#2a3848",
+    "pathB": "#1e2a38",
+    "pathC": "#364858",
+    "dirtLeft": "#1a2434",
+    "dirtLeftMid": "#243044",
+    "dirtRight": "#344058",
+    "dirtRightLit": "#445870",
+    "dirtEdge": "#0a1018",
+    "labelWood": "#1a3048",
+    "labelText": "#e0f4ff"
+  },
+  "zones": {
+    "specs": {
+      "a": "#1a6870",
+      "b": "#145860",
+      "c": "#2a8890",
+      "d": "#0e4850",
+      "floor": "#186870",
+      "floorHi": "#28a0a8",
+      "wall": "#0a3840",
+      "wallLit": "#1a6870",
+      "edge": "rgba(40,220,230,0.55)",
+      "ring": "rgba(60,220,230,0.35)"
+    },
+    "plan": {
+      "a": "#284878",
+      "b": "#1e3868",
+      "c": "#3868a0",
+      "d": "#142850",
+      "floor": "#245080",
+      "floorHi": "#3a78b8",
+      "wall": "#102040",
+      "wallLit": "#285898",
+      "edge": "rgba(80,160,255,0.55)",
+      "ring": "rgba(100,180,255,0.35)"
+    },
+    "build": {
+      "a": "#785028",
+      "b": "#604018",
+      "c": "#987038",
+      "d": "#483010",
+      "floor": "#705028",
+      "floorHi": "#a07030",
+      "wall": "#382010",
+      "wallLit": "#684028",
+      "edge": "rgba(255,160,60,0.5)",
+      "ring": "rgba(255,170,70,0.3)"
+    },
+    "review": {
+      "a": "#583888",
+      "b": "#482870",
+      "c": "#7050a8",
+      "d": "#381858",
+      "floor": "#503880",
+      "floorHi": "#7850b0",
+      "wall": "#281048",
+      "wallLit": "#503888",
+      "edge": "rgba(180,120,255,0.5)",
+      "ring": "rgba(190,130,255,0.3)"
+    },
+    "idle": {
+      "a": "#2a3848",
+      "b": "#222e3c",
+      "c": "#3a4a5c",
+      "d": "#1a2430",
+      "floor": "#283848",
+      "floorHi": "#3a5068",
+      "wall": "#141c28",
+      "wallLit": "#2a3c50",
+      "edge": "rgba(120,200,255,0.4)",
+      "ring": "rgba(100,180,255,0.25)"
+    },
+    "explore": {
+      "a": "#2a3848",
+      "b": "#222e3c",
+      "c": "#3a4a5c",
+      "d": "#1a2430",
+      "floor": "#283848",
+      "floorHi": "#3a5068",
+      "wall": "#141c28",
+      "wallLit": "#2a3c50",
+      "edge": "rgba(120,200,255,0.4)",
+      "ring": "rgba(100,180,255,0.25)"
+    }
+  },
+  "props": {
+    "specs": {
+      "prop": "proc_holo",
+      "motif": "motif_compass"
+    },
+    "plan": {
+      "prop": "proc_holo",
+      "motif": "motif_gear"
+    },
+    "build": {
+      "prop": "proc_console",
+      "motif": "motif_tick"
+    },
+    "review": {
+      "prop": "proc_scanner",
+      "motif": "motif_tick"
+    },
+    "idle": {
+      "prop": "proc_dome",
+      "motif": "motif_moon"
+    }
+  },
+  "ambientSpots": [
+    {
+      "type": "city_space_shuttle",
+      "gx": 17.6,
+      "gy": 14.0
+    },
+    {
+      "type": "city_space_crates",
+      "gx": 3.4,
+      "gy": 13.9
+    },
+    {
+      "type": "city_space_canisters",
+      "gx": 0.6,
+      "gy": 11.35
+    },
+    {
+      "type": "city_space_bot",
+      "gx": 5.2,
+      "gy": 15.2
+    },
+    {
+      "type": "city_space_console",
+      "gx": 9.3,
+      "gy": 14.4
+    },
+    {
+      "type": "city_space_crates",
+      "gx": 11.0,
+      "gy": 15.6
+    },
+    {
+      "type": "city_space_holo_beacon",
+      "gx": 7.3,
+      "gy": 12.5
+    },
+    {
+      "type": "city_space_tank",
+      "gx": 12.4,
+      "gy": 12.4
+    },
+    {
+      "type": "city_space_hydro_pod",
+      "gx": 14.4,
+      "gy": 12.5
+    },
+    {
+      "type": "city_space_drone",
+      "gx": 20.9,
+      "gy": 11.95
+    },
+    {
+      "type": "city_space_canisters",
+      "gx": 14.6,
+      "gy": 15.6
+    },
+    {
+      "type": "city_space_floor_light",
+      "gx": 2.9,
+      "gy": 12.3
+    },
+    {
+      "type": "city_space_floor_light",
+      "gx": 21.6,
+      "gy": 15.8
+    }
+  ],
+  "ground": {
+    "sprite": "space_ground",
+    "keepZoneTiles": true
+  },
+  "traffic": {
+    "lanes": [
+      {
+        "prefix": "ship",
+        "z": 24,
+        "bob": true,
+        "wake": true,
+        "trail": "#6fe3ff",
+        "fade": 1.5,
+        "axis": "x",
+        "at": 19.0,
+        "dir": 1,
+        "from": 4,
+        "to": 26,
+        "speed": 1.1,
+        "cars": [
+          "shuttle",
+          "pod",
+          "hauler"
+        ]
+      },
+      {
+        "prefix": "ship",
+        "z": 24,
+        "bob": true,
+        "wake": true,
+        "trail": "#ff8a5a",
+        "fade": 1.5,
+        "axis": "x",
+        "at": 21.0,
+        "dir": -1,
+        "from": 6,
+        "to": 26,
+        "speed": 1.6,
+        "cars": [
+          "fighter",
+          "shuttle_orange"
+        ]
+      },
+      {
+        "prefix": "ship",
+        "z": 24,
+        "bob": true,
+        "wake": true,
+        "trail": "#6fe3ff",
+        "fade": 1.5,
+        "axis": "y",
+        "at": -3.0,
+        "dir": 1,
+        "from": -3,
+        "to": 13,
+        "speed": 0.9,
+        "cars": [
+          "hauler",
+          "pod"
+        ]
+      },
+      {
+        "prefix": "ship",
+        "z": 24,
+        "bob": true,
+        "wake": true,
+        "trail": "#ff8a5a",
+        "fade": 1.5,
+        "axis": "y",
+        "at": -5.0,
+        "dir": -1,
+        "from": -3,
+        "to": 13,
+        "speed": 1.4,
+        "cars": [
+          "shuttle",
+          "fighter"
+        ]
+      },
+      {
+        "prefix": "ship",
+        "z": 24,
+        "bob": true,
+        "wake": true,
+        "trail": "#6fe3ff",
+        "fade": 1.5,
+        "axis": "x",
+        "at": -3.8,
+        "dir": 1,
+        "from": -1,
+        "to": 20,
+        "speed": 1.0,
+        "cars": [
+          "shuttle_orange",
+          "pod"
+        ]
+      },
+      {
+        "prefix": "ship",
+        "z": 24,
+        "bob": true,
+        "wake": true,
+        "trail": "#6fe3ff",
+        "fade": 1.5,
+        "axis": "y",
+        "at": 24.8,
+        "dir": -1,
+        "from": 1,
+        "to": 18,
+        "speed": 1.2,
+        "cars": [
+          "hauler",
+          "shuttle"
+        ]
+      }
+    ]
+  },
+  "interiors": {
+    "specs": {
+      "sprite": "space_interior_specs"
+    },
+    "plan": {
+      "sprite": "space_interior_plan"
+    },
+    "build": {
+      "sprite": "space_interior_build"
+    },
+    "review": {
+      "sprite": "space_interior_review"
+    },
+    "idle": {
+      "sprite": "space_interior_idle"
+    },
+    "explore": {
+      "sprite": "space_interior_explore"
+    }
+  }
+}

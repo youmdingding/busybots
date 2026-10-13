@@ -1,0 +1,16 @@
+{
+  "_comment": "Optional. Merge into the hooks section of ~/.claude/settings.json (don't replace your existing hooks). Makes the board's 'needs you' badge exact for permission prompts; without it the board guesses from the transcript. If you installed from a clone, use: node /path/to/busybots/bin/cli.js hook",
+  "hooks": {
+    "Notification": [
+      {
+        "matcher": "",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "npx --no-install busybots hook"
+          }
+        ]
+      }
+    ]
+  }
+}

@@ -1,0 +1,58 @@
+{
+ "description": "Codex running tests (code-mode exec with unquoted cmd) → Test & Review",
+ "files": [
+  {
+   "path": ".codex/sessions/{{today:/}}/rollout-x-tests.jsonl",
+   "jsonl": [
+    {
+     "timestamp": "{{t:-120}}",
+     "type": "session_meta",
+     "payload": {
+      "id": "cx-tests",
+      "cwd": "/work/shop",
+      "originator": "codex-tui",
+      "source": "cli",
+      "git": {
+       "branch": "me/feature-x"
+      }
+     }
+    },
+    {
+     "timestamp": "{{t:-60}}",
+     "type": "event_msg",
+     "payload": {
+      "type": "task_started"
+     }
+    },
+    {
+     "timestamp": "{{t:-50}}",
+     "type": "response_item",
+     "payload": {
+      "type": "custom_tool_call",
+      "name": "exec",
+      "call_id": "c1",
+      "input": "const r = await tools.exec_command({cmd:\"pnpm test --run cart\",workdir:\"/work/shop\"});"
+     }
+    }
+   ]
+  }
+ ],
+ "expect": [
+  {
+   "brand": "codex",
+   "name": "shop",
+   "zone": "review",
+   "state": "active",
+   "phase": "test",
+   "skill": null,
+   "bubble": "Running tests",
+   "attention": {
+    "needsYou": false,
+    "reason": null,
+    "done": false,
+    "stuck": false,
+    "subagents": 0
+   }
+  }
+ ]
+}

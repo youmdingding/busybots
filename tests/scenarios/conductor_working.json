@@ -1,0 +1,75 @@
+{
+ "description": "Conductor workspace in progress (from its database) → shown with the branch name",
+ "files": [
+  {
+   "path": "conductor/workspaces/shop/oslo/.keep",
+   "text": ""
+  },
+  {
+   "path": "Library/conductor.db",
+   "sqlite": [
+    "CREATE TABLE workspaces (id TEXT, local_id TEXT, directory_name TEXT, workspace_name TEXT, workspace_path TEXT, secondary_directory_name TEXT, branch TEXT, user_set_workspace_name TEXT, active_session_id TEXT, derived_status TEXT, manual_status TEXT, state TEXT)",
+    "CREATE TABLE sessions (id TEXT, status TEXT, title TEXT, claude_session_id TEXT, agent_type TEXT)",
+    "INSERT INTO workspaces VALUES ('w1','7','oslo','Shop work','{{home}}/conductor/workspaces/shop/oslo',NULL,'me/fix-cart-totals',NULL,'s1','in-progress',NULL,'ready')",
+    "INSERT INTO sessions VALUES ('s1','working','Fix cart totals','cond-0001','claude')"
+   ]
+  },
+  {
+   "path": ".claude/projects/{{projdir:conductor/workspaces/shop/oslo}}/cond-0001.jsonl",
+   "jsonl": [
+    {
+     "type": "user",
+     "timestamp": "{{t:-30}}",
+     "message": {
+      "role": "user",
+      "content": "fix totals"
+     }
+    },
+    {
+     "type": "assistant",
+     "timestamp": "{{t:-3}}",
+     "message": {
+      "content": [
+       {
+        "type": "tool_use",
+        "id": "k1",
+        "name": "Edit",
+        "input": {
+         "file_path": "/x/cart.ts"
+        }
+       }
+      ]
+     }
+    }
+   ],
+   "mtime": -3
+  }
+ ],
+ "settings": {
+  "sources": {
+   "conductor": {
+    "enabled": true,
+    "db": "{{home}}/Library/conductor.db",
+    "workspaces": "{{home}}/conductor/workspaces"
+   }
+  }
+ },
+ "expect": [
+  {
+   "brand": "conductor",
+   "name": "fix-cart-totals",
+   "zone": "build",
+   "state": "active",
+   "phase": "build",
+   "skill": null,
+   "bubble": "Editing cart.ts",
+   "attention": {
+    "needsYou": false,
+    "reason": null,
+    "done": false,
+    "stuck": false,
+    "subagents": 0
+   }
+  }
+ ]
+}

@@ -1,0 +1,105 @@
+{
+ "description": "Codex: three failing commands in a row → stuck",
+ "files": [
+  {
+   "path": ".codex/sessions/{{today:/}}/rollout-x-stuck.jsonl",
+   "jsonl": [
+    {
+     "timestamp": "{{t:-120}}",
+     "type": "session_meta",
+     "payload": {
+      "id": "cx-stuck",
+      "cwd": "/work/app",
+      "originator": "codex-tui",
+      "source": "cli",
+      "git": {
+       "branch": "me/feature-x"
+      }
+     }
+    },
+    {
+     "timestamp": "{{t:-90}}",
+     "type": "event_msg",
+     "payload": {
+      "type": "task_started"
+     }
+    },
+    {
+     "timestamp": "{{t:-80}}",
+     "type": "response_item",
+     "payload": {
+      "type": "function_call",
+      "name": "exec_command",
+      "call_id": "e0",
+      "arguments": "{\"cmd\": \"make build\"}"
+     }
+    },
+    {
+     "timestamp": "{{t:-79}}",
+     "type": "response_item",
+     "payload": {
+      "type": "function_call_output",
+      "call_id": "e0",
+      "output": "Process exited with code 2"
+     }
+    },
+    {
+     "timestamp": "{{t:-70}}",
+     "type": "response_item",
+     "payload": {
+      "type": "function_call",
+      "name": "exec_command",
+      "call_id": "e1",
+      "arguments": "{\"cmd\": \"make build\"}"
+     }
+    },
+    {
+     "timestamp": "{{t:-69}}",
+     "type": "response_item",
+     "payload": {
+      "type": "function_call_output",
+      "call_id": "e1",
+      "output": "Process exited with code 2"
+     }
+    },
+    {
+     "timestamp": "{{t:-60}}",
+     "type": "response_item",
+     "payload": {
+      "type": "function_call",
+      "name": "exec_command",
+      "call_id": "e2",
+      "arguments": "{\"cmd\": \"make build\"}"
+     }
+    },
+    {
+     "timestamp": "{{t:-59}}",
+     "type": "response_item",
+     "payload": {
+      "type": "function_call_output",
+      "call_id": "e2",
+      "output": "Process exited with code 2"
+     }
+    }
+   ]
+  }
+ ],
+ "expect": [
+  {
+   "brand": "codex",
+   "name": "work",
+   "zone": "build",
+   "state": "active",
+   "phase": "build",
+   "skill": null,
+   "bubble": "Running a command",
+   "attention": {
+    "needsYou": false,
+    "reason": null,
+    "done": false,
+    "stuck": true,
+    "subagents": 0
+   }
+  }
+ ]
+}

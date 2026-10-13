@@ -1,0 +1,80 @@
+{
+ "description": "Session in a second Claude folder listed in settings",
+ "procs": [
+  "agent"
+ ],
+ "files": [
+  {
+   "path": "claude-work/sessions/{{pid:agent}}.json",
+   "json": {
+    "pid": "{{pid:agent}}",
+    "sessionId": "sid-second_home",
+    "cwd": "{{home}}/work/second_home",
+    "status": "busy"
+   }
+  },
+  {
+   "path": "work/second_home/.keep",
+   "text": ""
+  },
+  {
+   "path": "claude-work/projects/{{projdir:work/second_home}}/sid-second_home.jsonl",
+   "jsonl": [
+    {
+     "type": "user",
+     "timestamp": "{{t:-20}}",
+     "message": {
+      "role": "user",
+      "content": "go"
+     }
+    },
+    {
+     "type": "assistant",
+     "timestamp": "{{t:-3}}",
+     "message": {
+      "content": [
+       {
+        "type": "tool_use",
+        "id": "z",
+        "name": "Edit",
+        "input": {
+         "file_path": "/x/b.py"
+        }
+       }
+      ]
+     }
+    }
+   ],
+   "mtime": -3
+  }
+ ],
+ "settings": {
+  "sources": {
+   "claude": {
+    "enabled": true,
+    "paths": [
+     "~/.claude",
+     "{{home}}/claude-work"
+    ]
+   }
+  }
+ },
+ "expect": [
+  {
+   "brand": "claude",
+   "name": "second_home",
+   "zone": "build",
+   "state": "active",
+   "phase": "build",
+   "skill": null,
+   "bubble": "Editing b.py",
+   "attention": {
+    "needsYou": false,
+    "reason": null,
+    "done": false,
+    "stuck": false,
+    "subagents": 0
+   }
+  }
+ ]
+}

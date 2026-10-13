@@ -1,0 +1,121 @@
+{
+ "description": "A new plain prompt after a finished /plan turn → back to normal rooms",
+ "procs": [
+  "agent"
+ ],
+ "files": [
+  {
+   "path": ".claude/sessions/{{pid:agent}}.json",
+   "json": {
+    "pid": "{{pid:agent}}",
+    "sessionId": "sid-reset",
+    "cwd": "{{home}}/work/reset",
+    "status": "busy"
+   }
+  },
+  {
+   "path": "work/reset/.keep",
+   "text": ""
+  },
+  {
+   "path": ".claude/projects/{{projdir:work/reset}}/sid-reset.jsonl",
+   "jsonl": [
+    {
+     "type": "user",
+     "timestamp": "{{t:-300}}",
+     "message": {
+      "role": "user",
+      "content": "<command-message>plan is running…</command-message>\n<command-name>/plan</command-name>\n<command-args>TICKET-1</command-args>"
+     }
+    },
+    {
+     "type": "assistant",
+     "timestamp": "{{t:-280}}",
+     "message": {
+      "content": [
+       {
+        "type": "tool_use",
+        "id": "r1",
+        "name": "Read",
+        "input": {
+         "file_path": "/x"
+        }
+       }
+      ]
+     }
+    },
+    {
+     "type": "user",
+     "timestamp": "{{t:-279}}",
+     "toolUseResult": {},
+     "message": {
+      "content": [
+       {
+        "type": "tool_result",
+        "tool_use_id": "r1",
+        "is_error": false
+       }
+      ]
+     }
+    },
+    {
+     "type": "user",
+     "timestamp": "{{t:-60}}",
+     "message": {
+      "role": "user",
+      "content": "ok now implement it"
+     }
+    },
+    {
+     "type": "assistant",
+     "timestamp": "{{t:-3}}",
+     "message": {
+      "content": [
+       {
+        "type": "tool_use",
+        "id": "r2",
+        "name": "Edit",
+        "input": {
+         "file_path": "/x/a.ts"
+        }
+       }
+      ]
+     }
+    },
+    {
+     "type": "user",
+     "timestamp": "{{t:-2}}",
+     "toolUseResult": {},
+     "message": {
+      "content": [
+       {
+        "type": "tool_result",
+        "tool_use_id": "r2",
+        "is_error": false
+       }
+      ]
+     }
+    }
+   ],
+   "mtime": -2
+  }
+ ],
+ "expect": [
+  {
+   "brand": "claude",
+   "name": "reset",
+   "zone": "build",
+   "state": "active",
+   "phase": "build",
+   "skill": null,
+   "bubble": "Editing a.ts",
+   "attention": {
+    "needsYou": false,
+    "reason": null,
+    "done": false,
+    "stuck": false,
+    "subagents": 0
+   }
+  }
+ ]
+}

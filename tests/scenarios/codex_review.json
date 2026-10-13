@@ -1,0 +1,68 @@
+{
+ "description": "Codex review mode → code-review skill, Test & Review",
+ "files": [
+  {
+   "path": ".codex/sessions/{{today:/}}/rollout-x-review.jsonl",
+   "jsonl": [
+    {
+     "timestamp": "{{t:-120}}",
+     "type": "session_meta",
+     "payload": {
+      "id": "cx-review",
+      "cwd": "/work/api",
+      "originator": "codex-tui",
+      "source": "cli",
+      "git": {
+       "branch": "me/feature-x"
+      }
+     }
+    },
+    {
+     "timestamp": "{{t:-60}}",
+     "type": "event_msg",
+     "payload": {
+      "type": "task_started"
+     }
+    },
+    {
+     "timestamp": "{{t:-55}}",
+     "type": "event_msg",
+     "payload": {
+      "type": "item_completed",
+      "item": {
+       "type": "EnteredReviewMode"
+      }
+     }
+    },
+    {
+     "timestamp": "{{t:-10}}",
+     "type": "response_item",
+     "payload": {
+      "type": "function_call",
+      "name": "exec_command",
+      "call_id": "r1",
+      "arguments": "{\"cmd\": \"git diff develop\"}"
+     }
+    }
+   ]
+  }
+ ],
+ "expect": [
+  {
+   "brand": "codex",
+   "name": "work",
+   "zone": "review",
+   "state": "active",
+   "phase": "review",
+   "skill": "code-review",
+   "bubble": "Reviewing · Running a command",
+   "attention": {
+    "needsYou": false,
+    "reason": null,
+    "done": false,
+    "stuck": false,
+    "subagents": 0
+   }
+  }
+ ]
+}

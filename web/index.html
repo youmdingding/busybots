@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Busybots</title>
+  <link rel="icon" href="icons/claude-00.png">
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <div id="app">
+    <header id="header">
+      <div class="title-row">
+        <div class="title-meta">
+          <h1 id="board-title">Busybots</h1>
+          <span id="project-name" class="sub"></span>
+          <div id="agent-filter-chips" class="filter-chips" role="group" aria-label="Filter agents by brand">
+            <button type="button" class="chip" data-filter="all" aria-pressed="true">All</button>
+            <button type="button" class="chip" data-filter="claude" aria-pressed="false">Claude</button>
+            <button type="button" class="chip" data-filter="codex" aria-pressed="false">Codex</button>
+            <button type="button" class="chip" data-filter="conductor" aria-pressed="false">Conductor</button>
+            <button type="button" class="chip" data-filter="gemini" aria-pressed="false">Gemini</button>
+            <button type="button" class="chip" data-filter="opencode" aria-pressed="false">OpenCode</button>
+            <button type="button" class="chip" data-filter="cursor" aria-pressed="false">Cursor</button>
+          </div>
+          <div id="theme-chips" class="filter-chips theme-chips" role="group" aria-label="Environment theme">
+            <button type="button" class="chip" data-theme="island" aria-pressed="true">Island</button>
+            <button type="button" class="chip" data-theme="office" aria-pressed="false">Office</button>
+            <button type="button" class="chip" data-theme="city" aria-pressed="false">City</button>
+            <button type="button" class="chip" data-theme="space" aria-pressed="false">Space</button>
+          </div>
+        </div>
+      </div>
+      <div class="meta-row">
+        <span id="updated-at">—</span>
+        <span id="stale-warn" class="warn hidden">STALE</span>
+        <span id="poll-dot" title="polling"></span>
+        <a id="settings-link" href="/admin" title="Settings">Settings</a>
+      </div>
+    </header>
+    <div id="board-row" class="board-row">
+    <canvas id="board" width="1600" height="1020" aria-label="Busybots: your coding agents at work"></canvas>
+    <aside id="agent-panel" class="agent-panel hidden" aria-hidden="true">
+      <div class="panel-head">
+        <div>
+          <h2 id="panel-name">Agent</h2>
+          <div id="panel-meta" class="panel-meta"></div>
+        </div>
+        <button type="button" id="panel-close" class="panel-x" aria-label="Close">×</button>
+      </div>
+      <div id="panel-status" class="panel-status"></div>
+      <div class="panel-actions">
+        <button type="button" id="panel-jump" class="panel-btn">Jump to it</button>
+      </div>
+      <h3 class="panel-section">Transcript</h3>
+      <div id="panel-transcript" class="panel-transcript"></div>
+      <h3 class="panel-section">Prompt</h3>
+      <div id="panel-prompt-wrap">
+        <textarea id="panel-prompt" rows="3" placeholder="Send a follow-up…" disabled></textarea>
+        <div class="panel-prompt-row">
+          <span id="panel-prompt-note" class="panel-note"></span>
+          <button type="button" id="panel-send" class="panel-btn primary" disabled>Send</button>
+        </div>
+      </div>
+    </aside>
+    </div>
+    <footer id="footer">
+      <span>Updates every ~2s</span>
+    </footer>
+  </div>
+  <script type="module" src="board/main.js"></script>
+</body>
+</html>

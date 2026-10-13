@@ -1,0 +1,39 @@
+{
+ "description": "OpenCode: turn closed by an idle row → idle; first turn's edit doesn't count",
+ "files": [
+  {
+   "path": ".local/share/opencode/opencode.db",
+   "sqlite": [
+    "CREATE TABLE `session_v2` (\n  `id` text PRIMARY KEY,\n  `project_id` text NOT NULL,\n  `workspace_id` text,\n  `parent_id` text,\n  `fork_session_id` text,\n  `fork_boundary` text,\n  `slug` text NOT NULL,\n  `directory` text NOT NULL,\n  `path` text,\n  `title` text,\n  `version` text NOT NULL,\n  `share_url` text,\n  `summary_additions` integer,\n  `summary_deletions` integer,\n  `summary_files` integer,\n  `summary_diffs` text,\n  `metadata` text,\n  `cost` real DEFAULT 0 NOT NULL,\n  `tokens_input` integer DEFAULT 0 NOT NULL,\n  `tokens_output` integer DEFAULT 0 NOT NULL,\n  `tokens_reasoning` integer DEFAULT 0 NOT NULL,\n  `tokens_cache_read` integer DEFAULT 0 NOT NULL,\n  `tokens_cache_write` integer DEFAULT 0 NOT NULL,\n  `revert` text,\n  `permission` text,\n  `agent` text,\n  `model` text,\n  `time_created` integer NOT NULL,\n  `time_updated` integer NOT NULL,\n  `time_idle` integer,\n  `time_viewed` integer,\n  `idle_outcome` text,\n  `time_compacting` integer,\n  `time_archived` integer,\n  `time_suspended` integer,\n  `resume_attempts` integer DEFAULT 0 NOT NULL,\n  CONSTRAINT `fk_session_v2_project_id_project_id_fk` FOREIGN KEY (`project_id`) REFERENCES `project`(`id`) ON DELETE CASCADE\n        )",
+    "CREATE TABLE `session_message` (\n  `id` text PRIMARY KEY,\n  `session_id` text NOT NULL,\n  `type` text NOT NULL,\n  `seq` integer NOT NULL,\n  `time_created` integer NOT NULL,\n  `time_updated` integer NOT NULL,\n  `data` text NOT NULL,\n  CONSTRAINT `fk_session_message_session_id_session_v2_id_fk` FOREIGN KEY (`session_id`) REFERENCES `session_v2`(`id`) ON DELETE CASCADE\n        )",
+    "INSERT INTO session_v2 (id, project_id, slug, directory, title, version, time_created, time_updated, time_idle, time_suspended) VALUES ('ses_00ab12cd34ef56gh78ij90kl', 'prj1', 'fix-cart', '/work/shop', 'Fix cart rounding', '1.14.0', {{ms:-300}}, {{ms:-15}}, {{ms:-268}}, NULL)",
+    "INSERT INTO session_message (id, session_id, type, seq, time_created, time_updated, data) VALUES ('msg_01', 'ses_00ab12cd34ef56gh78ij90kl', 'user', 1, {{ms:-300}}, {{ms:-300}}, '{\"text\": \"The 10% discount rounds wrong in src/cart.ts - fix it.\"}')",
+    "INSERT INTO session_message (id, session_id, type, seq, time_created, time_updated, data) VALUES ('msg_02', 'ses_00ab12cd34ef56gh78ij90kl', 'assistant', 2, {{ms:-290}}, {{ms:-290}}, '{\"content\": [{\"type\": \"tool\", \"id\": \"t1\", \"name\": \"read\", \"state\": {\"status\": \"completed\", \"input\": {\"path\": \"src/cart.ts\"}}, \"time\": {\"created\": {{ms:-289}}, \"completed\": {{ms:-288}}}}], \"time\": {\"created\": {{ms:-290}}, \"completed\": {{ms:-288}}}}')",
+    "INSERT INTO session_message (id, session_id, type, seq, time_created, time_updated, data) VALUES ('msg_03', 'ses_00ab12cd34ef56gh78ij90kl', 'assistant', 3, {{ms:-280}}, {{ms:-280}}, '{\"content\": [{\"type\": \"tool\", \"id\": \"t2\", \"name\": \"edit\", \"state\": {\"status\": \"completed\", \"input\": {\"path\": \"src/cart.ts\", \"oldString\": \"a\", \"newString\": \"b\"}}, \"time\": {\"created\": {{ms:-279}}, \"completed\": {{ms:-278}}}}], \"time\": {\"created\": {{ms:-280}}, \"completed\": {{ms:-278}}}}')",
+    "INSERT INTO session_message (id, session_id, type, seq, time_created, time_updated, data) VALUES ('msg_04', 'ses_00ab12cd34ef56gh78ij90kl', 'assistant', 4, {{ms:-270}}, {{ms:-270}}, '{\"content\": [{\"type\": \"text\", \"text\": \"Fixed the rounding.\"}], \"finish\": \"stop\", \"time\": {\"created\": {{ms:-270}}, \"completed\": {{ms:-269}}}}')",
+    "INSERT INTO session_message (id, session_id, type, seq, time_created, time_updated, data) VALUES ('msg_05', 'ses_00ab12cd34ef56gh78ij90kl', 'idle', 5, {{ms:-268}}, {{ms:-268}}, '{\"outcome\": \"succeeded\"}')",
+    "INSERT INTO session_message (id, session_id, type, seq, time_created, time_updated, data) VALUES ('msg_06', 'ses_00ab12cd34ef56gh78ij90kl', 'user', 6, {{ms:-20}}, {{ms:-20}}, '{\"text\": \"Now run the tests.\"}')",
+    "INSERT INTO session_message (id, session_id, type, seq, time_created, time_updated, data) VALUES ('msg_07', 'ses_00ab12cd34ef56gh78ij90kl', 'assistant', 7, {{ms:-15}}, {{ms:-15}}, '{\"content\": [{\"type\": \"text\", \"text\": \"All tests pass.\"}], \"finish\": \"stop\", \"time\": {\"created\": {{ms:-15}}, \"completed\": {{ms:-14}}}}')",
+    "INSERT INTO session_message (id, session_id, type, seq, time_created, time_updated, data) VALUES ('msg_08', 'ses_00ab12cd34ef56gh78ij90kl', 'idle', 8, {{ms:-13}}, {{ms:-13}}, '{\"outcome\": \"succeeded\"}')"
+   ]
+  }
+ ],
+ "expect": [
+  {
+   "brand": "opencode",
+   "name": "shop",
+   "zone": "idle",
+   "state": "idle",
+   "phase": "idle",
+   "skill": null,
+   "bubble": null,
+   "attention": {
+    "needsYou": false,
+    "reason": null,
+    "done": false,
+    "stuck": false,
+    "subagents": 0
+   }
+  }
+ ]
+}

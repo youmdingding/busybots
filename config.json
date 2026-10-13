@@ -1,0 +1,339 @@
+{
+ "project": {
+  "id": "claude-code",
+  "name": "Your coding agents",
+  "palette": {
+   "bg": "#c8e6e8",
+   "accent": "#2d8a7a",
+   "idle": "#8aa8b0",
+   "bubble": "#f7faf8"
+  }
+ },
+ "areas": [
+  {
+   "key": "specs",
+   "label": "Specs",
+   "tint": "#1CC3B0",
+   "gx": 1.0,
+   "gy": 0.9,
+   "gw": 5.0,
+   "gh": 4.4,
+   "elevOffset": 22,
+   "door": "S",
+   "enclosed": true,
+   "prop": "prop_lookout",
+   "motif": "motif_compass",
+   "hub": "specsGate"
+  },
+  {
+   "key": "plan",
+   "label": "Plan",
+   "tint": "#2A92FE",
+   "gx": 7.0,
+   "gy": 0.9,
+   "gw": 5.0,
+   "gh": 4.4,
+   "elevOffset": 22,
+   "door": "S",
+   "enclosed": true,
+   "prop": "prop_lookout",
+   "motif": "motif_gear",
+   "hub": "planGate"
+  },
+  {
+   "key": "build",
+   "label": "Build",
+   "tint": "#FF781C",
+   "gx": 1.0,
+   "gy": 6.0,
+   "gw": 5.0,
+   "gh": 4.6,
+   "elevOffset": 14,
+   "door": "N",
+   "enclosed": true,
+   "prop": "prop_bench",
+   "motif": "motif_tick",
+   "hub": "buildGate"
+  },
+  {
+   "key": "review",
+   "label": "Test & Review",
+   "tint": "#A97EFE",
+   "gx": 7.0,
+   "gy": 6.0,
+   "gw": 5.0,
+   "gh": 4.6,
+   "elevOffset": 14,
+   "door": "N",
+   "enclosed": true,
+   "prop": "prop_bench",
+   "motif": "motif_tick",
+   "hub": "reviewGate"
+  },
+  {
+   "key": "explore",
+   "label": "Explore",
+   "tint": "#E8B931",
+   "gx": 12.8,
+   "gy": 0.9,
+   "gw": 8.2,
+   "gh": 4.4,
+   "elevOffset": 22,
+   "door": "S",
+   "enclosed": true,
+   "prop": "prop_lookout",
+   "motif": "motif_compass",
+   "hub": "exploreGate",
+   "slotCols": 4
+  },
+  {
+   "key": "idle",
+   "label": "Idle",
+   "tint": "#8aa8b0",
+   "gx": 12.8,
+   "gy": 6.0,
+   "gw": 8.2,
+   "gh": 5.4,
+   "elevOffset": 6,
+   "door": "W",
+   "enclosed": true,
+   "prop": "prop_bench",
+   "motif": "motif_moon",
+   "hub": "idleGate",
+   "inset": {
+    "n": 0.95,
+    "s": 1.25,
+    "w": 1.35,
+    "e": 1.0
+   },
+   "slotCols": 5
+  }
+ ],
+ "pathHubs": {
+  "specsGate": [
+   3.5,
+   5.5
+  ],
+  "planGate": [
+   9.5,
+   5.5
+  ],
+  "buildGate": [
+   3.5,
+   5.8
+  ],
+  "reviewGate": [
+   9.5,
+   5.8
+  ],
+  "mid": [
+   6.5,
+   5.65
+  ],
+  "east": [
+   12.4,
+   5.65
+  ],
+  "exploreGate": [
+   16.9,
+   5.65
+  ],
+  "idleGate": [
+   12.4,
+   8.7
+  ]
+ },
+ "pathHubEdges": [
+  [
+   "specsGate",
+   "mid"
+  ],
+  [
+   "planGate",
+   "mid"
+  ],
+  [
+   "buildGate",
+   "mid"
+  ],
+  [
+   "reviewGate",
+   "mid"
+  ],
+  [
+   "specsGate",
+   "buildGate"
+  ],
+  [
+   "planGate",
+   "reviewGate"
+  ],
+  [
+   "planGate",
+   "east"
+  ],
+  [
+   "reviewGate",
+   "east"
+  ],
+  [
+   "mid",
+   "east"
+  ],
+  [
+   "east",
+   "exploreGate"
+  ],
+  [
+   "east",
+   "idleGate"
+  ]
+ ],
+ "activityAreas": {
+  "Edit.spec": "specs",
+  "Write.spec": "specs",
+  "MultiEdit.spec": "specs",
+  "Read.spec": "specs",
+  "Grep.spec": "specs",
+  "Glob.spec": "specs",
+  "spec": "specs",
+  "specs": "specs",
+  "requirements": "specs",
+  "Edit.plan": "plan",
+  "Write.plan": "plan",
+  "MultiEdit.plan": "plan",
+  "Read.plan": "plan",
+  "Grep.plan": "plan",
+  "Glob.plan": "plan",
+  "plan": "plan",
+  "planning": "plan",
+  "design": "plan",
+  "Edit": "build",
+  "Write": "build",
+  "MultiEdit": "build",
+  "NotebookEdit": "build",
+  "Bash.other": "build",
+  "Agent": "build",
+  "Task": "build",
+  "TaskCreate": "build",
+  "TaskUpdate": "build",
+  "active": "build",
+  "busy": "build",
+  "working": "build",
+  "thinking": "build",
+  "assistant": "build",
+  "default": "build",
+  "Read": "explore",
+  "Grep": "explore",
+  "Glob": "explore",
+  "WebFetch": "explore",
+  "WebSearch": "explore",
+  "ToolSearch": "explore",
+  "Bash.test": "review",
+  "review": "review",
+  "test": "review",
+  "lint": "review",
+  "waiting": "idle",
+  "idle": "idle",
+  "Browser.verify": "review",
+  "Edit.review": "review",
+  "Read.review": "review",
+  "Write.review": "review",
+  "MultiEdit.review": "review",
+  "Grep.review": "review",
+  "Glob.review": "review",
+  "e2e": "review",
+  "playwright": "review",
+  "cypress": "review",
+  "browser": "review",
+  "explore": "explore",
+  "research": "explore",
+  "Browser.read": "explore"
+ },
+ "slotColumns": 4,
+ "slotGap": 1.8,
+ "idleSeconds": 60,
+ "maxBubbleChars": 60,
+ "showOriginBadge": true,
+ "iconPool": [
+  "icons/claude-00.png",
+  "icons/claude-01.png",
+  "icons/claude-02.png",
+  "icons/claude-03.png",
+  "icons/claude-04.png",
+  "icons/claude-05.png",
+  "icons/claude-06.png",
+  "icons/claude-07.png"
+ ],
+ "spriteScale": 0.64,
+ "island": {
+  "cx": 11.0,
+  "cy": 6.2,
+  "rx": 12.2,
+  "ry": 8.0
+ },
+ "busyWindowSeconds": 60,
+ "iconPools": {
+  "claude": [
+   "icons/claude-00.png",
+   "icons/claude-01.png",
+   "icons/claude-02.png",
+   "icons/claude-03.png",
+   "icons/claude-04.png",
+   "icons/claude-05.png",
+   "icons/claude-06.png",
+   "icons/claude-07.png"
+  ],
+  "codex": [
+   "icons/codex-00.png",
+   "icons/codex-01.png",
+   "icons/codex-02.png",
+   "icons/codex-03.png",
+   "icons/codex-04.png",
+   "icons/codex-05.png",
+   "icons/codex-06.png",
+   "icons/codex-07.png"
+  ],
+  "conductor": [
+   "icons/conductor-00.png",
+   "icons/conductor-01.png",
+   "icons/conductor-02.png",
+   "icons/conductor-03.png",
+   "icons/conductor-04.png",
+   "icons/conductor-05.png",
+   "icons/conductor-06.png",
+   "icons/conductor-07.png"
+  ]
+ },
+ "skillAreas": {
+  "brainstorming": "specs",
+  "writing-plans": "plan",
+  "executing-plans": "build",
+  "subagent-driven-development": "build",
+  "test-driven-development": "build",
+  "systematic-debugging": "build",
+  "using-git-worktrees": "build",
+  "requesting-code-review": "review",
+  "receiving-code-review": "review",
+  "verification-before-completion": "review",
+  "finishing-a-development-branch": "review"
+ },
+ "skillLabels": {
+  "writing-plans": "Planning",
+  "brainstorming": "Brainstorming",
+  "requesting-code-review": "Reviewing",
+  "receiving-code-review": "Reviewing",
+  "verification-before-completion": "Verifying",
+  "executing-plans": "Building",
+  "systematic-debugging": "Debugging",
+  "test-driven-development": "TDD"
+ },
+ "phaseFiles": {
+  "plan": [
+   "research.md",
+   "data-model.md",
+   "quickstart.md"
+  ],
+  "spec": []
+ }
+}

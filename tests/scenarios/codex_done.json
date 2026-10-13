@@ -1,0 +1,88 @@
+{
+ "description": "Codex turn finished after adding a file → idle, done",
+ "files": [
+  {
+   "path": ".codex/sessions/{{today:/}}/rollout-x-done.jsonl",
+   "jsonl": [
+    {
+     "timestamp": "{{t:-120}}",
+     "type": "session_meta",
+     "payload": {
+      "id": "cx-done",
+      "cwd": "/work/lib",
+      "originator": "codex-tui",
+      "source": "cli",
+      "git": {
+       "branch": "me/feature-x"
+      }
+     }
+    },
+    {
+     "timestamp": "{{t:-300}}",
+     "type": "event_msg",
+     "payload": {
+      "type": "task_started"
+     }
+    },
+    {
+     "timestamp": "{{t:-280}}",
+     "type": "response_item",
+     "payload": {
+      "type": "function_call",
+      "name": "apply_patch",
+      "call_id": "d1",
+      "arguments": "{\"input\": \"*** Begin Patch\\n*** Add File: x.py\\n\"}"
+     }
+    },
+    {
+     "timestamp": "{{t:-279}}",
+     "type": "response_item",
+     "payload": {
+      "type": "function_call_output",
+      "call_id": "d1",
+      "output": "Done"
+     }
+    },
+    {
+     "timestamp": "{{t:-270}}",
+     "type": "response_item",
+     "payload": {
+      "type": "message",
+      "role": "assistant",
+      "content": [
+       {
+        "type": "output_text",
+        "text": "Added x.py."
+       }
+      ]
+     }
+    },
+    {
+     "timestamp": "{{t:-269}}",
+     "type": "event_msg",
+     "payload": {
+      "type": "task_complete"
+     }
+    }
+   ]
+  }
+ ],
+ "expect": [
+  {
+   "brand": "codex",
+   "name": "lib",
+   "zone": "idle",
+   "state": "idle",
+   "phase": "idle",
+   "skill": null,
+   "bubble": null,
+   "attention": {
+    "needsYou": false,
+    "reason": null,
+    "done": true,
+    "stuck": false,
+    "subagents": 0
+   }
+  }
+ ]
+}

@@ -1,0 +1,211 @@
+{
+ "description": "Plugin skill (from config skillAreas) stays active across follow-up prompts",
+ "procs": [
+  "agent"
+ ],
+ "files": [
+  {
+   "path": ".claude/sessions/{{pid:agent}}.json",
+   "json": {
+    "pid": "{{pid:agent}}",
+    "sessionId": "sid-sp_plan",
+    "cwd": "{{home}}/work/sp_plan",
+    "status": "busy"
+   }
+  },
+  {
+   "path": "work/sp_plan/.keep",
+   "text": ""
+  },
+  {
+   "path": ".claude/projects/{{projdir:work/sp_plan}}/sid-sp_plan.jsonl",
+   "jsonl": [
+    {
+     "type": "user",
+     "timestamp": "{{t:-900}}",
+     "message": {
+      "role": "user",
+      "content": "I approve the specs"
+     }
+    },
+    {
+     "type": "assistant",
+     "timestamp": "{{t:-890}}",
+     "message": {
+      "content": [
+       {
+        "type": "tool_use",
+        "id": "w1",
+        "name": "Skill",
+        "input": {
+         "skill": "superpowers:writing-plans"
+        }
+       }
+      ]
+     }
+    },
+    {
+     "type": "user",
+     "timestamp": "{{t:-889}}",
+     "toolUseResult": {},
+     "message": {
+      "content": [
+       {
+        "type": "tool_result",
+        "tool_use_id": "w1",
+        "is_error": false
+       }
+      ]
+     }
+    },
+    {
+     "type": "user",
+     "isMeta": true,
+     "timestamp": "{{t:-889}}",
+     "message": {
+      "content": [
+       {
+        "type": "text",
+        "text": "Base directory for this skill: ..."
+       }
+      ]
+     }
+    },
+    {
+     "type": "assistant",
+     "timestamp": "{{t:-800}}",
+     "message": {
+      "content": [
+       {
+        "type": "tool_use",
+        "id": "w2",
+        "name": "Write",
+        "input": {
+         "file_path": "/x/.specify/specs/T-752-flows/plan.md"
+        }
+       }
+      ]
+     }
+    },
+    {
+     "type": "user",
+     "timestamp": "{{t:-799}}",
+     "toolUseResult": {},
+     "message": {
+      "content": [
+       {
+        "type": "tool_result",
+        "tool_use_id": "w2",
+        "is_error": false
+       }
+      ]
+     }
+    },
+    {
+     "type": "user",
+     "timestamp": "{{t:-300}}",
+     "message": {
+      "role": "user",
+      "content": "What is the difference between A and B?"
+     }
+    },
+    {
+     "type": "assistant",
+     "timestamp": "{{t:-280}}",
+     "message": {
+      "content": [
+       {
+        "type": "text",
+        "text": "A does..."
+       }
+      ]
+     }
+    },
+    {
+     "type": "user",
+     "timestamp": "{{t:-60}}",
+     "message": {
+      "role": "user",
+      "content": "let's go with strict in-tx"
+     }
+    },
+    {
+     "type": "assistant",
+     "timestamp": "{{t:-50}}",
+     "message": {
+      "content": [
+       {
+        "type": "tool_use",
+        "id": "w3",
+        "name": "Edit",
+        "input": {
+         "file_path": "/home/dev/.claude/projects/x/memory/notes.md"
+        }
+       }
+      ]
+     }
+    },
+    {
+     "type": "user",
+     "timestamp": "{{t:-49}}",
+     "toolUseResult": {},
+     "message": {
+      "content": [
+       {
+        "type": "tool_result",
+        "tool_use_id": "w3",
+        "is_error": false
+       }
+      ]
+     }
+    },
+    {
+     "type": "assistant",
+     "timestamp": "{{t:-3}}",
+     "message": {
+      "content": [
+       {
+        "type": "tool_use",
+        "id": "w4",
+        "name": "Bash",
+        "input": {
+         "command": "git status"
+        }
+       }
+      ]
+     }
+    }
+   ],
+   "mtime": -3
+  }
+ ],
+ "config": {
+  "skillAreas": {
+   "brainstorming": "specs",
+   "writing-plans": "plan",
+   "executing-plans": "build"
+  },
+  "skillLabels": {
+   "writing-plans": "Planning",
+   "brainstorming": "Brainstorming"
+  }
+ },
+ "expect": [
+  {
+   "brand": "claude",
+   "name": "sp_plan",
+   "zone": "plan",
+   "state": "active",
+   "phase": "plan",
+   "skill": "superpowers:writing-plans",
+   "bubble": "Planning · Running a command",
+   "attention": {
+    "needsYou": false,
+    "reason": null,
+    "done": false,
+    "stuck": false,
+    "subagents": 0
+   }
+  }
+ ]
+}

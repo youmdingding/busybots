@@ -1,0 +1,353 @@
+{
+ "project": {
+  "id": "claude-code",
+  "name": "Your coding agents",
+  "palette": {
+   "bg": "#c8e6e8",
+   "accent": "#2d8a7a",
+   "idle": "#8aa8b0",
+   "bubble": "#f7faf8"
+  },
+  "updatedAt": "2026-10-12T10:00:00+13:00"
+ },
+ "zones": [
+  {
+   "id": "specs",
+   "label": "Specs"
+  },
+  {
+   "id": "plan",
+   "label": "Plan"
+  },
+  {
+   "id": "build",
+   "label": "Build"
+  },
+  {
+   "id": "review",
+   "label": "Test & Review"
+  },
+  {
+   "id": "explore",
+   "label": "Explore"
+  },
+  {
+   "id": "idle",
+   "label": "Idle"
+  }
+ ],
+ "bots": [
+  {
+   "id": "claude-00-0000-4000-8000-000000000000",
+   "name": "api-gateway",
+   "icon": "icons/claude-00.png",
+   "zone": "build",
+   "state": "active",
+   "bubble": "Editing server.ts",
+   "task": "Edit",
+   "origin": "terminal",
+   "brand": "claude",
+   "cwd": "/Users/dev/api-gateway",
+   "livePid": 1000,
+   "open": true,
+   "entrypoint": "cli",
+   "activeReason": "tool:3s",
+   "phase": "build",
+   "skill": null,
+   "attention": {
+    "needsYou": false,
+    "reason": null,
+    "done": false,
+    "subagents": 0,
+    "stuck": false,
+    "errors": 0
+   }
+  },
+  {
+   "id": "claude-01-0000-4000-8000-000000000000",
+   "name": "web",
+   "icon": "icons/claude-01.png",
+   "zone": "plan",
+   "state": "active",
+   "bubble": "Planning \u00b7 Reading plan.md",
+   "task": "Edit",
+   "origin": "terminal",
+   "brand": "claude",
+   "cwd": "/Users/dev/web",
+   "livePid": 1001,
+   "open": true,
+   "entrypoint": "cli",
+   "activeReason": "tool:3s",
+   "phase": "build",
+   "skill": null,
+   "attention": {
+    "needsYou": false,
+    "reason": null,
+    "done": false,
+    "subagents": 0,
+    "stuck": false,
+    "errors": 0
+   }
+  },
+  {
+   "id": "claude-02-0000-4000-8000-000000000000",
+   "name": "docs-site",
+   "icon": "icons/claude-02.png",
+   "zone": "review",
+   "state": "active",
+   "bubble": "Running tests",
+   "task": "Edit",
+   "origin": "terminal",
+   "brand": "claude",
+   "cwd": "/Users/dev/docs-site",
+   "livePid": 1002,
+   "open": true,
+   "entrypoint": "cli",
+   "activeReason": "tool:3s",
+   "phase": "build",
+   "skill": null,
+   "attention": {
+    "needsYou": false,
+    "reason": null,
+    "done": false,
+    "subagents": 0,
+    "stuck": true,
+    "errors": 3
+   }
+  },
+  {
+   "id": "claude-03-0000-4000-8000-000000000000",
+   "name": "mobile-app",
+   "icon": "icons/claude-03.png",
+   "zone": "build",
+   "state": "active",
+   "bubble": "Approve: Run migrations",
+   "task": "Edit",
+   "origin": "terminal",
+   "brand": "claude",
+   "cwd": "/Users/dev/mobile-app",
+   "livePid": 1003,
+   "open": true,
+   "entrypoint": "cli",
+   "activeReason": "tool:3s",
+   "phase": "build",
+   "skill": null,
+   "attention": {
+    "needsYou": true,
+    "reason": "Approve: Run migrations",
+    "done": false,
+    "subagents": 0,
+    "stuck": false,
+    "errors": 0
+   }
+  },
+  {
+   "id": "claude-04-0000-4000-8000-000000000000",
+   "name": "payments",
+   "icon": "icons/claude-04.png",
+   "zone": "idle",
+   "state": "idle",
+   "bubble": null,
+   "task": "Edit",
+   "origin": "terminal",
+   "brand": "claude",
+   "cwd": "/Users/dev/payments",
+   "livePid": null,
+   "open": false,
+   "entrypoint": "cli",
+   "activeReason": null,
+   "phase": "build",
+   "skill": null,
+   "attention": {
+    "needsYou": false,
+    "reason": null,
+    "done": true,
+    "subagents": 0,
+    "stuck": false,
+    "errors": 0
+   }
+  },
+  {
+   "id": "codex-05-0000-4000-8000-000000000000",
+   "name": "shop",
+   "icon": "icons/codex-05.png",
+   "zone": "review",
+   "state": "active",
+   "bubble": "Running tests",
+   "task": "Edit",
+   "origin": "terminal",
+   "brand": "codex",
+   "cwd": "/Users/dev/shop",
+   "livePid": 1005,
+   "open": true,
+   "entrypoint": "cli",
+   "activeReason": "tool:3s",
+   "phase": "build",
+   "skill": null,
+   "attention": {
+    "needsYou": false,
+    "reason": null,
+    "done": false,
+    "subagents": 0,
+    "stuck": false,
+    "errors": 0
+   }
+  },
+  {
+   "id": "codex-06-0000-4000-8000-000000000000",
+   "name": "infra",
+   "icon": "icons/codex-06.png",
+   "zone": "explore",
+   "state": "active",
+   "bubble": "Searching with Grep",
+   "task": "Edit",
+   "origin": "terminal",
+   "brand": "codex",
+   "cwd": "/Users/dev/infra",
+   "livePid": 1006,
+   "open": true,
+   "entrypoint": "cli",
+   "activeReason": "tool:3s",
+   "phase": "build",
+   "skill": null,
+   "attention": {
+    "needsYou": false,
+    "reason": null,
+    "done": false,
+    "subagents": 0,
+    "stuck": false,
+    "errors": 0
+   }
+  },
+  {
+   "id": "gemini-07-0000-4000-8000-000000000000",
+   "name": "analytics",
+   "icon": "icons/gemini-07.png",
+   "zone": "specs",
+   "state": "active",
+   "bubble": "Specs \u00b7 Editing spec.md",
+   "task": "Edit",
+   "origin": "terminal",
+   "brand": "gemini",
+   "cwd": "/Users/dev/analytics",
+   "livePid": 1007,
+   "open": true,
+   "entrypoint": "cli",
+   "activeReason": "tool:3s",
+   "phase": "build",
+   "skill": null,
+   "attention": {
+    "needsYou": false,
+    "reason": null,
+    "done": false,
+    "subagents": 0,
+    "stuck": false,
+    "errors": 0
+   }
+  },
+  {
+   "id": "opencode-08-0000-4000-8000-000000000000",
+   "name": "cli-tool",
+   "icon": "icons/opencode-00.png",
+   "zone": "build",
+   "state": "active",
+   "bubble": "Delegating work",
+   "task": "Edit",
+   "origin": "terminal",
+   "brand": "opencode",
+   "cwd": "/Users/dev/cli-tool",
+   "livePid": 1008,
+   "open": true,
+   "entrypoint": "cli",
+   "activeReason": "tool:3s",
+   "phase": "build",
+   "skill": null,
+   "attention": {
+    "needsYou": false,
+    "reason": null,
+    "done": false,
+    "subagents": 2,
+    "stuck": false,
+    "errors": 0
+   }
+  },
+  {
+   "id": "cursor-09-0000-4000-8000-000000000000",
+   "name": "landing",
+   "icon": "icons/cursor-01.png",
+   "zone": "explore",
+   "state": "active",
+   "bubble": "Reading README.md",
+   "task": "Edit",
+   "origin": "terminal",
+   "brand": "cursor",
+   "cwd": "/Users/dev/landing",
+   "livePid": 1009,
+   "open": true,
+   "entrypoint": "cli",
+   "activeReason": "tool:3s",
+   "phase": "build",
+   "skill": null,
+   "attention": {
+    "needsYou": false,
+    "reason": null,
+    "done": false,
+    "subagents": 0,
+    "stuck": false,
+    "errors": 0
+   }
+  },
+  {
+   "id": "conductor-10-0000-4000-8000-000000000000",
+   "name": "checkout-flow-v2",
+   "icon": "icons/conductor-02.png",
+   "zone": "build",
+   "state": "active",
+   "bubble": "Editing flow.ts",
+   "task": "Edit",
+   "origin": "conductor",
+   "brand": "conductor",
+   "cwd": "/Users/dev/checkout-flow-v2",
+   "livePid": 1010,
+   "open": true,
+   "entrypoint": "cli",
+   "activeReason": "tool:3s",
+   "phase": "build",
+   "skill": null,
+   "attention": {
+    "needsYou": false,
+    "reason": null,
+    "done": false,
+    "subagents": 0,
+    "stuck": false,
+    "errors": 0
+   }
+  },
+  {
+   "id": "claude-11-0000-4000-8000-000000000000",
+   "name": "a-very-long-project-name-that-wraps",
+   "icon": "icons/claude-03.png",
+   "zone": "idle",
+   "state": "idle",
+   "bubble": null,
+   "task": "Edit",
+   "origin": "terminal",
+   "brand": "claude",
+   "cwd": "/Users/dev/a-very-long-project-name-that-wraps",
+   "livePid": null,
+   "open": false,
+   "entrypoint": "cli",
+   "activeReason": null,
+   "phase": "build",
+   "skill": null,
+   "attention": {
+    "needsYou": false,
+    "reason": null,
+    "done": false,
+    "subagents": 0,
+    "stuck": false,
+    "errors": 0
+   }
+  }
+ ]
+}

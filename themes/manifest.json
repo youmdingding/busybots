@@ -1,0 +1,25 @@
+{
+  "themes": [
+    {
+      "id": "island",
+      "label": "Island",
+      "file": "island.json"
+    },
+    {
+      "id": "office",
+      "label": "Office",
+      "file": "office.json"
+    },
+    {
+      "id": "city",
+      "label": "City",
+      "file": "city.json"
+    },
+    {
+      "id": "space",
+      "label": "Space",
+      "file": "space.json"
+    }
+  ],
+  "default": "island"
+}

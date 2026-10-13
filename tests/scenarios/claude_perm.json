@@ -1,0 +1,99 @@
+{
+ "description": "Edit call with no result for >6 s and no child process → needs your permission",
+ "procs": [
+  "agent"
+ ],
+ "files": [
+  {
+   "path": ".claude/sessions/{{pid:agent}}.json",
+   "json": {
+    "pid": "{{pid:agent}}",
+    "sessionId": "sid-perm",
+    "cwd": "{{home}}/work/perm",
+    "status": "idle"
+   }
+  },
+  {
+   "path": "work/perm/.keep",
+   "text": ""
+  },
+  {
+   "path": ".claude/projects/{{projdir:work/perm}}/sid-perm.jsonl",
+   "jsonl": [
+    {
+     "type": "user",
+     "timestamp": "{{t:-30}}",
+     "message": {
+      "role": "user",
+      "content": "fix it"
+     }
+    },
+    {
+     "type": "assistant",
+     "timestamp": "{{t:-25}}",
+     "message": {
+      "content": [
+       {
+        "type": "tool_use",
+        "id": "a",
+        "name": "Read",
+        "input": {
+         "file_path": "/x/app.py"
+        }
+       }
+      ]
+     }
+    },
+    {
+     "type": "user",
+     "timestamp": "{{t:-24}}",
+     "toolUseResult": {},
+     "message": {
+      "content": [
+       {
+        "type": "tool_result",
+        "tool_use_id": "a",
+        "is_error": false
+       }
+      ]
+     }
+    },
+    {
+     "type": "assistant",
+     "timestamp": "{{t:-12}}",
+     "message": {
+      "content": [
+       {
+        "type": "tool_use",
+        "id": "b",
+        "name": "Edit",
+        "input": {
+         "file_path": "/x/app.py"
+        }
+       }
+      ]
+     }
+    }
+   ],
+   "mtime": -12
+  }
+ ],
+ "expect": [
+  {
+   "brand": "claude",
+   "name": "perm",
+   "zone": "build",
+   "state": "active",
+   "phase": "build",
+   "skill": null,
+   "bubble": "Approve edit: app.py",
+   "attention": {
+    "needsYou": true,
+    "reason": "Approve edit: app.py",
+    "done": false,
+    "stuck": false,
+    "subagents": 0
+   }
+  }
+ ]
+}

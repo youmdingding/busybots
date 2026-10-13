@@ -1,0 +1,140 @@
+{
+ "description": "Editing source code ends a planning skill → Build",
+ "procs": [
+  "agent"
+ ],
+ "files": [
+  {
+   "path": ".claude/sessions/{{pid:agent}}.json",
+   "json": {
+    "pid": "{{pid:agent}}",
+    "sessionId": "sid-sp_impl",
+    "cwd": "{{home}}/work/sp_impl",
+    "status": "busy"
+   }
+  },
+  {
+   "path": "work/sp_impl/.keep",
+   "text": ""
+  },
+  {
+   "path": ".claude/projects/{{projdir:work/sp_impl}}/sid-sp_impl.jsonl",
+   "jsonl": [
+    {
+     "type": "assistant",
+     "timestamp": "{{t:-900}}",
+     "message": {
+      "content": [
+       {
+        "type": "tool_use",
+        "id": "i1",
+        "name": "Skill",
+        "input": {
+         "skill": "superpowers:writing-plans"
+        }
+       }
+      ]
+     }
+    },
+    {
+     "type": "user",
+     "timestamp": "{{t:-899}}",
+     "toolUseResult": {},
+     "message": {
+      "content": [
+       {
+        "type": "tool_result",
+        "tool_use_id": "i1",
+        "is_error": false
+       }
+      ]
+     }
+    },
+    {
+     "type": "user",
+     "timestamp": "{{t:-120}}",
+     "message": {
+      "role": "user",
+      "content": "implement it"
+     }
+    },
+    {
+     "type": "assistant",
+     "timestamp": "{{t:-30}}",
+     "message": {
+      "content": [
+       {
+        "type": "tool_use",
+        "id": "i2",
+        "name": "Edit",
+        "input": {
+         "file_path": "/x/src/flows.ts"
+        }
+       }
+      ]
+     }
+    },
+    {
+     "type": "user",
+     "timestamp": "{{t:-29}}",
+     "toolUseResult": {},
+     "message": {
+      "content": [
+       {
+        "type": "tool_result",
+        "tool_use_id": "i2",
+        "is_error": false
+       }
+      ]
+     }
+    },
+    {
+     "type": "assistant",
+     "timestamp": "{{t:-3}}",
+     "message": {
+      "content": [
+       {
+        "type": "tool_use",
+        "id": "i3",
+        "name": "Read",
+        "input": {
+         "file_path": "/x/src/a.ts"
+        }
+       }
+      ]
+     }
+    }
+   ],
+   "mtime": -3
+  }
+ ],
+ "config": {
+  "skillAreas": {
+   "brainstorming": "specs",
+   "writing-plans": "plan",
+   "executing-plans": "build"
+  },
+  "skillLabels": {
+   "writing-plans": "Planning",
+   "brainstorming": "Brainstorming"
+  }
+ },
+ "expect": [
+  {
+   "brand": "claude",
+   "name": "sp_impl",
+   "zone": "build",
+   "state": "active",
+   "phase": "build",
+   "skill": null,
+   "bubble": "Reading a.ts",
+   "attention": {
+    "needsYou": false,
+    "reason": null,
+    "done": false,
+    "stuck": false,
+    "subagents": 0
+   }
+  }
+ ]
+}

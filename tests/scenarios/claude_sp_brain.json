@@ -1,0 +1,110 @@
+{
+ "description": "Brainstorming skill (config) → Specs",
+ "procs": [
+  "agent"
+ ],
+ "files": [
+  {
+   "path": ".claude/sessions/{{pid:agent}}.json",
+   "json": {
+    "pid": "{{pid:agent}}",
+    "sessionId": "sid-sp_brain",
+    "cwd": "{{home}}/work/sp_brain",
+    "status": "busy"
+   }
+  },
+  {
+   "path": "work/sp_brain/.keep",
+   "text": ""
+  },
+  {
+   "path": ".claude/projects/{{projdir:work/sp_brain}}/sid-sp_brain.jsonl",
+   "jsonl": [
+    {
+     "type": "assistant",
+     "timestamp": "{{t:-100}}",
+     "message": {
+      "content": [
+       {
+        "type": "tool_use",
+        "id": "b1",
+        "name": "Skill",
+        "input": {
+         "skill": "superpowers:brainstorming"
+        }
+       }
+      ]
+     }
+    },
+    {
+     "type": "user",
+     "timestamp": "{{t:-99}}",
+     "toolUseResult": {},
+     "message": {
+      "content": [
+       {
+        "type": "tool_result",
+        "tool_use_id": "b1",
+        "is_error": false
+       }
+      ]
+     }
+    },
+    {
+     "type": "user",
+     "timestamp": "{{t:-40}}",
+     "message": {
+      "role": "user",
+      "content": "Yes I mean (a)."
+     }
+    },
+    {
+     "type": "assistant",
+     "timestamp": "{{t:-3}}",
+     "message": {
+      "content": [
+       {
+        "type": "tool_use",
+        "id": "b2",
+        "name": "Read",
+        "input": {
+         "file_path": "/x/README.md"
+        }
+       }
+      ]
+     }
+    }
+   ],
+   "mtime": -3
+  }
+ ],
+ "config": {
+  "skillAreas": {
+   "brainstorming": "specs",
+   "writing-plans": "plan",
+   "executing-plans": "build"
+  },
+  "skillLabels": {
+   "writing-plans": "Planning",
+   "brainstorming": "Brainstorming"
+  }
+ },
+ "expect": [
+  {
+   "brand": "claude",
+   "name": "sp_brain",
+   "zone": "specs",
+   "state": "active",
+   "phase": "spec",
+   "skill": "superpowers:brainstorming",
+   "bubble": "Brainstorming · Reading README.md",
+   "attention": {
+    "needsYou": false,
+    "reason": null,
+    "done": false,
+    "stuck": false,
+    "subagents": 0
+   }
+  }
+ ]
+}

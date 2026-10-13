@@ -1,0 +1,243 @@
+{
+ "description": "Gemini: quiet for 2 min after a text reply → finished, idle",
+ "files": [
+  {
+   "path": ".gemini/projects.json",
+   "json": {
+    "projects": {
+     "/work/shop": "shop"
+    }
+   }
+  },
+  {
+   "path": ".gemini/tmp/shop/.project_root",
+   "text": "/work/shop"
+  },
+  {
+   "path": ".gemini/tmp/shop/chats/session-2026-10-12T09-14-3f2a9c1e.jsonl",
+   "jsonl": [
+    {
+     "sessionId": "3f2a9c1e-7b4d-4e8a-9c61-2d5f0e8b7a14",
+     "projectHash": "dbea7844263c6ce66006e75f3148ea36ea4d8a72e5da9660fcf609b9195c3e92",
+     "startTime": "{{t:-73}}",
+     "lastUpdated": "{{t:-73}}",
+     "kind": "main"
+    },
+    {
+     "id": "8a1d2c3e-0f4b-4a5c-9d6e-7f8a9b0c1d2e",
+     "timestamp": "{{t:-54}}",
+     "type": "user",
+     "content": [
+      {
+       "text": "The cart total ignores the discount code. Fix applyDiscount in src/cart.ts."
+      }
+     ]
+    },
+    {
+     "$set": {
+      "lastUpdated": "{{t:-54}}"
+     }
+    },
+    {
+     "id": "b2c3d4e5-f6a7-4b8c-9d0e-1f2a3b4c5d6e",
+     "timestamp": "{{t:-49}}",
+     "type": "gemini",
+     "content": "I'll fix `applyDiscount` so it actually subtracts the discount.",
+     "thoughts": [
+      {
+       "subject": "Locating the discount bug",
+       "description": "applyDiscount returns the subtotal unchanged; the percentage is never subtracted.",
+       "timestamp": "{{t:-51}}"
+      }
+     ],
+     "tokens": {
+      "input": 8412,
+      "output": 143,
+      "cached": 0,
+      "thoughts": 212,
+      "tool": 0,
+      "total": 8767
+     },
+     "model": "gemini-2.5-pro"
+    },
+    {
+     "$set": {
+      "lastUpdated": "{{t:-49}}"
+     }
+    },
+    {
+     "id": "b2c3d4e5-f6a7-4b8c-9d0e-1f2a3b4c5d6e",
+     "timestamp": "{{t:-49}}",
+     "type": "gemini",
+     "content": "I'll fix `applyDiscount` so it actually subtracts the discount.",
+     "thoughts": [
+      {
+       "subject": "Locating the discount bug",
+       "description": "applyDiscount returns the subtotal unchanged; the percentage is never subtracted.",
+       "timestamp": "{{t:-51}}"
+      }
+     ],
+     "tokens": {
+      "input": 8412,
+      "output": 143,
+      "cached": 0,
+      "thoughts": 212,
+      "tool": 0,
+      "total": 8767
+     },
+     "model": "gemini-2.5-pro",
+     "toolCalls": [
+      {
+       "id": "replace__replace_1760260466010_0",
+       "name": "replace",
+       "args": {
+        "file_path": "/work/shop/src/cart.ts",
+        "instruction": "Subtract the discount percentage from the subtotal.",
+        "old_string": "  return subtotal;\n",
+        "new_string": "  return subtotal - subtotal * (code.percent / 100);\n"
+       },
+       "result": [
+        {
+         "functionResponse": {
+          "id": "replace__replace_1760260466010_0",
+          "name": "replace",
+          "response": {
+           "output": "Successfully modified file: /work/shop/src/cart.ts (1 replacements)."
+          }
+         }
+        }
+       ],
+       "status": "success",
+       "timestamp": "{{t:-33}}",
+       "resultDisplay": {
+        "fileDiff": "Index: cart.ts\n===================================================================\n--- cart.ts\tCurrent\n+++ cart.ts\tProposed\n@@ -1,3 +1,3 @@\n export function applyDiscount(subtotal: number, code: DiscountCode): number {\n-  return subtotal;\n+  return subtotal - subtotal * (code.percent / 100);\n }\n",
+        "fileName": "cart.ts",
+        "filePath": "/work/shop/src/cart.ts",
+        "originalContent": "export function applyDiscount(subtotal: number, code: DiscountCode): number {\n  return subtotal;\n}\n",
+        "newContent": "export function applyDiscount(subtotal: number, code: DiscountCode): number {\n  return subtotal - subtotal * (code.percent / 100);\n}\n",
+        "diffStat": {
+         "model_added_lines": 1,
+         "model_removed_lines": 1,
+         "model_added_chars": 51,
+         "model_removed_chars": 18,
+         "user_added_lines": 0,
+         "user_removed_lines": 0,
+         "user_added_chars": 0,
+         "user_removed_chars": 0
+        },
+        "isNewFile": false,
+        "isBuildFile": false
+       },
+       "description": "src/cart.ts:   return subtotal; =>   return subtotal - subtotal * (c...",
+       "displayName": "Edit",
+       "renderOutputAsMarkdown": false
+      }
+     ]
+    },
+    {
+     "id": "c3d4e5f6-a7b8-4c9d-8e0f-2a3b4c5d6e7f",
+     "timestamp": "{{t:-33}}",
+     "type": "user",
+     "content": [
+      {
+       "functionResponse": {
+        "id": "replace__replace_1760260466010_0",
+        "name": "replace",
+        "response": {
+         "output": "Successfully modified file: /work/shop/src/cart.ts (1 replacements)."
+        }
+       }
+      }
+     ]
+    },
+    {
+     "$set": {
+      "lastUpdated": "{{t:-33}}"
+     }
+    },
+    {
+     "id": "d4e5f6a7-b8c9-4d0e-9f1a-3b4c5d6e7f80",
+     "timestamp": "{{t:-30}}",
+     "type": "gemini",
+     "content": "Fixed: `applyDiscount` now subtracts `code.percent` from the subtotal.",
+     "thoughts": [],
+     "tokens": {
+      "input": 8901,
+      "output": 31,
+      "cached": 8192,
+      "thoughts": 0,
+      "tool": 0,
+      "total": 8932
+     },
+     "model": "gemini-2.5-pro"
+    },
+    {
+     "$set": {
+      "lastUpdated": "{{t:-30}}"
+     }
+    },
+    {
+     "id": "e5f6a7b8-c9d0-4e1f-8a2b-4c5d6e7f8091",
+     "timestamp": "{{t:-5}}",
+     "type": "user",
+     "content": [
+      {
+       "text": "Run the tests."
+      }
+     ]
+    },
+    {
+     "$set": {
+      "lastUpdated": "{{t:-5}}"
+     }
+    },
+    {
+     "id": "f6a7b8c9-d0e1-4f2a-9b3c-5d6e7f8091a2",
+     "timestamp": "{{t:-2}}",
+     "type": "gemini",
+     "content": "Running the test suite.",
+     "thoughts": [
+      {
+       "subject": "Running the tests",
+       "description": "Use npm test to verify the cart change.",
+       "timestamp": "{{t:-2}}"
+      }
+     ],
+     "tokens": {
+      "input": 8960,
+      "output": 58,
+      "cached": 8192,
+      "thoughts": 44,
+      "tool": 0,
+      "total": 9062
+     },
+     "model": "gemini-2.5-pro"
+    },
+    {
+     "$set": {
+      "lastUpdated": "{{t:-2}}"
+     }
+    }
+   ],
+   "mtime": -120
+  }
+ ],
+ "expect": [
+  {
+   "brand": "gemini",
+   "name": "shop",
+   "zone": "idle",
+   "state": "idle",
+   "phase": "idle",
+   "skill": null,
+   "bubble": null,
+   "attention": {
+    "needsYou": false,
+    "reason": null,
+    "done": false,
+    "stuck": false,
+    "subagents": 0
+   }
+  }
+ ]
+}

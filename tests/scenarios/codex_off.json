@@ -1,0 +1,41 @@
+{
+ "description": "Codex turned off in settings → nothing shown",
+ "files": [
+  {
+   "path": ".codex/sessions/{{today:/}}/rollout-x-off.jsonl",
+   "jsonl": [
+    {
+     "timestamp": "{{t:-120}}",
+     "type": "session_meta",
+     "payload": {
+      "id": "cx-off",
+      "cwd": "/work/x",
+      "originator": "codex-tui",
+      "source": "cli",
+      "git": {
+       "branch": "me/feature-x"
+      }
+     }
+    },
+    {
+     "timestamp": "{{t:-60}}",
+     "type": "event_msg",
+     "payload": {
+      "type": "task_started"
+     }
+    }
+   ]
+  }
+ ],
+ "expect": [],
+ "settings": {
+  "sources": {
+   "codex": {
+    "enabled": false,
+    "paths": [
+     "~/.codex"
+    ]
+   }
+  }
+ }
+}

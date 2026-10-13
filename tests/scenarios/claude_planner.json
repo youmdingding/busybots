@@ -1,0 +1,99 @@
+{
+ "description": "/plan slash command keeps the whole turn in Plan",
+ "procs": [
+  "agent"
+ ],
+ "files": [
+  {
+   "path": ".claude/sessions/{{pid:agent}}.json",
+   "json": {
+    "pid": "{{pid:agent}}",
+    "sessionId": "sid-planner",
+    "cwd": "{{home}}/work/planner",
+    "status": "busy"
+   }
+  },
+  {
+   "path": "work/planner/.keep",
+   "text": ""
+  },
+  {
+   "path": ".claude/projects/{{projdir:work/planner}}/sid-planner.jsonl",
+   "jsonl": [
+    {
+     "type": "user",
+     "timestamp": "{{t:-60}}",
+     "message": {
+      "role": "user",
+      "content": "<command-message>plan is running…</command-message>\n<command-name>/plan</command-name>\n<command-args>TICKET-1</command-args>"
+     }
+    },
+    {
+     "type": "assistant",
+     "timestamp": "{{t:-40}}",
+     "message": {
+      "content": [
+       {
+        "type": "tool_use",
+        "id": "p1",
+        "name": "Read",
+        "input": {
+         "file_path": "/x/a.ts"
+        }
+       }
+      ]
+     }
+    },
+    {
+     "type": "user",
+     "timestamp": "{{t:-39}}",
+     "toolUseResult": {},
+     "message": {
+      "content": [
+       {
+        "type": "tool_result",
+        "tool_use_id": "p1",
+        "is_error": false
+       }
+      ]
+     }
+    },
+    {
+     "type": "assistant",
+     "timestamp": "{{t:-3}}",
+     "message": {
+      "content": [
+       {
+        "type": "tool_use",
+        "id": "p2",
+        "name": "Bash",
+        "input": {
+         "command": "git log"
+        }
+       }
+      ]
+     }
+    }
+   ],
+   "mtime": -3
+  }
+ ],
+ "expect": [
+  {
+   "brand": "claude",
+   "name": "planner",
+   "zone": "plan",
+   "state": "active",
+   "phase": "plan",
+   "skill": "plan",
+   "bubble": "Planning · Running a command",
+   "attention": {
+    "needsYou": false,
+    "reason": null,
+    "done": false,
+    "stuck": false,
+    "subagents": 0
+   }
+  }
+ ]
+}
