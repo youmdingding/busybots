@@ -13,11 +13,12 @@ Four themes: **Island**, **Office**, **City** and **Space**.
 Requires **Node.js 22.5 or newer** (it uses Node's built-in SQLite). No other dependencies.
 
 ```bash
-git clone https://github.com/youmdingding/busybots.git && cd busybots
-node bin/cli.js            # starts the board and opens http://127.0.0.1:8765/
+npx busybots               # starts the board and opens http://127.0.0.1:8765/
 ```
 
-Then open **Settings** (top right, or http://127.0.0.1:8765/admin) to check that your agents were found. Once the package is on npm, `npx busybots` will do the same without cloning.
+Then open **Settings** (top right, or http://127.0.0.1:8765/admin) to check that your agents were found. To keep it running in the background and start it at login, install it once with `npm install -g busybots` and run `busybots service install`.
+
+From a clone instead: `git clone https://github.com/youmdingding/busybots.git && cd busybots && node bin/cli.js`.
 
 | Command | What it does |
 |---|---|
@@ -28,7 +29,7 @@ Then open **Settings** (top right, or http://127.0.0.1:8765/admin) to check that
 | `busybots service install` | start the board at login (LaunchAgent on macOS, systemd user unit on Linux); `service uninstall` removes it |
 | `busybots hook` | optional Claude Code hook, see [Status badges](#status-badges) |
 
-Options: `--port N` (default 8765), `--no-open`. From a clone, run them as `node bin/cli.js <command>`.
+Options: `--port N` (default 8765), `--no-open`. With `npx`, prefix them: `npx busybots doctor`. From a clone, run `node bin/cli.js <command>`.
 
 Everything the board writes (settings, API token, logs, a copy of the current status) lives in a per-user folder, never in the repo: `~/Library/Application Support/busybots` on macOS, `$XDG_STATE_HOME/busybots` (default `~/.local/state/busybots`) on Linux, `%LOCALAPPDATA%\busybots` on Windows. Override with `BUSYBOTS_STATE`, or just the settings file with `BUSYBOTS_SETTINGS`.
 
