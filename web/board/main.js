@@ -11,7 +11,7 @@ import { fitIslandCamera, loadTile } from "./layout.js";
 import { TRAFFIC, signalState, trafficSpec } from "./city.js";
 import { initBoard, poll, setAgentFilter } from "./status.js";
 import { frame } from "./render.js";
-import { apiPost, closeAgentPanel, elPanelClose, elPanelJump, elPanelNote, elPanelPrompt, elPanelSend, hitTestBot, openAgentPanel, refreshPanel } from "./panel.js";
+import { apiPost, chooseIcon, closeAgentPanel, elPanelClose, elPanelJump, elPanelNote, elPanelPrompt, elPanelSend, hitTestBot, openAgentPanel, refreshPanel, toggleIconPicker } from "./panel.js";
 
 S.agentFilter = normalizeAgentFilter((() => {
   try { return localStorage.getItem(LS_AGENT_FILTER_KEY); } catch (_) { return "all"; }
@@ -106,6 +106,12 @@ canvas.addEventListener("mousemove", (ev) => {
 });
 
 elPanelClose?.addEventListener("click", closeAgentPanel);
+document.getElementById("panel-icon")?.addEventListener("click", () => toggleIconPicker());
+document.getElementById("panel-icon-reset")?.addEventListener("click", () => chooseIcon(null));
+document.getElementById("panel-icon-grid")?.addEventListener("click", (ev) => {
+  const btn = ev.target.closest("button[data-icon]");
+  if (btn) chooseIcon(btn.dataset.icon);
+});
 document.addEventListener("keydown", (ev) => {
   if (ev.key === "Escape") closeAgentPanel();
 });

@@ -92,8 +92,30 @@ export function session(source, sid, cwd, events, { turnOpen, mtime, nameHint = 
   };
 }
 
+export const TRANSCRIPT_MESSAGES = 15;
+const MAX_PANEL_ITEMS = 200; // a turn with hundreds of tool calls still makes a short panel
+
+/**
+ * The window the agent panel shows: the last `messages` user/agent messages, plus the
+ * tool steps between and after them (steps before the first kept message are dropped).
+ */
+export function lastMessages(items, messages = TRANSCRIPT_MESSAGES) {
+  let seen = 0;
+  let start = 0;
+  for (let i = items.length - 1; i >= 0; i--) {
+    if (items[i].kind === "user" || items[i].kind === "assistant") {
+      seen++;
+      if (seen === messages) {
+        start = i;
+        break;
+      }
+    }
+  }
+  return items.slice(start).slice(-MAX_PANEL_ITEMS);
+}
+
 /** Agent-panel items (user turns, assistant text, tool steps) from normalized events. */
-export function transcript(events, limit = 15) {
+export function transcript(events, limit = TRANSCRIPT_MESSAGES) {
   const items = [];
   for (const e of events) {
     const ts = e.timestamp;
@@ -114,7 +136,7 @@ export function transcript(events, limit = 15) {
       }
     }
   }
-  return items.slice(-limit);
+  return lastMessages(items, limit);
 }
 
 const reported = new Set();

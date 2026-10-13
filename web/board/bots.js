@@ -5,7 +5,7 @@ import { CANVAS_H, CANVAS_W, SCALE, SPRITE, UI_FONT, WALK_MS } from "./constants
 import { ctx } from "./dom.js";
 import { pointAlongPolyline, polylineLength } from "./routes.js";
 import { targetFor, zoneSlots } from "./layout.js";
-import { easeInOut } from "./status.js";
+import { easeInOut, drawSubagentOrbit } from "./status.js";
 import { wrapText } from "./canvas.js";
 import { roundRectPath } from "./zones.js";
 
@@ -249,6 +249,9 @@ export function drawBot(b, now, part) {
   else ctx.globalAlpha = 1;
 
   if (part !== "overlay") {
+  // Sub-agent dots passing behind the bot (same size and bob as the badges pass in render.js)
+  drawSubagentOrbit(b, drawX, b.y + (still ? 0 : b.state === "active" ? Math.sin(now / 280 + b.bobPhase) * 2.5 : 0),
+    SPRITE * SCALE * (S.claudeConfig?.spriteScale || 0.82), now, "back");
   if (img && img.complete && img.naturalWidth) {
     // Soft rounded clip so sidebar avatars read as pills on the island
     const ax = drawX - size / 2;
@@ -260,6 +263,20 @@ export function drawBot(b, now, part) {
     ctx.imageSmoothingQuality = "high";
     ctx.drawImage(img, ax, ay, size, size);
     ctx.restore();
+    // Picked icon: the agent's own character as a small badge, so you can still tell its type
+    const own = b.iconDefault && icons.get(b.iconDefault);
+    if (own && own.complete && own.naturalWidth) {
+      const bs = size * 0.42;
+      const bx = drawX + size * 0.5 - bs * 0.75, by = drawY + size * 0.5 - bs * 0.85;
+      ctx.save();
+      ctx.beginPath();
+      ctx.arc(bx + bs / 2, by + bs / 2, bs * 0.58, 0, Math.PI * 2);
+      ctx.fillStyle = "rgba(255,255,255,0.92)";
+      ctx.fill();
+      ctx.imageSmoothingEnabled = true;
+      ctx.drawImage(own, bx, by, bs, bs);
+      ctx.restore();
+    }
   } else {
     ctx.fillStyle = "#6db06a";
     roundRectPath(drawX - size / 2, drawY - size / 2, size, size, size * 0.28);

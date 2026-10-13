@@ -13,10 +13,12 @@ import { spawn, execFileSync, spawnSync } from "node:child_process";
 import { PACKAGE_ROOT, stateDir, settingsPath, expand } from "./paths.js";
 import * as S from "./settings.js";
 import { READERS } from "./readers/index.js";
+import { lastMessages, TRANSCRIPT_MESSAGES } from "./events.js";
 import { jsonlPathFor, tailJsonl } from "./claude.js";
 import { pidAlive, ttyForPid } from "./proc.js";
 import { withReadOnly, sqliteAvailable, SQLITE_HINT } from "./sqlite.js";
 import { CONFIG_PATH } from "./watcher.js";
+import { IconChoices, iconChoices } from "./icons.js";
 
 export const DEFAULT_PORT = 8765;
 const MAX_BODY = 256_000;
@@ -134,7 +136,7 @@ function cleanText(raw, n = 160) {
 }
 
 /** Claude Code transcript → panel items (user turns, assistant text, tool steps). */
-function claudeTranscript(homes, cwd, sid, limit = 15) {
+function claudeTranscript(homes, cwd, sid, limit = TRANSCRIPT_MESSAGES) {
   if (!cwd) return [];
   let path = null;
   for (const h of homes) {
@@ -178,7 +180,7 @@ function claudeTranscript(homes, cwd, sid, limit = 15) {
       if (text) items.push({ kind: "user", text, ts });
     }
   }
-  return items.slice(-limit);
+  return lastMessages(items, limit);
 }
 
 const CONDUCTOR_LOOKUP = `
@@ -192,7 +194,7 @@ const CONDUCTOR_LOOKUP = `
  * createBoardServer({ port, getStatus, token, log })
  * getStatus() returns the watcher's latest status object (served as /status.json).
  */
-export function createBoardServer({ port = DEFAULT_PORT, getStatus = () => null, token = ensureToken(), log = (m) => console.error(m) } = {}) {
+export function createBoardServer({ port = DEFAULT_PORT, getStatus = () => null, token = ensureToken(), icons = new IconChoices(), log = (m) => console.error(m) } = {}) {
   const allowedHosts = new Set([`127.0.0.1:${port}`, `localhost:${port}`, `[::1]:${port}`]);
   const allowedOrigins = new Set([...allowedHosts].map((h) => `http://${h}`));
   const tokenBuf = Buffer.from(token);
@@ -212,7 +214,8 @@ export function createBoardServer({ port = DEFAULT_PORT, getStatus = () => null,
     const bot = statusBot(sid);
     if (bot) {
       Object.assign(out, { name: bot.name || out.name, cwd: bot.cwd ?? null, origin: bot.origin ?? null, state: bot.state ?? null,
-        zone: bot.zone ?? null, livePid: bot.livePid ?? null, entrypoint: bot.entrypoint ?? null, bubble: bot.bubble ?? null, brand: bot.brand ?? null });
+        zone: bot.zone ?? null, livePid: bot.livePid ?? null, entrypoint: bot.entrypoint ?? null, bubble: bot.bubble ?? null, brand: bot.brand ?? null,
+        icon: bot.icon ?? null, iconDefault: bot.iconDefault ?? bot.icon ?? null });
     }
     if (out.brand in READERS) {
       const label = agentLabel(out.brand);
@@ -439,9 +442,9 @@ export function createBoardServer({ port = DEFAULT_PORT, getStatus = () => null,
           for (const k of ["cwd", "title", "tty", "bubble"]) delete meta[k];
           meta.name = bot?.name || "Agent";
           meta.privacy = true;
-          return send(res, 200, { ok: true, session: meta, transcript: [] });
+          return send(res, 200, { ok: true, session: meta, transcript: [], icons: iconChoices() });
         }
-        return send(res, 200, { ok: true, session: meta, transcript: sessionTranscript(meta, sid) });
+        return send(res, 200, { ok: true, session: meta, transcript: sessionTranscript(meta, sid), icons: iconChoices() });
       }
       if (path.startsWith("/api/")) return send(res, 404, { ok: false, error: "Not found" });
       return serveStatic(res, path);
@@ -465,7 +468,7 @@ export function createBoardServer({ port = DEFAULT_PORT, getStatus = () => null,
         return send(res, 500, { ok: false, error: `Could not write settings: ${err.message}` });
       }
     }
-    const m = /^\/api\/session\/([0-9A-Za-z_-]{8,80})\/(jump|prompt)$/.exec(path);
+    const m = /^\/api\/session\/([0-9A-Za-z_-]{8,80})\/(jump|prompt|icon)$/.exec(path);
     if (!m) return send(res, 404, { ok: false, error: "Not found" });
     const [, sid, action] = m;
     if (action === "jump") {
@@ -477,6 +480,16 @@ export function createBoardServer({ port = DEFAULT_PORT, getStatus = () => null,
     }
     const body = await readJson(req, res);
     if (!body) return;
+    if (action === "icon") {
+      // Pick an icon for this conversation only (null = back to the agent's own icon)
+      const icon = body.icon === null ? null : String(body.icon || "");
+      try {
+        icons.set(sid, icon);
+      } catch (err) {
+        return send(res, 400, { ok: false, error: err.message });
+      }
+      return send(res, 200, { ok: true, icon });
+    }
     const prompt = String(body.prompt || "").trim();
     if (!prompt) return send(res, 400, { ok: false, error: "Empty prompt" });
     if (prompt.length > 4000) return send(res, 400, { ok: false, error: "Prompt too long" });

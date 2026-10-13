@@ -46,6 +46,7 @@ export function setBoardPanelOpen(open) {
 
 export function closeAgentPanel() {
   S.panelSessionId = null;
+  toggleIconPicker(false);
   if (S.panelTimer) {
     clearInterval(S.panelTimer);
     S.panelTimer = null;
@@ -59,6 +60,7 @@ export function closeAgentPanel() {
 
 export function renderTranscript(items, hidden = false) {
   if (!elPanelTranscript) return;
+  document.getElementById("panel-transcript-note")?.classList.toggle("hidden", hidden);
   elPanelTranscript.replaceChildren();
   if (!items || !items.length) {
     const div = document.createElement("div");
@@ -83,8 +85,78 @@ export function renderTranscript(items, hidden = false) {
   elPanelTranscript.scrollTop = elPanelTranscript.scrollHeight;
 }
 
+// ---- icon picker: choose another icon for this conversation ----
+const elIconBtn = document.getElementById("panel-icon");
+const elIconImg = document.getElementById("panel-icon-img");
+const elIconPicker = document.getElementById("panel-icon-picker");
+const elIconGrid = document.getElementById("panel-icon-grid");
+let iconChoiceList = [];
+let currentIcon = null;
+let ownIcon = null;
+
+function renderIconGrid() {
+  if (!elIconGrid) return;
+  elIconGrid.replaceChildren();
+  let group = null;
+  // Characters, then the colour variants of this agent's own type (e.g. every Claude icon)
+  const ownKind = String(ownIcon || "").replace(/^icons\//, "").split("-")[0];
+  const shown = iconChoiceList.filter((c) => c.group === "fun" || c.id.startsWith(`icons/${ownKind}-`));
+  for (const c of shown) {
+    if (c.group !== group) {
+      group = c.group;
+      const lab = document.createElement("div");
+      lab.className = "group-label";
+      lab.textContent = group === "fun" ? "Characters" : "Other colours";
+      elIconGrid.appendChild(lab);
+    }
+    const btn = document.createElement("button");
+    btn.type = "button";
+    btn.title = c.label;
+    btn.setAttribute("aria-label", c.label);
+    btn.setAttribute("aria-pressed", String(c.id === currentIcon));
+    btn.dataset.icon = c.id;
+    const img = document.createElement("img");
+    img.src = c.id;
+    img.alt = "";
+    btn.appendChild(img);
+    elIconGrid.appendChild(btn);
+  }
+}
+
+export function toggleIconPicker(open = elIconPicker?.classList.contains("hidden")) {
+  if (!elIconPicker) return;
+  elIconPicker.classList.toggle("hidden", !open);
+  elIconBtn?.setAttribute("aria-expanded", String(!!open));
+  if (open) renderIconGrid();
+}
+
+/** icon = a path from the choices, or null for the agent's own icon. */
+export async function chooseIcon(icon) {
+  if (!S.panelSessionId) return;
+  const r = await apiPost(`/api/session/${encodeURIComponent(S.panelSessionId)}/icon`, { icon });
+  if (!r?.ok) return;
+  currentIcon = icon || ownIcon;
+  if (elIconImg && currentIcon) elIconImg.src = currentIcon;
+  const b = bots.get(S.panelSessionId); // show it right away; the next status update confirms it
+  if (b && currentIcon) {
+    if (icon) b.iconDefault = b.iconDefault || ownIcon;
+    else b.iconDefault = null;
+    b.icon = currentIcon;
+  }
+  toggleIconPicker(false);
+}
+
 export function applyPanelSession(data) {
   const s = data.session || {};
+  if (Array.isArray(data.icons)) iconChoiceList = data.icons;
+  const shown = bots.get(S.panelSessionId); // fall back to what the board draws
+  currentIcon = s.icon || shown?.icon || null;
+  ownIcon = s.iconDefault || shown?.iconDefault || currentIcon;
+  if (elIconImg) {
+    if (currentIcon) elIconImg.src = currentIcon;
+    else elIconImg.removeAttribute("src");
+  }
+  if (elIconPicker && !elIconPicker.classList.contains("hidden")) renderIconGrid();
   if (elPanelName) elPanelName.textContent = s.name || s.id || "Agent";
   if (elPanelMeta) {
     const BRAND_LABELS = { codex: "Codex CLI", gemini: "Gemini CLI", opencode: "OpenCode", cursor: "Cursor CLI" };
@@ -154,6 +226,7 @@ export async function refreshPanel() {
 }
 
 export async function openAgentPanel(bot) {
+  toggleIconPicker(false);
   if (!bot) return;
   S.panelSessionId = bot.id;
   if (elPanel) {

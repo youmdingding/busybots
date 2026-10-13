@@ -9,6 +9,7 @@ import * as settingsMod from "./settings.js";
 import * as claude from "./claude.js";
 import * as conductorSrc from "./conductor.js";
 import { READERS } from "./readers/index.js";
+import { IconChoices } from "./icons.js";
 import {
   makeRules, latestActivity, classifySession, attentionFor, bubbleFromTool, phaseFor, zoneFor,
   areaForSkill, skillLabel, clip, DELEGATE_TOOLS, STRONG_KEYS,
@@ -115,12 +116,13 @@ function areasAsZones(cfg) {
  * touches the outside world can be injected for tests.
  */
 export class Watcher {
-  constructor({ config, settings, attentionDir, log = (m) => console.error(m) } = {}) {
+  constructor({ config, settings, attentionDir, icons, log = (m) => console.error(m) } = {}) {
     this.config = config;           // object, or undefined → read config.json each pass
     this.settings = settings;       // object, or undefined → read settings.json each pass
     this.attentionDir = attentionDir ?? join(stateDir(), "attention");
     this.log = log;
     this.skills = new claude.SkillTracker();
+    this.icons = icons ?? new IconChoices();
   }
 
   build(now = Date.now() / 1000) {
@@ -159,10 +161,16 @@ export class Watcher {
     }
     const firstHome = claudeHomes[0] || null;
 
+    const picked = this.icons ? this.icons.map() : {};
     const bots = [];
     for (const sess of sessions) {
       try {
-        bots.push(this.bot(sess, { now, cfg, s, rules, mapping, busyWindow, maxChars, firstHome }));
+        const bot = this.bot(sess, { now, cfg, s, rules, mapping, busyWindow, maxChars, firstHome });
+        if (picked[bot.id]) {
+          bot.iconDefault = bot.icon; // the board draws it as a small badge so the agent type stays visible
+          bot.icon = picked[bot.id];
+        }
+        bots.push(bot);
       } catch (err) {
         this.log(`session ${sess.sessionId}: ${err.stack || err.message}`);
       }

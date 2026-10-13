@@ -1,7 +1,7 @@
 """
-City-theme ground: one pixel-art slab covering the board (grid x 0..22, y 0..16)
+City-theme ground: one pixel-art slab covering the board (grid x -3..25, y -3..16)
 with streets between the zones, sidewalks + curbs, yellow centre dashes, zebra
-crossings and a wide front avenue. Also writes the matching prop placements
+crossings, a wide front avenue and a ring road on the other three sides. Also writes the matching prop placements
 (ground_spots.json) so trees sit in their pits, cars in their lanes, etc.
 
 Run: python3 ground.py  -> out/city_ground.png + manifest entry + ground_spots.json
@@ -11,7 +11,7 @@ from isopix import box, render, rgb, mix, hash2, face_uv
 from interiors import U
 from props import solid_hull
 
-GX0, GY0, GX1, GY1 = 0.0, 0.0, 22.0, 16.3
+GX0, GY0, GX1, GY1 = -2.2, -2.2, 24.1, 16.3
 SLAB = 11.0  # board island sits 22 px above its base; drawn at 2x
 
 # zone footprints (runtimeLayout in board.js)
@@ -27,10 +27,18 @@ ZONES = {
 # streets (grid units). Each: (axis, centre, half_width_of_road, start, end)
 #   axis "x": road runs along x at y=centre ; axis "y": runs along y at x=centre
 AVE_Y0, AVE_Y1 = 13.6, 15.6                     # front avenue (two-way, one lane each way)
+# Ring road on the back and right sides, same width and markings as the avenue.
+# Each: (axis, centre, half width) — axis "x" runs along x at y=centre.
+RING = [
+    ("x", -1.2, 0.8),                            # back-right side (behind Specs / Plan / Explore)
+    ("y", -1.2, 0.8),                            # back-left side (behind Specs / Build)
+    ("y", 23.1, 0.8),                            # front-right side (beside Explore / Idle)
+]
+WIDE = [("x", (AVE_Y0 + AVE_Y1) / 2, (AVE_Y1 - AVE_Y0) / 2)] + RING
 STREETS = [
-    ("y", 6.5, 0.36, 0.9, AVE_Y0),               # between Specs/Build and Plan/Review
-    ("y", 12.4, 0.29, 0.9, AVE_Y0),              # between Plan/Review and Idle
-    ("x", 5.65, 0.24, 1.0, 21.0),                # between the two zone rows (now runs past Explore/Idle)
+    ("y", 6.5, 0.36, -0.4, AVE_Y0),              # between Specs/Build and Plan/Review (meets the ring road)
+    ("y", 12.4, 0.29, -0.4, AVE_Y0),             # between Plan/Review and Idle
+    ("x", 5.65, 0.24, -0.4, 22.3),               # between the two zone rows, ring road to ring road
 ]
 CROSSINGS = [
     # (x0, y0, x1, y1, bars_along) — bars_along = direction of the bars (= traffic direction)
@@ -51,8 +59,11 @@ def classify(x, y):
     for z in ZONES.values():
         if in_rect(x, y, z):
             return "zone", None
-    if AVE_Y0 <= y <= AVE_Y1:
-        return "road", ("x", (AVE_Y0 + AVE_Y1) / 2, (AVE_Y1 - AVE_Y0) / 2)
+    hits = [w for w in WIDE if abs((y if w[0] == "x" else x) - w[1]) <= w[2]]
+    if len(hits) > 1:
+        return "road", ("junction", 0, 0)        # two wide roads cross: plain asphalt
+    if hits:
+        return "road", hits[0]
     for (ax, c, hw, a0, a1) in STREETS:
         if ax == "y" and abs(x - c) <= hw and a0 <= y <= a1:
             return "road", ("y", c, hw)
@@ -86,17 +97,19 @@ def ground_mat(p, n):
                 return asphalt(ux, uy)
     if kind == "road":
         ax, c, hw = info
+        if ax == "junction":
+            return asphalt(ux, uy)
         d_c = (y - c) if ax == "x" else (x - c)              # signed offset from centre (grid)
         along = ux if ax == "x" else uy
         edge = hw - abs(d_c)                                 # distance to road edge (grid)
         # avenue: white edge lines + yellow double centre; side streets: dashed centre
-        if ax == "x" and abs(c - (AVE_Y0 + AVE_Y1) / 2) < 0.01:
+        if hw >= 0.75:  # avenue and ring road
             if edge * U < 1.6 and edge * U > 0.8:
                 return rgb("#e6e6e0")
             if abs(abs(d_c * U) - 0.7) < 0.45 and not near_crossing(x, y):
                 return rgb("#f0c43a")  # solid double yellow: two-way traffic
             # manhole covers
-            for (mx, my) in ((3.4, 14.1), (10.5, 15.1), (19.6, 14.1)):
+            for (mx, my) in ((3.4, 14.1), (10.5, 15.1), (19.6, 14.1), (9.0, -1.6), (-0.8, 9.5), (23.5, 4.0)):
                 if math.hypot(x - mx, y - my) * U < 2.3:
                     rr = math.hypot(x - mx, y - my) * U
                     return rgb("#2a2d33") if rr > 1.8 or int(ux + uy) % 2 else rgb("#4b5059")
@@ -134,7 +147,7 @@ def near_intersection(x, y):
     for (ax, c, hw, a0, a1) in STREETS:
         if ax == "y" and abs(x - c) <= hw + 0.05 and abs(y - 5.65) < 0.5:
             return True
-    if y > AVE_Y0 - 0.3:
+    if y > AVE_Y0 - 0.3 or y < -0.2 or x < -0.2 or x > 22.1:   # where side streets meet the wide roads
         return True
     return near_crossing(x, y)
 
@@ -181,6 +194,15 @@ def spots():
     for lx in (2.6, 9.6, 16.4, 20.4):
         add("lamp", lx, AVE_Y1 + 0.34)
     add("hydrant", 11.4, AVE_Y1 + 0.36)
+    # ring-road sidewalks: lamps and a few trees between the rooms and the road
+    for lx in (3.6, 9.6, 15.4, 19.8):
+        add("lamp", lx, -0.15)
+    for ly in (3.2, 8.4, 12.0):
+        add("lamp", -0.15, ly)
+    for ly in (2.6, 7.6, 11.6):
+        add("lamp", 22.0, ly)
+    for (tx, ty) in ((0.2, 0.15), (21.7, 0.15), (21.7, 12.6)):
+        add("tree_small", tx, ty)
     # traffic lights on both kerbs of each avenue crossing (signal id → board cycles them)
     for (x, y, sid) in ((5.0, AVE_Y1 + 0.34, 0), (5.05, 13.35, 0), (13.9, AVE_Y1 + 0.34, 1), (13.8, 13.35, 1)):
         S.append({"type": "city_traffic_light", "gx": x, "gy": y, "signal": sid})
@@ -190,6 +212,9 @@ def spots():
 def traffic():
     """Lanes / signals for the board's animated traffic (theme.traffic)."""
     far, near = AVE_Y0 + 0.5, AVE_Y1 - 0.5
+    (bx, bc, _), (lx, lc, _), (rx, rc, _) = RING
+    ring = lambda axis, at, d, a, b, sp, cars: {"axis": axis, "dir": d, "at": at, "from": a, "to": b,
+                                                "speed": sp, "fade": 1.0, "cars": cars}
     return {
         "cycle": 15, "green": 8, "amber": 1.6,
         "signals": [
@@ -201,6 +226,13 @@ def traffic():
              "cars": ["taxi", "sedan_blue", "van", "sedan_white"]},
             {"axis": "x", "dir": 1, "at": near, "from": 0.2, "to": 21.8, "speed": 1.7, "fade": 1.0, "signals": True,
              "cars": ["sedan_red", "hatch_green", "taxi", "van", "sedan_blue"]},
+            # ring road: cars fade in and out before the corners, like the boats around the island
+            ring("x", bc - 0.4, -1, -0.4, 22.4, 1.4, ["van", "sedan_white", "taxi"]),
+            ring("x", bc + 0.4, 1, -0.4, 22.4, 1.6, ["sedan_blue", "hatch_green", "sedan_red"]),
+            ring("y", lc - 0.4, -1, -0.4, 13.4, 1.3, ["taxi", "sedan_red"]),
+            ring("y", lc + 0.4, 1, -0.4, 13.4, 1.5, ["sedan_white", "van", "hatch_green"]),
+            ring("y", rc - 0.4, -1, -0.4, 13.4, 1.4, ["sedan_blue", "taxi"]),
+            ring("y", rc + 0.4, 1, -0.4, 13.4, 1.6, ["hatch_green", "van", "sedan_white"]),
         ],
     }
 

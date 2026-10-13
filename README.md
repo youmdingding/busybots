@@ -115,7 +115,9 @@ Detection is heuristic from the transcripts. For exact permission detection, add
 
 ## Agent panel
 
-Click an agent to open its panel: recent transcript, **Jump to it** (brings its Terminal/iTerm tab or Conductor to the front, macOS) and, for idle terminal sessions, a prompt box that runs `claude --resume <id> -p "<prompt>"`.
+Click an agent to open its panel: the last 15 messages between you and the agent (with the tool steps in between), **Jump to it** (brings its Terminal/iTerm tab or Conductor to the front, macOS) and, for idle terminal sessions, a prompt box that runs `claude --resume <id> -p "<prompt>"`.
+
+Click the agent's icon in the panel to give that conversation a different character: a robot, cat, fox, frog, owl, octopus, mushroom, cactus, slime, alien, rocket, bunny, star, heart, crystal or bird, or another colour of its own icon. The choice lasts for that conversation only; the agent's own icon stays visible as a small badge.
 
 ## Local API and security
 
@@ -126,6 +128,7 @@ The server binds **127.0.0.1** only, rejects other Host/Origin headers, and only
 - `GET /api/session/<id>` — session meta + last ~15 transcript items
 - `POST /api/session/<id>/jump` — focus the session's window
 - `POST /api/session/<id>/prompt` — resume an idle terminal session with a prompt
+- `POST /api/session/<id>/icon` — pick an icon for that conversation (`{"icon": "icons/pick-cat.png"}`, or `null` for its own)
 
 The status (`/status.json`, and `status.json` in your state folder) contains local paths, session names and short snippets of agent output — don't share it.
 

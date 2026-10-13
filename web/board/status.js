@@ -190,6 +190,8 @@ export function applyStatus(data) {
     const zoneChanged = prevZone !== raw.zone;
     b.name = raw.name;
     b.icon = raw.icon;
+    b.iconDefault = raw.iconDefault || null; // set when you picked another icon for this conversation
+    if (b.iconDefault) loadIcon(b.iconDefault);
     b.state = raw.state || "idle";
     b.bubble = raw.bubble;
     b.task = raw.task;
@@ -278,19 +280,20 @@ export function updateAttentionSummary(list) {
  * Status badges on an agent: "!" needs you (pulsing), ✓ done, ⚠ stuck, and little
  * satellites for live sub-agents. Drawn in the overlay pass so walls never hide them.
  */
+function disc(x, y, r, fill, ring) {
+  ctx.beginPath();
+  ctx.arc(x, y, r, 0, Math.PI * 2);
+  ctx.fillStyle = fill;
+  ctx.fill();
+  ctx.lineWidth = 2;
+  ctx.strokeStyle = ring || "#ffffff";
+  ctx.stroke();
+}
+
 export function drawAttentionBadges(b, drawX, drawY, size, now) {
   const a = b.attention;
   if (!a) return;
   const bx = drawX + size * 0.42, by = drawY - size * 0.42;
-  const disc = (x, y, r, fill, ring) => {
-    ctx.beginPath();
-    ctx.arc(x, y, r, 0, Math.PI * 2);
-    ctx.fillStyle = fill;
-    ctx.fill();
-    ctx.lineWidth = 2;
-    ctx.strokeStyle = ring || "#ffffff";
-    ctx.stroke();
-  };
   ctx.save();
   ctx.globalAlpha = 1;
   if (a.needsYou) {
@@ -349,12 +352,7 @@ export function drawAttentionBadges(b, drawX, drawY, size, now) {
   const n = Math.min(4, a.subagents || 0);
   if (n > 0) {
     const R = size * 0.72;
-    for (let i = 0; i < n; i++) {
-      const ang = now / 700 + (i * Math.PI * 2) / n + b.bobPhase;
-      const ox = drawX + Math.cos(ang) * R;
-      const oy = drawY + Math.sin(ang) * R * 0.45;
-      disc(ox, oy, 4.2, "#3ec8e0", "#0b3a44");
-    }
+    drawSubagentOrbit(b, drawX, drawY, size, now, "front");
     if ((a.subagents || 0) > 4) {
       ctx.fillStyle = "#0b3a44";
       ctx.font = `700 10px ${UI_FONT}`;
@@ -363,6 +361,22 @@ export function drawAttentionBadges(b, drawX, drawY, size, now) {
     }
   }
   ctx.restore();
+}
+
+/**
+ * Sub-agent dots circling a bot. The far half of the orbit ("back") is drawn before the
+ * sprite so the bot hides it; the near half ("front") after, with the other badges.
+ */
+export function drawSubagentOrbit(b, drawX, drawY, size, now, half) {
+  const n = Math.min(4, b.attention?.subagents || 0);
+  if (!n) return;
+  const R = size * 0.72;
+  for (let i = 0; i < n; i++) {
+    const ang = now / 700 + (i * Math.PI * 2) / n + b.bobPhase;
+    const behind = Math.sin(ang) < 0; // upper half of the ellipse = further from the viewer
+    if (behind !== (half === "back")) continue;
+    disc(drawX + Math.cos(ang) * R, drawY + Math.sin(ang) * R * 0.45, 4.2, "#3ec8e0", "#0b3a44");
+  }
 }
 
 export function updateHeaderTime(iso) {

@@ -9,6 +9,10 @@ Original characters, one silhouette per agent type, colour varies per agent:
   - opencode-*.png  — "dome": wide dome with a round top
   - cursor-*.png    — "tv": squat screen with two antennas
 
+Plus a set of "pick" icons (pick-*.png) anyone can choose for an agent from its panel:
+robot, cat, fox, frog, owl, octopus, mushroom, cactus, slime, alien, rocket, bunny,
+star, heart, crystal and bird.
+
 Every icon gets two punched-out horizontal oval eyes and a dark outline.
 The silhouettes deliberately don't imitate any product's logo.
 
@@ -106,6 +110,133 @@ def tv(d, s):
     d.ellipse([20 * s, 4 * s, 32 * s, 16 * s], fill=255)
     d.ellipse([64 * s, 4 * s, 76 * s, 16 * s], fill=255)
     _feet(d, s, y=84, xs=(30, 66))
+
+
+# ---- pick icons (chosen per conversation from the agent panel) -------------------
+
+def robot(d, s):
+    d.rounded_rectangle([18 * s, 24 * s, 78 * s, 80 * s], radius=8 * s, fill=255)
+    d.rectangle([10 * s, 40 * s, 18 * s, 60 * s], fill=255)          # ear bolts
+    d.rectangle([78 * s, 40 * s, 86 * s, 60 * s], fill=255)
+    d.line([(48 * s, 24 * s), (48 * s, 10 * s)], fill=255, width=4 * s)
+    d.rectangle([42 * s, 4 * s, 54 * s, 12 * s], fill=255)
+    d.rectangle([26 * s, 80 * s, 40 * s, 90 * s], fill=255)          # square feet
+    d.rectangle([56 * s, 80 * s, 70 * s, 90 * s], fill=255)
+
+def cat(d, s):
+    d.rounded_rectangle([18 * s, 30 * s, 78 * s, 86 * s], radius=24 * s, fill=255)
+    d.polygon([(20 * s, 44 * s), (24 * s, 12 * s), (44 * s, 32 * s)], fill=255)
+    d.polygon([(76 * s, 44 * s), (72 * s, 12 * s), (52 * s, 32 * s)], fill=255)
+    d.line([(76 * s, 76 * s), (88 * s, 64 * s), (88 * s, 50 * s)], fill=255, width=6 * s, joint="curve")
+
+def fox(d, s):
+    d.polygon([(12 * s, 36 * s), (48 * s, 30 * s), (84 * s, 36 * s), (48 * s, 84 * s)], fill=255)
+    d.ellipse([20 * s, 34 * s, 76 * s, 82 * s], fill=255)
+    d.polygon([(14 * s, 40 * s), (18 * s, 6 * s), (40 * s, 32 * s)], fill=255)
+    d.polygon([(82 * s, 40 * s), (78 * s, 6 * s), (56 * s, 32 * s)], fill=255)
+
+def frog(d, s):
+    d.ellipse([10 * s, 38 * s, 86 * s, 86 * s], fill=255)
+    d.ellipse([18 * s, 24 * s, 44 * s, 50 * s], fill=255)           # eye bumps
+    d.ellipse([52 * s, 24 * s, 78 * s, 50 * s], fill=255)
+    _feet(d, s, y=86, xs=(26, 70), r=9)
+
+def owl(d, s):
+    d.ellipse([18 * s, 22 * s, 78 * s, 88 * s], fill=255)
+    d.polygon([(22 * s, 34 * s), (22 * s, 8 * s), (42 * s, 26 * s)], fill=255)
+    d.polygon([(74 * s, 34 * s), (74 * s, 8 * s), (54 * s, 26 * s)], fill=255)
+    d.ellipse([8 * s, 44 * s, 26 * s, 76 * s], fill=255)             # wings
+    d.ellipse([70 * s, 44 * s, 88 * s, 76 * s], fill=255)
+
+def octopus(d, s):
+    d.ellipse([18 * s, 8 * s, 78 * s, 68 * s], fill=255)
+    for x in (22, 38, 54, 70):                                        # four curly legs
+        d.rounded_rectangle([(x - 6) * s, 54 * s, (x + 6) * s, 82 * s], radius=6 * s, fill=255)
+        d.ellipse([(x - 2) * s, 76 * s, (x + 10) * s, 88 * s], fill=255)
+
+def mushroom(d, s):
+    d.pieslice([6 * s, 8 * s, 90 * s, 76 * s], 180, 360, fill=255)
+    d.rounded_rectangle([6 * s, 36 * s, 90 * s, 46 * s], radius=5 * s, fill=255)
+    d.rounded_rectangle([28 * s, 42 * s, 68 * s, 88 * s], radius=14 * s, fill=255)
+
+def cactus(d, s):
+    d.rounded_rectangle([34 * s, 8 * s, 62 * s, 88 * s], radius=14 * s, fill=255)
+    d.rounded_rectangle([12 * s, 34 * s, 26 * s, 62 * s], radius=7 * s, fill=255)
+    d.rectangle([18 * s, 54 * s, 36 * s, 64 * s], fill=255)
+    d.rounded_rectangle([70 * s, 24 * s, 84 * s, 52 * s], radius=7 * s, fill=255)
+    d.rectangle([60 * s, 44 * s, 78 * s, 54 * s], fill=255)
+
+def slime(d, s):
+    d.ellipse([10 * s, 40 * s, 86 * s, 90 * s], fill=255)
+    d.ellipse([24 * s, 18 * s, 72 * s, 66 * s], fill=255)
+    d.ellipse([60 * s, 8 * s, 74 * s, 24 * s], fill=255)              # little droplet
+    d.ellipse([14 * s, 76 * s, 30 * s, 92 * s], fill=255)
+
+def alien(d, s):
+    d.ellipse([12 * s, 14 * s, 84 * s, 70 * s], fill=255)
+    d.rounded_rectangle([32 * s, 56 * s, 64 * s, 86 * s], radius=10 * s, fill=255)
+    d.line([(30 * s, 20 * s), (20 * s, 4 * s)], fill=255, width=4 * s)
+    d.line([(66 * s, 20 * s), (76 * s, 4 * s)], fill=255, width=4 * s)
+    _feet(d, s, y=88, xs=(36, 60), r=6)
+
+def rocket(d, s):
+    d.ellipse([30 * s, 4 * s, 66 * s, 80 * s], fill=255)
+    d.polygon([(30 * s, 52 * s), (14 * s, 82 * s), (36 * s, 74 * s)], fill=255)
+    d.polygon([(66 * s, 52 * s), (82 * s, 82 * s), (60 * s, 74 * s)], fill=255)
+    d.polygon([(40 * s, 76 * s), (48 * s, 92 * s), (56 * s, 76 * s)], fill=255)  # flame
+
+def bunny(d, s):
+    d.ellipse([18 * s, 36 * s, 78 * s, 88 * s], fill=255)
+    d.ellipse([24 * s, 2 * s, 40 * s, 48 * s], fill=255)
+    d.ellipse([56 * s, 2 * s, 72 * s, 48 * s], fill=255)
+
+def star(d, s):
+    pts = []
+    for i in range(10):
+        r = 44 if i % 2 == 0 else 20
+        a = -math.pi / 2 + i * math.pi / 5
+        pts.append(((48 + r * math.cos(a)) * s, (52 + r * math.sin(a)) * s))
+    d.polygon(pts, fill=255)
+    d.ellipse([28 * s, 34 * s, 68 * s, 74 * s], fill=255)
+
+def heart(d, s):
+    d.ellipse([10 * s, 14 * s, 52 * s, 56 * s], fill=255)
+    d.ellipse([44 * s, 14 * s, 86 * s, 56 * s], fill=255)
+    d.polygon([(12 * s, 42 * s), (48 * s, 88 * s), (84 * s, 42 * s), (48 * s, 30 * s)], fill=255)
+
+def crystal(d, s):
+    d.polygon([(48 * s, 4 * s), (82 * s, 34 * s), (48 * s, 92 * s), (14 * s, 34 * s)], fill=255)
+
+def bird(d, s):
+    d.ellipse([14 * s, 28 * s, 78 * s, 88 * s], fill=255)
+    d.polygon([(76 * s, 52 * s), (92 * s, 58 * s), (76 * s, 64 * s)], fill=255)   # beak
+    d.polygon([(18 * s, 60 * s), (4 * s, 50 * s), (8 * s, 72 * s)], fill=255)     # tail
+    for x, h in ((38, 12), (46, 6), (54, 14)):                                    # head tuft
+        d.ellipse([(x - 4) * s, h * s, (x + 4) * s, (h + 24) * s], fill=255)
+
+
+# name: (draw fn, colour, eye centre x, eye centre y)
+PICKS = {
+    "robot": (robot, "#8FA3B8", 48, 50), "cat": (cat, "#FF9F1C", 48, 56), "fox": (fox, "#FF6B2C", 48, 54),
+    "frog": (frog, "#3DDC97", 48, 37), "owl": (owl, "#A9846A", 48, 46), "octopus": (octopus, "#E85D75", 48, 38),
+    "mushroom": (mushroom, "#E5484D", 48, 62), "cactus": (cactus, "#2EAF6E", 48, 40), "slime": (slime, "#7ED957", 48, 56),
+    "alien": (alien, "#5BD5A0", 48, 42), "rocket": (rocket, "#5C7CFA", 48, 38), "bunny": (bunny, "#F5F0E6", 48, 62),
+    "star": (star, "#FFD23F", 48, 54), "heart": (heart, "#FF5C8A", 48, 44), "crystal": (crystal, "#7FDBFF", 48, 40),
+    "bird": (bird, "#FFC72C", 50, 54),
+}
+
+
+def generate_picks(out_dir: str = OUT) -> list[str]:
+    os.makedirs(out_dir, exist_ok=True)
+    paths = []
+    for name, (fn, color, ecx, ecy) in PICKS.items():
+        DRAW[name] = fn
+        im = make_icon(name, color, ecx, ecy, outline=True, outline_radius=4, **EYES)
+        path = os.path.join(out_dir, f"pick-{name}.png")
+        im.save(path, "PNG")
+        print("wrote", path)
+        paths.append(f"icons/pick-{name}.png")
+    return paths
 
 
 DRAW = {
@@ -298,4 +429,6 @@ if __name__ == "__main__":
         generate_opencode()
     if not args or "cursor" in args:
         generate_cursor()
+    if not args or "picks" in args:
+        generate_picks()
     print("done")

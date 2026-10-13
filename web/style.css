@@ -406,3 +406,28 @@ h1 {
   background: rgba(255, 255, 255, 0.6);
 }
 #settings-link:hover { background: rgba(45, 138, 122, 0.1); }
+
+/* Agent panel: icon (click to pick another for this conversation) */
+.panel-head { align-items: flex-start; gap: 10px; }
+.panel-title { flex: 1; min-width: 0; }
+.panel-icon {
+  position: relative; flex: none; width: 56px; height: 56px; padding: 3px;
+  border: 2px solid var(--line, #8fb3a8); border-radius: 10px; background: #fff; cursor: pointer;
+}
+.panel-icon img { width: 48px; height: 48px; image-rendering: pixelated; display: block; }
+.panel-icon-edit {
+  position: absolute; right: -6px; bottom: -6px; width: 20px; height: 20px; border-radius: 50%;
+  background: #2d8a7a; color: #fff; font-size: 11px; line-height: 20px; text-align: center;
+}
+.panel-icon:hover, .panel-icon[aria-expanded="true"] { border-color: #2d8a7a; }
+.panel-icon-picker { margin: 4px 0 10px; padding: 10px; border: 2px solid #cfe2dc; border-radius: 10px; background: #f6fbf9; }
+.panel-icon-grid { display: grid; grid-template-columns: repeat(6, 1fr); gap: 6px; margin: 6px 0 8px; }
+.panel-icon-grid button {
+  padding: 3px; border: 2px solid transparent; border-radius: 8px; background: #fff; cursor: pointer;
+}
+.panel-icon-grid button:hover { border-color: #8fb3a8; }
+.panel-icon-grid button[aria-pressed="true"] { border-color: #2d8a7a; background: #e3f4ee; }
+.panel-icon-grid img { width: 100%; height: auto; image-rendering: pixelated; display: block; }
+.panel-icon-grid .group-label { grid-column: 1 / -1; font-size: 11px; color: #5f7d75; margin-top: 4px; }
+.panel-btn-link { border: 0; background: none; padding: 0; color: #2d8a7a; font-weight: 600; cursor: pointer; font-size: 12px; }
+.panel-transcript-note { margin: -4px 0 8px; font-size: 12px; color: #5f7d75; }

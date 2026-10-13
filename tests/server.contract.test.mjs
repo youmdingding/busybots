@@ -164,3 +164,15 @@ test("privacy mode: the agent panel API returns no transcript or paths", async (
   s.board.privacy = false;
   await req("POST", "/api/settings", { body: { settings: s }, headers: { "X-Board-Token": tok } });
 });
+
+test("icon API: pick for a session, refuse unknown icons and missing token", async () => {
+  const tok = await token();
+  const url = "/api/session/ses_00ab12cd34ef56gh/icon";
+  assert.equal((await req("POST", url, { body: { icon: "icons/pick-owl.png" } })).status, 401);
+  assert.equal((await req("POST", url, { body: { icon: "icons/pick-owl.png" }, headers: { "X-Board-Token": tok } })).status, 200);
+  assert.equal((await req("POST", url, { body: { icon: "../api-token" }, headers: { "X-Board-Token": tok } })).status, 400);
+  assert.equal((await req("POST", url, { body: { icon: null }, headers: { "X-Board-Token": tok } })).status, 200);
+  const r = await req("GET", "/api/session/ses_00ab12cd34ef56gh");
+  assert.ok(Array.isArray(r.json.icons) && r.json.icons.length >= 16);
+  assert.equal((await req("GET", "/icons/pick-owl.png")).status, 200);
+});

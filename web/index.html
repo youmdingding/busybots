@@ -42,17 +42,27 @@
     <canvas id="board" width="1600" height="1020" aria-label="Busybots: your coding agents at work"></canvas>
     <aside id="agent-panel" class="agent-panel hidden" aria-hidden="true">
       <div class="panel-head">
-        <div>
+        <button type="button" id="panel-icon" class="panel-icon" title="Pick an icon for this conversation" aria-expanded="false">
+          <img id="panel-icon-img" alt="" width="48" height="48" />
+          <span class="panel-icon-edit" aria-hidden="true">✎</span>
+        </button>
+        <div class="panel-title">
           <h2 id="panel-name">Agent</h2>
           <div id="panel-meta" class="panel-meta"></div>
         </div>
         <button type="button" id="panel-close" class="panel-x" aria-label="Close">×</button>
+      </div>
+      <div id="panel-icon-picker" class="panel-icon-picker hidden">
+        <p class="panel-transcript-note">Pick an icon for this conversation</p>
+        <div id="panel-icon-grid" class="panel-icon-grid" role="group" aria-label="Icons"></div>
+        <button type="button" id="panel-icon-reset" class="panel-btn-link">Use the agent's own icon</button>
       </div>
       <div id="panel-status" class="panel-status"></div>
       <div class="panel-actions">
         <button type="button" id="panel-jump" class="panel-btn">Jump to it</button>
       </div>
       <h3 class="panel-section">Transcript</h3>
+      <p id="panel-transcript-note" class="panel-transcript-note">Last 15 messages, plus the steps between them</p>
       <div id="panel-transcript" class="panel-transcript"></div>
       <h3 class="panel-section">Prompt</h3>
       <div id="panel-prompt-wrap">
