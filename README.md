@@ -13,7 +13,7 @@ Four themes: **Island**, **Office**, **City** and **Space**.
 Requires **Node.js 22.5 or newer** (it uses Node's built-in SQLite). No other dependencies.
 
 ```bash
-git clone <this repo> busybots && cd busybots
+git clone https://github.com/youmdingding/busybots.git && cd busybots
 node bin/cli.js            # starts the board and opens http://127.0.0.1:8765/
 ```
 
