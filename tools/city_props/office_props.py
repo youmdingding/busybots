@@ -4,10 +4,11 @@ grid point at floor level; footprints (fp) are written to the manifest for the
 board's depth sort.
 
 Run: python3 office_props.py [name ...]  -> out/office_*.png + manifest entries
+(copy tiles/city_v2/manifest.json to out/ first, and the results back after)
 """
 import json, math, sys
 from isopix import box, vcyl, hcyl, blob, face_uv, rgb, mix, hash2, render, plane_through
-from props import flat, cone, solid_hull
+from props import flat, cone, solid_hull, swap_xy, mirror_x
 from interiors import water_cooler, printer, office_chair
 
 WOOD, WOOD_D, WOOD_L = "#a8774f", "#7a5236", "#c99a6a"
@@ -274,6 +275,43 @@ def whiteboard():
     return S
 
 
+def vacuum():
+    """Robot vacuum facing +x: charcoal disc, silver front bumper, lidar turret at the back,
+    a cyan status light and two side brushes. props.swap_xy / mirror_x give the other headings."""
+    r = 5.0
+    body_c, rim_c, bump_c = rgb("#2b2f35"), rgb("#454c55"), rgb("#aab3bb")
+
+    def body(p, n):
+        d = math.hypot(p[0], p[1])
+        if n[2] > 0.9:  # lid
+            if math.hypot(p[0] - 2.5, p[1]) < 0.75:
+                return (rgb("#3fe6cf"), True)
+            return rim_c if d > r - 0.9 else body_c
+        return bump_c if p[0] > r * 0.45 else mix(body_c, rim_c, 0.5)
+
+    S = [vcyl(0, 0, r, 0.5, 2.6, body, sides=16),
+         vcyl(-1.7, 0, 1.5, 2.6, 3.7, flat("#1b1e22"), sides=10),
+         vcyl(-1.7, 0, 1.6, 3.7, 4.1, flat("#5d6670"), sides=10)]
+    for sy in (-1, 1):
+        S.append(box(r * 0.62 - 1.0, sy * r * 0.62 - 0.25, 0.1, r * 0.62 + 1.0, sy * r * 0.62 + 0.25, 0.4,
+                     flat("#d8dde2"), name="decal"))
+    return S
+
+
+def vacuum_dock():
+    """Charging dock the vacuum backs onto (it faces +y; the vacuum rests at the origin)."""
+    def shell(p, n):
+        if n[1] > 0.9 and abs(p[0]) < 0.8 and 4.2 < p[2] < 5.2:
+            return (rgb("#58e07a"), True)  # charging light
+        if n[2] > 0.9:
+            return rgb("#4b525b")
+        return rgb("#30353b")
+    return [box(-4.6, -8.6, 0, 4.6, -5.8, 6.4, shell),
+            box(-4.2, -5.8, 0, 4.2, -1.0, 0.35, flat("#5a616a"), name="decal"),
+            box(-2.6, -5.8, 0.35, -1.6, -4.6, 0.7, flat("#c9b26a"), name="decal"),
+            box(1.6, -5.8, 0.35, 2.6, -4.6, 0.7, flat("#c9b26a"), name="decal")]
+
+
 def catalogue():
     return {
         "office_fig_big": (fig(True, 3), 10),
@@ -290,6 +328,11 @@ def catalogue():
         "office_coffee_bar": (coffee_bar(), 6),
         "office_bins": (bins(), 4),
         "office_whiteboard": (whiteboard(), 8),
+        "office_vacuum_x": (vacuum(), 3),
+        "office_vacuum_y": (swap_xy(vacuum()), 3),
+        "office_vacuum_xr": (mirror_x(vacuum()), 3),
+        "office_vacuum_yr": (swap_xy(mirror_x(vacuum())), 3),
+        "office_vacuum_dock": (vacuum_dock(), 4),
     }
 
 
@@ -301,8 +344,9 @@ if __name__ == "__main__":
             continue
         im, anchor = render(solids, ground_shadow=gs)
         im.save(f"out/{name}.png")
-        fx0 = min(s.aabb[0] for s in solids); fy0 = min(s.aabb[1] for s in solids)
-        fx1 = max(s.aabb[3] for s in solids); fy1 = max(s.aabb[4] for s in solids)
+        body = [s for s in solids if s.name != "decal"] or solids  # flat floor decals don't count
+        fx0 = min(s.aabb[0] for s in body); fy0 = min(s.aabb[1] for s in body)
+        fx1 = max(s.aabb[3] for s in body); fy1 = max(s.aabb[4] for s in body)
         man[name] = dict(w=im.width, h=im.height, ax=anchor[0], ay=anchor[1],
                          hull=solid_hull(solids, anchor), fp=[round(fx0, 2), round(fy0, 2), round(fx1, 2), round(fy1, 2)])
         print(name, im.size, flush=True)

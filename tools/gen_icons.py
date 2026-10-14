@@ -227,15 +227,21 @@ PICKS = {
 
 
 def generate_picks(out_dir: str = OUT) -> list[str]:
+    """Every pick character in each of the 12 BRIGHT_PALETTE colours: pick-<name>-NN.png
+    (same colour order as the agent icons, so one colour row works for all of them)."""
     os.makedirs(out_dir, exist_ok=True)
+    for old in os.listdir(out_dir):
+        if old.startswith("pick-") and old.endswith(".png"):
+            os.remove(os.path.join(out_dir, old))
     paths = []
-    for name, (fn, color, ecx, ecy) in PICKS.items():
+    for name, (fn, _color, ecx, ecy) in PICKS.items():
         DRAW[name] = fn
-        im = make_icon(name, color, ecx, ecy, outline=True, outline_radius=4, **EYES)
-        path = os.path.join(out_dir, f"pick-{name}.png")
-        im.save(path, "PNG")
-        print("wrote", path)
-        paths.append(f"icons/pick-{name}.png")
+        for i, color in enumerate(BRIGHT_PALETTE):
+            im = make_icon(name, color, ecx, ecy, outline=True, outline_radius=4, **EYES)
+            path = os.path.join(out_dir, f"pick-{name}-{i:02d}.png")
+            im.save(path, "PNG", optimize=True)
+            paths.append(f"icons/pick-{name}-{i:02d}.png")
+    print("wrote", len(paths), "pick icons")
     return paths
 
 

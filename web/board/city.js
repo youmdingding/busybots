@@ -9,6 +9,10 @@ import { screenToGrid, toIso } from "./layout.js";
 import { drawDecorItem } from "./decor.js";
 import { drawOneZone, footprintTop } from "./zones.js";
 import { advanceBot, drawBot } from "./bots.js";
+import { roamerItems, stepRoamers } from "./roamers.js";
+import { drawWindowViews } from "./windows.js";
+import { drawWallClocks } from "./wallclock.js";
+import { drawLiveScreens, roomBusy } from "./livescreens.js";
 
 export const cityHazeCache = new Map();
 
@@ -143,10 +147,12 @@ export function drawZoneInterior(zid, L, spec) {
   const s = (TILE_W * S.worldScale) / (2 * upg);   // one grid cell = upg sprite units
   const elev = BASE_ELEV + (L.elevOffset || 0);
   const p = toIso(L.gx, L.gy);                   // sprite origin = footprint NW corner at floor level
+  const x = p.sx - m.ax * s, y = p.sy - elev - m.ay * s;
   ctx.save();
   ctx.imageSmoothingEnabled = false;
-  ctx.drawImage(img, p.sx - m.ax * s, p.sy - elev - m.ay * s, m.w * s, m.h * s);
+  ctx.drawImage(img, x, y, m.w * s, m.h * s);
   ctx.restore();
+  if (m.live && roomBusy(zid)) drawLiveScreens(spec.sprite, x, y, s, performance.now()); // screens come alive
   return true;
 }
 
@@ -164,10 +170,12 @@ export function drawCityGround() {
   if (!m || !img || !img.complete || !img.naturalWidth) return false;
   const s = (TILE_W * S.worldScale) / (2 * (m.unitsPerGrid || 22));
   const p = toIso(m.gx0 || 0, m.gy0 || 0);
+  if (spec.windows) drawWindowViews(spec, m); // seen through the sprite's transparent glass
   ctx.save();
   ctx.imageSmoothingEnabled = false;
   ctx.drawImage(img, p.sx - m.ax * s, p.sy - BASE_ELEV - m.ay * s, m.w * s, m.h * s);
   ctx.restore();
+  if (spec.clocks) drawWallClocks(spec, m);
   return true;
 }
 
@@ -457,12 +465,16 @@ export function drawCityScene(now, list) {
   for (const d of S.decor) items.push({ name: d.type, box: decorBox(d), draw: () => drawDecorItem(d) });
   for (const it of trafficItems("street")) items.push(it);
   for (const it of trafficItems("zones")) items.push(it);
+  const agents = [];
   for (const b of list) {
     advanceBot(b, now);
     const g = botGrid(b);
+    agents.push(g);
     const r = 0.12;
     items.push({ name: "bot", box: [g.gx - r, g.gy - r, g.gx + r, g.gy + r], draw: () => drawBot(b, now, "sprite") });
   }
+  stepRoamers(now || performance.now(), agents);
+  for (const it of roamerItems()) items.push(it);
   const ordered = depthSort(items);
   if (window.__sceneDebug) window.__sceneOrder = ordered.map((it) => [it.name || "car", it.box.map((v) => +v.toFixed(2))]);
   for (const it of ordered) it.draw();

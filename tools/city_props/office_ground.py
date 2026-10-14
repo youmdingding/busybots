@@ -1,9 +1,9 @@
 """
 Office-theme ground: one storey of an office tower seen as a cut-away — carpet-tile
 corridors between the zones with coloured way-finding lines to each zone's door, a
-terrazzo lift lobby along the front, a glass curtain wall (city view) on the N and W
-back walls, a lift core with two lift doors on the W wall, and the slab edge showing
-the lit storey below. Zones are NOT part of this: the board draws them on top.
+terrazzo lift lobby along the front, a tall glass curtain wall on the N and W back walls
+(see-through: the board draws the sky and city behind it, web/board/windows.js), a lift
+core with two lift doors on the W wall, and the slab edge showing the lit storey below. Zones are NOT part of this: the board draws them on top.
 
 Run: python3 office_ground.py  -> out/office_ground.png + manifest entry + out/office_spots.json
 """
@@ -14,7 +14,8 @@ from props import solid_hull, flat
 
 GX0, GY0, GX1, GY1 = 0.0, 0.0, 22.0, 16.3
 SLAB = 14.0
-WALL_H = 46.0
+WALL_H = 74.0                 # tall glass: the board draws the sky behind it
+GLASS_KEY = (255, 0, 255)     # glass pixels, made transparent after rendering
 WT = 3.0                      # curtain wall depth (units)
 LOBBY_Y = 11.9                # grid y where the lobby terrazzo starts
 CORE = (11.7, 16.3)           # lift core along the W wall (grid y range)
@@ -118,28 +119,6 @@ def floor_top(x, y, ux, uy):
     return carpet(ux, uy)
 
 
-def sky_view(u, z, seed):
-    """What you see through the curtain wall: afternoon sky + city towers."""
-    t = (z - 6.0) / (WALL_H - 10.0)
-    sky = mix(rgb("#cfe6f2"), rgb("#8fc2e2"), max(0.0, min(1.0, t)))
-    k = int(u // 7.3)
-    hgt = 8.0 + hash2(k, 3, seed) * 20.0
-    if hash2(k, 4, seed) > 0.8:
-        hgt += 10.0
-    zz = z - 6.0
-    if zz < hgt:
-        far = hash2(k, 5, seed) > 0.5
-        c = rgb("#7f97ad") if far else rgb("#6a8299")
-        if (u % 7.3) < 0.6:
-            return c * 0.85
-        if int(zz) % 3 == 0 and (u % 1.8) < 1.0:
-            return (rgb("#d8ecf5"), True) if hash2(int(u), int(zz), seed) > 0.7 else c * 1.12
-        return c
-    if hash2(int(u // 9), int(z // 4), seed + 1) > 0.985:
-        return rgb("#ffffff")
-    return sky
-
-
 def curtain(which):
     def m(p, n):
         f, u, v = face_uv(p, n)
@@ -157,12 +136,9 @@ def curtain(which):
         if z > WALL_H - 4.0:
             return rgb("#3e454e") if z < WALL_H - 3.3 else rgb("#d9dde2")  # soffit
         # mullions every half grid, transom
-        if coord % (U / 2) < 0.9 or abs(z - 30.0) < 0.5:
+        if coord % (U / 2) < 0.9 or abs(z - 48.0) < 0.5:
             return rgb("#3e454e")
-        c = sky_view(coord + (300 if which == "W" else 0), z, 7 if which == "N" else 9)
-        if isinstance(c, tuple):
-            return (c[0], True)
-        return (c, True)
+        return (rgb("#ff00ff"), True)  # glass: see-through (web/board/windows.js draws the view)
     return m
 
 
@@ -269,6 +245,13 @@ def spots():
 if __name__ == "__main__":
     S = solids()
     im, anchor = render(S, ground_shadow=0)
+    im = im.copy()
+    px = im.load()
+    for j in range(im.height):
+        for i in range(im.width):
+            r, g, b, a = px[i, j]
+            if a and r > 150 and b > 150 and g < 70 and abs(r - b) < 30:  # glass key (outlines darken it a little)
+                px[i, j] = (0, 0, 0, 0)
     im.save("out/office_ground.png")
     man = json.load(open("out/manifest.json"))
     man["office_ground"] = dict(w=im.width, h=im.height, ax=anchor[0], ay=anchor[1], unitsPerGrid=U,

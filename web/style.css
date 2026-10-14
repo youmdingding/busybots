@@ -421,7 +421,7 @@ h1 {
 }
 .panel-icon:hover, .panel-icon[aria-expanded="true"] { border-color: #2d8a7a; }
 .panel-icon-picker { margin: 4px 0 10px; padding: 10px; border: 2px solid #cfe2dc; border-radius: 10px; background: #f6fbf9; }
-.panel-icon-grid { display: grid; grid-template-columns: repeat(6, 1fr); gap: 6px; margin: 6px 0 8px; }
+.panel-icon-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 6px; margin: 6px 0 8px; }
 .panel-icon-grid button {
   padding: 3px; border: 2px solid transparent; border-radius: 8px; background: #fff; cursor: pointer;
 }
@@ -431,3 +431,27 @@ h1 {
 .panel-icon-grid .group-label { grid-column: 1 / -1; font-size: 11px; color: #5f7d75; margin-top: 4px; }
 .panel-btn-link { border: 0; background: none; padding: 0; color: #2d8a7a; font-weight: 600; cursor: pointer; font-size: 12px; }
 .panel-transcript-note { margin: -4px 0 8px; font-size: 12px; color: #5f7d75; }
+.panel-pick-label { font-size: 11px; font-weight: 700; color: #5f7d75; text-transform: uppercase; letter-spacing: 0.04em; margin-top: 4px; }
+.panel-icon-colours { display: grid; grid-template-columns: repeat(12, 1fr); gap: 4px; margin: 6px 0 10px; }
+.panel-icon-colours button {
+  aspect-ratio: 1; min-width: 0; padding: 0; border-radius: 50%; border: 2px solid #ffffff;
+  box-shadow: 0 0 0 1px #b9cfc8; cursor: pointer;
+}
+.panel-icon-colours button[aria-pressed="true"] { box-shadow: 0 0 0 2px #0d3d32; }
+.panel-pick-actions { display: flex; align-items: center; gap: 8px; }
+.panel-pick-actions .panel-btn-link { margin-right: auto; }
+/* Agent panel: rename this conversation */
+.panel-name-row { display: flex; align-items: center; gap: 6px; min-width: 0; }
+.panel-name-row h2 { margin: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.panel-rename { flex: none; border: 0; background: none; color: #5f7d75; cursor: pointer; font-size: 14px; padding: 2px 4px; border-radius: 6px; }
+.panel-rename:hover { background: #e3f4ee; color: #0d3d32; }
+.panel-name-form { margin: 2px 0 6px; }
+.panel-name-form input {
+  width: 100%; box-sizing: border-box; font: inherit; font-size: 15px; font-weight: 700; color: #0d3d32;
+  padding: 6px 8px; border: 2px solid #8fb3a8; border-radius: 8px; margin-bottom: 6px;
+}
+.panel-name-form input:focus { outline: none; border-color: #2d8a7a; }
+/* Transcript: when each message was sent */
+.panel-item .t { display: block; margin-top: 2px; font-size: 10px; color: #7c968f; font-variant-numeric: tabular-nums; }
+.panel-name-form .panel-pick-actions { flex-wrap: wrap; justify-content: flex-end; }
+.panel-name-form .panel-pick-actions .panel-btn-link { order: 3; flex-basis: 100%; margin: 4px 0 0; text-align: left; }

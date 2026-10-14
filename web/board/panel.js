@@ -47,6 +47,7 @@ export function setBoardPanelOpen(open) {
 export function closeAgentPanel() {
   S.panelSessionId = null;
   toggleIconPicker(false);
+  toggleRename(false);
   if (S.panelTimer) {
     clearInterval(S.panelTimer);
     S.panelTimer = null;
@@ -56,6 +57,22 @@ export function closeAgentPanel() {
     elPanel.setAttribute("aria-hidden", "true");
   }
   setBoardPanelOpen(false);
+}
+
+/** "14:05" for today, "Mon 12 Oct, 14:05" otherwise (viewer's own locale and time zone). */
+export function formatWhen(ts, now = new Date()) {
+  if (ts === null || ts === undefined || ts === "") return "";
+  let d;
+  if (typeof ts === "number") d = new Date(ts < 1e12 ? ts * 1000 : ts); // seconds or milliseconds
+  else d = new Date(String(ts));
+  if (Number.isNaN(d.getTime())) return "";
+  const time = d.toLocaleTimeString(undefined, { hour: "2-digit", minute: "2-digit" });
+  if (d.toDateString() === now.toDateString()) return time;
+  const sameYear = d.getFullYear() === now.getFullYear();
+  const date = d.toLocaleDateString(undefined, sameYear
+    ? { weekday: "short", day: "numeric", month: "short" }
+    : { day: "numeric", month: "short", year: "numeric" });
+  return `${date}, ${time}`;
 }
 
 export function renderTranscript(items, hidden = false) {
@@ -80,83 +97,189 @@ export function renderTranscript(items, hidden = false) {
     k.textContent = it.kind === "tool" ? "tool" : it.kind === "user" ? "you" : "agent";
     div.appendChild(k);
     div.appendChild(document.createTextNode(it.text || ""));
+    const when = formatWhen(it.ts);
+    if (when) {
+      const t = document.createElement("time");
+      t.className = "t";
+      t.textContent = when;
+      const d = new Date(typeof it.ts === "number" && it.ts < 1e12 ? it.ts * 1000 : it.ts);
+      if (!Number.isNaN(d.getTime())) t.dateTime = d.toISOString();
+      div.appendChild(t);
+    }
     elPanelTranscript.appendChild(div);
   }
   elPanelTranscript.scrollTop = elPanelTranscript.scrollHeight;
 }
 
-// ---- icon picker: choose another icon for this conversation ----
+// ---- icon picker: choose a character and a colour for this conversation ----
+// Nothing changes until Save; the panel's big icon previews the selection.
 const elIconBtn = document.getElementById("panel-icon");
 const elIconImg = document.getElementById("panel-icon-img");
 const elIconPicker = document.getElementById("panel-icon-picker");
-const elIconGrid = document.getElementById("panel-icon-grid");
-let iconChoiceList = [];
-let currentIcon = null;
-let ownIcon = null;
+const elIconChars = document.getElementById("panel-icon-chars");
+const elIconColours = document.getElementById("panel-icon-colours");
+const elIconMsg = document.getElementById("panel-icon-msg");
+let iconSetData = { colours: [], characters: [] };
+let currentIcon = null; // what the board shows now
+let ownIcon = null; // the agent's own icon
+let pick = { key: null, colour: 0 }; // selection in the picker
 
-function renderIconGrid() {
-  if (!elIconGrid) return;
-  elIconGrid.replaceChildren();
-  let group = null;
-  // Characters, then the colour variants of this agent's own type (e.g. every Claude icon)
-  const ownKind = String(ownIcon || "").replace(/^icons\//, "").split("-")[0];
-  const shown = iconChoiceList.filter((c) => c.group === "fun" || c.id.startsWith(`icons/${ownKind}-`));
-  for (const c of shown) {
-    if (c.group !== group) {
-      group = c.group;
-      const lab = document.createElement("div");
-      lab.className = "group-label";
-      lab.textContent = group === "fun" ? "Characters" : "Other colours";
-      elIconGrid.appendChild(lab);
-    }
+/** "icons/pick-cat-03.png" → { key: "pick-cat", colour: 3 } */
+function parseIcon(path) {
+  const m = /^icons\/((?:pick-)?[a-z]+)-(\d{2})\.png$/.exec(String(path || ""));
+  return m ? { key: m[1], colour: Number(m[2]) } : { key: null, colour: 0 };
+}
+
+function pickedPath() {
+  const c = iconSetData.characters.find((x) => x.key === pick.key);
+  return (c && c.files[pick.colour]) || null;
+}
+
+function setPreview(path) {
+  if (!elIconImg) return;
+  if (path) elIconImg.src = path;
+  else elIconImg.removeAttribute("src");
+}
+
+function renderPicker() {
+  if (!elIconChars || !elIconColours) return;
+  elIconChars.replaceChildren();
+  elIconColours.replaceChildren();
+  const own = parseIcon(ownIcon).key;
+  // The agent's own character, then every pick character
+  const chars = iconSetData.characters.filter((c) => c.group === "fun" || c.key === own);
+  if (elIconMsg) {
+    elIconMsg.classList.toggle("hidden", chars.length > 0);
+    elIconMsg.textContent = chars.length ? "" : "No icons came from the server. Restart Busybots to load them.";
+  }
+  for (const c of chars) {
     const btn = document.createElement("button");
     btn.type = "button";
-    btn.title = c.label;
-    btn.setAttribute("aria-label", c.label);
-    btn.setAttribute("aria-pressed", String(c.id === currentIcon));
-    btn.dataset.icon = c.id;
+    btn.title = c.group === "agent" ? `${c.label} (its own)` : c.label;
+    btn.setAttribute("aria-label", btn.title);
+    btn.setAttribute("aria-pressed", String(c.key === pick.key));
+    btn.dataset.key = c.key;
     const img = document.createElement("img");
-    img.src = c.id;
+    img.src = c.files[pick.colour] || c.files.find(Boolean) || "";
     img.alt = "";
     btn.appendChild(img);
-    elIconGrid.appendChild(btn);
+    elIconChars.appendChild(btn);
   }
+  const avail = iconSetData.characters.find((c) => c.key === pick.key)?.files || [];
+  iconSetData.colours.forEach((hex, i) => {
+    if (!avail[i]) return;
+    const btn = document.createElement("button");
+    btn.type = "button";
+    btn.style.background = hex;
+    btn.title = `Colour ${i + 1}`;
+    btn.setAttribute("aria-label", btn.title);
+    btn.setAttribute("aria-pressed", String(i === pick.colour));
+    btn.dataset.colour = String(i);
+    elIconColours.appendChild(btn);
+  });
+  setPreview(pickedPath() || currentIcon);
 }
 
 export function toggleIconPicker(open = elIconPicker?.classList.contains("hidden")) {
   if (!elIconPicker) return;
   elIconPicker.classList.toggle("hidden", !open);
   elIconBtn?.setAttribute("aria-expanded", String(!!open));
-  if (open) renderIconGrid();
+  if (open) {
+    pick = parseIcon(currentIcon);
+    renderPicker();
+  } else {
+    setPreview(currentIcon); // Cancel / close: back to what the board shows
+  }
 }
 
-/** icon = a path from the choices, or null for the agent's own icon. */
-export async function chooseIcon(icon) {
+export function pickCharacter(key) {
+  pick.key = key;
+  renderPicker();
+}
+
+export function pickColour(i) {
+  pick.colour = i;
+  renderPicker();
+}
+
+export function pickOwnIcon() {
+  pick = parseIcon(ownIcon);
+  renderPicker();
+}
+
+/** Save: the selection becomes this conversation's icon (its own icon = no choice). */
+export async function saveIcon() {
   if (!S.panelSessionId) return;
+  const chosen = pickedPath();
+  if (!chosen) return;
+  const icon = chosen === ownIcon ? null : chosen;
   const r = await apiPost(`/api/session/${encodeURIComponent(S.panelSessionId)}/icon`, { icon });
-  if (!r?.ok) return;
-  currentIcon = icon || ownIcon;
-  if (elIconImg && currentIcon) elIconImg.src = currentIcon;
+  if (!r?.ok) {
+    if (elIconMsg) {
+      elIconMsg.textContent = r?.error || "Could not save the icon";
+      elIconMsg.classList.remove("hidden");
+    }
+    return;
+  }
+  currentIcon = chosen;
   const b = bots.get(S.panelSessionId); // show it right away; the next status update confirms it
-  if (b && currentIcon) {
-    if (icon) b.iconDefault = b.iconDefault || ownIcon;
-    else b.iconDefault = null;
-    b.icon = currentIcon;
+  if (b) {
+    b.icon = chosen;
+    b.iconDefault = icon ? ownIcon : null;
   }
   toggleIconPicker(false);
 }
 
+// ---- rename this conversation ----
+const elNameRow = document.getElementById("panel-name-row");
+const elNameForm = document.getElementById("panel-name-form");
+const elNameInput = document.getElementById("panel-name-input");
+const elNameMsg = document.getElementById("panel-name-msg");
+const elRename = document.getElementById("panel-rename");
+let nameDefault = null;
+
+export function toggleRename(open = elNameForm?.classList.contains("hidden")) {
+  if (!elNameForm) return;
+  elNameForm.classList.toggle("hidden", !open);
+  elNameRow?.classList.toggle("hidden", !!open);
+  elNameMsg?.classList.add("hidden");
+  if (open && elNameInput) {
+    elNameInput.value = elPanelName?.textContent || "";
+    elNameInput.focus();
+    elNameInput.select();
+  }
+}
+
+/** name = text you typed, or null for the default (folder) name. */
+export async function saveName(name) {
+  if (!S.panelSessionId) return;
+  if (name !== null && name.trim() === (nameDefault || "")) name = null; // typed the default back
+  const r = await apiPost(`/api/session/${encodeURIComponent(S.panelSessionId)}/name`, { name });
+  if (!r?.ok) {
+    if (elNameMsg) {
+      elNameMsg.textContent = r?.error || "Could not rename";
+      elNameMsg.classList.remove("hidden");
+    }
+    return;
+  }
+  const shown = r.name || nameDefault || "Agent";
+  if (elPanelName) elPanelName.textContent = shown;
+  const b = bots.get(S.panelSessionId); // show it right away; the next status update confirms it
+  if (b) b.name = shown;
+  toggleRename(false);
+}
+
 export function applyPanelSession(data) {
   const s = data.session || {};
-  if (Array.isArray(data.icons)) iconChoiceList = data.icons;
+  nameDefault = s.nameDefault || null;
+  if (elRename) elRename.classList.toggle("hidden", !!s.privacy); // privacy mode: names stay generic
+  if (data.iconSet && Array.isArray(data.iconSet.characters)) iconSetData = data.iconSet;
   const shown = bots.get(S.panelSessionId); // fall back to what the board draws
   currentIcon = s.icon || shown?.icon || null;
   ownIcon = s.iconDefault || shown?.iconDefault || currentIcon;
-  if (elIconImg) {
-    if (currentIcon) elIconImg.src = currentIcon;
-    else elIconImg.removeAttribute("src");
-  }
-  if (elIconPicker && !elIconPicker.classList.contains("hidden")) renderIconGrid();
+  // While the picker is open, keep previewing the selection (the panel refreshes every few seconds)
+  if (elIconPicker && !elIconPicker.classList.contains("hidden")) renderPicker();
+  else setPreview(currentIcon);
   if (elPanelName) elPanelName.textContent = s.name || s.id || "Agent";
   if (elPanelMeta) {
     const BRAND_LABELS = { codex: "Codex CLI", gemini: "Gemini CLI", opencode: "OpenCode", cursor: "Cursor CLI" };
@@ -227,6 +350,7 @@ export async function refreshPanel() {
 
 export async function openAgentPanel(bot) {
   toggleIconPicker(false);
+  toggleRename(false);
   if (!bot) return;
   S.panelSessionId = bot.id;
   if (elPanel) {

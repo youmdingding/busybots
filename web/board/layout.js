@@ -47,6 +47,13 @@ export function fitIslandCamera() {
       maxY = Math.max(maxY, sy + TILE_H + 28);
     }
   }
+  // A ground sprite with tall walls (theme.ground.fitSprite) must fit too, not just the floor
+  const g = S.activeTheme && S.activeTheme.ground;
+  const m = g && g.fitSprite && S.CITY_MANIFEST && S.CITY_MANIFEST[g.sprite];
+  if (m) {
+    const s = TILE_W / (2 * (m.unitsPerGrid || 22));
+    minY = Math.min(minY, toIso(m.gx0 || 0, m.gy0 || 0).sy - BASE_ELEV - m.ay * s + 12);
+  }
   // Water pad + signs/bots above tiles
   minY -= 18;
   maxY += 48;

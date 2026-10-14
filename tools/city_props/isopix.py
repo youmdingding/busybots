@@ -201,6 +201,34 @@ def shade(col, n, shadowed=False, emissive=False):
     return np.clip(out, 0, 255)
 
 
+LAST_LIVE = None  # live-screen buffer of the last render() (None when nothing was tagged)
+
+
+def live(solid, sid, facing):
+    """Tag a screen so the board can animate it: every emissive pixel on its `facing` face
+    ("L" = toward +y, "R" = toward +x) records (sid, u, v) in face units from the screen's
+    top-left as seen. render() collects them in LAST_LIVE; save it with save_live()."""
+    m0 = solid.mat
+    x0, y0, z0, x1, y1, z1 = solid.aabb
+
+    def m(p, n):
+        r = m0(p, n)
+        if isinstance(r, tuple) and r[1] and face_uv(p, n)[0] == facing:
+            u = p[0] - x0 if facing == "L" else y1 - p[1]
+            return (r[0], True, (sid, u, z1 - p[2]))
+        return r
+    solid.mat = m
+    return solid
+
+
+def save_live(path):
+    """Write LAST_LIVE as a PNG (R = screen id, G = u, B = v); False when nothing was tagged."""
+    if LAST_LIVE is None:
+        return False
+    Image.fromarray(LAST_LIVE, "RGBA").save(path)
+    return True
+
+
 def render(solids, ground_shadow=12.0, outline=True, pad=2, shadow_alpha=95,
            ao=True):
     # ---- frame from AABB corners (+ projected shadows)
@@ -247,6 +275,7 @@ def render(solids, ground_shadow=12.0, outline=True, pad=2, shadow_alpha=95,
         shadowed &= (normals @ LIGHT) > 0.05
     # direct facing light also matters: faces away from light are "in shadow" already by shade()
     face_code = np.full((H, W), -1, int)
+    live = np.zeros((H, W, 4), np.uint8)  # screens the board animates: (id, u, v, 255), see live()
     for q, (i, j) in enumerate(zip(ii, jj)):
         s = solids[best_s[i, j]]
         n = normals[q]
@@ -254,7 +283,11 @@ def render(solids, ground_shadow=12.0, outline=True, pad=2, shadow_alpha=95,
         res = s.mat(p, n)
         emis = False
         if isinstance(res, tuple):
-            res, emis = res
+            if len(res) == 3:
+                res, emis, tag = res
+                live[i, j] = (tag[0], max(0, min(255, int(tag[1]))), max(0, min(255, int(tag[2]))), 255)
+            else:
+                res, emis = res
         col = shade(np.array(res, float), n, bool(shadowed[q]) and not emis, emis)
         img[i, j, :3] = col
         img[i, j, 3] = 255
@@ -324,4 +357,6 @@ def render(solids, ground_shadow=12.0, outline=True, pad=2, shadow_alpha=95,
                     img[i, j, :3] = np.minimum(255, c * 1.1 + 6)
     out = Image.fromarray(np.clip(img, 0, 255).astype(np.uint8), "RGBA")
     anchor = (-sx0, -sy0)  # pixel where world (0,0,0) lands
+    global LAST_LIVE
+    LAST_LIVE = live if live[:, :, 3].any() else None
     return out, anchor

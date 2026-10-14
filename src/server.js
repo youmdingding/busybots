@@ -18,7 +18,7 @@ import { jsonlPathFor, tailJsonl } from "./claude.js";
 import { pidAlive, ttyForPid } from "./proc.js";
 import { withReadOnly, sqliteAvailable, SQLITE_HINT } from "./sqlite.js";
 import { CONFIG_PATH } from "./watcher.js";
-import { IconChoices, iconChoices } from "./icons.js";
+import { SessionPrefs, iconSet, MAX_NAME } from "./icons.js";
 
 export const DEFAULT_PORT = 8765;
 const MAX_BODY = 256_000;
@@ -194,7 +194,7 @@ const CONDUCTOR_LOOKUP = `
  * createBoardServer({ port, getStatus, token, log })
  * getStatus() returns the watcher's latest status object (served as /status.json).
  */
-export function createBoardServer({ port = DEFAULT_PORT, getStatus = () => null, token = ensureToken(), icons = new IconChoices(), log = (m) => console.error(m) } = {}) {
+export function createBoardServer({ port = DEFAULT_PORT, getStatus = () => null, token = ensureToken(), prefs = new SessionPrefs(), log = (m) => console.error(m) } = {}) {
   const allowedHosts = new Set([`127.0.0.1:${port}`, `localhost:${port}`, `[::1]:${port}`]);
   const allowedOrigins = new Set([...allowedHosts].map((h) => `http://${h}`));
   const tokenBuf = Buffer.from(token);
@@ -215,7 +215,8 @@ export function createBoardServer({ port = DEFAULT_PORT, getStatus = () => null,
     if (bot) {
       Object.assign(out, { name: bot.name || out.name, cwd: bot.cwd ?? null, origin: bot.origin ?? null, state: bot.state ?? null,
         zone: bot.zone ?? null, livePid: bot.livePid ?? null, entrypoint: bot.entrypoint ?? null, bubble: bot.bubble ?? null, brand: bot.brand ?? null,
-        icon: bot.icon ?? null, iconDefault: bot.iconDefault ?? bot.icon ?? null });
+        icon: bot.icon ?? null, iconDefault: bot.iconDefault ?? bot.icon ?? null,
+        nameDefault: bot.nameDefault ?? bot.name ?? null, nameCustom: Boolean(bot.nameDefault), nameMax: MAX_NAME });
     }
     if (out.brand in READERS) {
       const label = agentLabel(out.brand);
@@ -439,12 +440,13 @@ export function createBoardServer({ port = DEFAULT_PORT, getStatus = () => null,
         if (settings().board.privacy) {
           // Privacy mode: the board already shows a generic name; don't leak paths or text here
           const bot = statusBot(sid);
-          for (const k of ["cwd", "title", "tty", "bubble"]) delete meta[k];
+          for (const k of ["cwd", "title", "tty", "bubble", "nameDefault"]) delete meta[k];
+          meta.nameCustom = false;
           meta.name = bot?.name || "Agent";
           meta.privacy = true;
-          return send(res, 200, { ok: true, session: meta, transcript: [], icons: iconChoices() });
+          return send(res, 200, { ok: true, session: meta, transcript: [], iconSet: iconSet() });
         }
-        return send(res, 200, { ok: true, session: meta, transcript: sessionTranscript(meta, sid), icons: iconChoices() });
+        return send(res, 200, { ok: true, session: meta, transcript: sessionTranscript(meta, sid), iconSet: iconSet() });
       }
       if (path.startsWith("/api/")) return send(res, 404, { ok: false, error: "Not found" });
       return serveStatic(res, path);
@@ -468,7 +470,7 @@ export function createBoardServer({ port = DEFAULT_PORT, getStatus = () => null,
         return send(res, 500, { ok: false, error: `Could not write settings: ${err.message}` });
       }
     }
-    const m = /^\/api\/session\/([0-9A-Za-z_-]{8,80})\/(jump|prompt|icon)$/.exec(path);
+    const m = /^\/api\/session\/([0-9A-Za-z_-]{8,80})\/(jump|prompt|icon|name)$/.exec(path);
     if (!m) return send(res, 404, { ok: false, error: "Not found" });
     const [, sid, action] = m;
     if (action === "jump") {
@@ -484,11 +486,20 @@ export function createBoardServer({ port = DEFAULT_PORT, getStatus = () => null,
       // Pick an icon for this conversation only (null = back to the agent's own icon)
       const icon = body.icon === null ? null : String(body.icon || "");
       try {
-        icons.set(sid, icon);
+        prefs.setIcon(sid, icon);
       } catch (err) {
         return send(res, 400, { ok: false, error: err.message });
       }
       return send(res, 200, { ok: true, icon });
+    }
+    if (action === "name") {
+      // Name this conversation (null = back to the folder name)
+      try {
+        const name = prefs.setName(sid, body.name === null ? null : body.name);
+        return send(res, 200, { ok: true, name });
+      } catch (err) {
+        return send(res, 400, { ok: false, error: err.message });
+      }
     }
     const prompt = String(body.prompt || "").trim();
     if (!prompt) return send(res, 400, { ok: false, error: "Empty prompt" });

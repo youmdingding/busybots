@@ -254,7 +254,6 @@
  "slotGap": 1.8,
  "idleSeconds": 60,
  "maxBubbleChars": 60,
- "showOriginBadge": true,
  "iconPool": [
   "icons/claude-00.png",
   "icons/claude-01.png",

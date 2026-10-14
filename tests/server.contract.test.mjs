@@ -168,11 +168,23 @@ test("privacy mode: the agent panel API returns no transcript or paths", async (
 test("icon API: pick for a session, refuse unknown icons and missing token", async () => {
   const tok = await token();
   const url = "/api/session/ses_00ab12cd34ef56gh/icon";
-  assert.equal((await req("POST", url, { body: { icon: "icons/pick-owl.png" } })).status, 401);
-  assert.equal((await req("POST", url, { body: { icon: "icons/pick-owl.png" }, headers: { "X-Board-Token": tok } })).status, 200);
+  assert.equal((await req("POST", url, { body: { icon: "icons/pick-owl-02.png" } })).status, 401);
+  assert.equal((await req("POST", url, { body: { icon: "icons/pick-owl-02.png" }, headers: { "X-Board-Token": tok } })).status, 200);
   assert.equal((await req("POST", url, { body: { icon: "../api-token" }, headers: { "X-Board-Token": tok } })).status, 400);
   assert.equal((await req("POST", url, { body: { icon: null }, headers: { "X-Board-Token": tok } })).status, 200);
   const r = await req("GET", "/api/session/ses_00ab12cd34ef56gh");
-  assert.ok(Array.isArray(r.json.icons) && r.json.icons.length >= 16);
-  assert.equal((await req("GET", "/icons/pick-owl.png")).status, 200);
+  assert.ok(r.json.iconSet.characters.length >= 22 && r.json.iconSet.colours.length === 12);
+  assert.equal((await req("GET", "/icons/pick-owl-02.png")).status, 200);
+});
+
+test("name API: rename a session, refuse empty / too long names and missing token", async () => {
+  const tok = await token();
+  const url = "/api/session/ses_00ab12cd34ef56gh/name";
+  assert.equal((await req("POST", url, { body: { name: "Checkout" } })).status, 401);
+  const ok = await req("POST", url, { body: { name: "  Checkout  rewrite " }, headers: { "X-Board-Token": tok } });
+  assert.equal(ok.status, 200);
+  assert.equal(ok.json.name, "Checkout rewrite");
+  assert.equal((await req("POST", url, { body: { name: "  " }, headers: { "X-Board-Token": tok } })).status, 400);
+  assert.equal((await req("POST", url, { body: { name: "x".repeat(41) }, headers: { "X-Board-Token": tok } })).status, 400);
+  assert.equal((await req("POST", url, { body: { name: null }, headers: { "X-Board-Token": tok } })).status, 200);
 });

@@ -9,9 +9,10 @@ import { loadThemeManifest, normalizeThemeId, resolveInitialTheme, setTheme } fr
 import { buildIsland } from "./island.js";
 import { fitIslandCamera, loadTile } from "./layout.js";
 import { TRAFFIC, signalState, trafficSpec } from "./city.js";
+import { ROAMERS } from "./roamers.js";
 import { initBoard, poll, setAgentFilter } from "./status.js";
 import { frame } from "./render.js";
-import { apiPost, chooseIcon, closeAgentPanel, elPanelClose, elPanelJump, elPanelNote, elPanelPrompt, elPanelSend, hitTestBot, openAgentPanel, refreshPanel, toggleIconPicker } from "./panel.js";
+import { apiPost, closeAgentPanel, elPanelClose, elPanelJump, elPanelNote, elPanelPrompt, elPanelSend, hitTestBot, openAgentPanel, pickCharacter, pickColour, pickOwnIcon, refreshPanel, saveIcon, saveName, toggleIconPicker, toggleRename } from "./panel.js";
 
 S.agentFilter = normalizeAgentFilter((() => {
   try { return localStorage.getItem(LS_AGENT_FILTER_KEY); } catch (_) { return "all"; }
@@ -81,6 +82,7 @@ fetch(`${CITY_DIR}manifest.json?t=${Date.now()}`, { cache: "no-store" })
   .then((m) => {
     S.CITY_MANIFEST = m;
     if (m) Object.keys(m).forEach((n) => loadTile(`${CITY_DIR}${n}.png`));
+    if (m && S.activeTheme && S.activeTheme.ground && S.activeTheme.ground.fitSprite) fitIslandCamera();
   })
   .catch(() => {});
 
@@ -107,10 +109,29 @@ canvas.addEventListener("mousemove", (ev) => {
 
 elPanelClose?.addEventListener("click", closeAgentPanel);
 document.getElementById("panel-icon")?.addEventListener("click", () => toggleIconPicker());
-document.getElementById("panel-icon-reset")?.addEventListener("click", () => chooseIcon(null));
-document.getElementById("panel-icon-grid")?.addEventListener("click", (ev) => {
-  const btn = ev.target.closest("button[data-icon]");
-  if (btn) chooseIcon(btn.dataset.icon);
+document.getElementById("panel-rename")?.addEventListener("click", () => toggleRename(true));
+document.getElementById("panel-name-cancel")?.addEventListener("click", () => toggleRename(false));
+document.getElementById("panel-name-reset")?.addEventListener("click", () => saveName(null));
+document.getElementById("panel-name-form")?.addEventListener("submit", (ev) => {
+  ev.preventDefault();
+  saveName(document.getElementById("panel-name-input").value);
+});
+document.getElementById("panel-name-input")?.addEventListener("keydown", (ev) => {
+  if (ev.key === "Escape") {
+    ev.stopPropagation(); // cancel the rename, keep the panel open
+    toggleRename(false);
+  }
+});
+document.getElementById("panel-icon-cancel")?.addEventListener("click", () => toggleIconPicker(false));
+document.getElementById("panel-icon-save")?.addEventListener("click", () => saveIcon());
+document.getElementById("panel-icon-reset")?.addEventListener("click", () => pickOwnIcon());
+document.getElementById("panel-icon-chars")?.addEventListener("click", (ev) => {
+  const btn = ev.target.closest("button[data-key]");
+  if (btn) pickCharacter(btn.dataset.key);
+});
+document.getElementById("panel-icon-colours")?.addEventListener("click", (ev) => {
+  const btn = ev.target.closest("button[data-colour]");
+  if (btn) pickColour(Number(btn.dataset.colour));
 });
 document.addEventListener("keydown", (ev) => {
   if (ev.key === "Escape") closeAgentPanel();
@@ -176,6 +197,9 @@ if (bootParams.has("debug")) window.__boardDebug = {
   },
   camera() {
     return { ORIGIN_X: S.ORIGIN_X, ORIGIN_Y: S.ORIGIN_Y, worldScale: S.worldScale, tiles: S.islandTiles.length };
+  },
+  roamers() {
+    return ROAMERS.list.map((r) => ({ gx: r.gx, gy: r.gy, face: r.face, mode: r.mode, i: r.i, v: r.v }));
   },
   traffic() {
     const spec = trafficSpec();

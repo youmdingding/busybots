@@ -489,12 +489,12 @@ def office_explore(W, D, slab):
             if hash2(int(uu * 0.8), int(vv * 0.8), 52) > 0.96:
                 return (rgb(OI.SKY), True)
         return (rgb("#26313b"), True)
-    S.append(box(76.0, T, 11.0, 136.0, T + 0.9, 26.0, dash))
+    S += OI.liven([box(76.0, T, 11.0, 136.0, T + 0.9, 26.0, dash)], 0, "dash", "L")
     S += bookshelf(140.0, T + 0.2, W - 3.0, T + 6.0, 24.0, seed=61, wood=OI.OAK, along="x")
     # research table in front of the dashboard with laptops + stools
     S += OI.standing_desk(80.0, T + 6.0, 132.0, T + 13.0, h=10.0)
-    S += OI.laptop(90.0, T + 9.4, 10.0)
-    S += OI.laptop(116.0, T + 9.0, 10.0)
+    S += OI.liven(OI.laptop(90.0, T + 9.4, 10.0), 1, "glint", "L")
+    S += OI.liven(OI.laptop(116.0, T + 9.0, 10.0), 1, "glint", "L")
     S += [box(100.0, T + 8.0, 10.0, 108.0, T + 11.5, 10.6, flat("#fbfbf6")),
           box(101.0, T + 8.4, 10.6, 107.0, T + 11.0, 11.0, flat("#e3e3da"))]
     for sx, col in ((90.0, OI.CORAL), (106.0, gold), (122.0, OI.SKY)):
@@ -707,10 +707,11 @@ ROOMS = {
 if __name__ == "__main__":
     man = json.load(open("out/manifest.json"))
     for name in (sys.argv[1:] or ROOMS):
+        import office_interiors as OI
+        OI.LIVE.clear()  # live screens (office rooms tag theirs, see office_interiors.liven)
         fn, W, D, elev = ROOMS[name]
         S = fn(W, D, elev / 2.0)
         im, anchor = render(S, ground_shadow=0)
-        im.save(f"out/{name}.png")
-        man[name] = dict(w=im.width, h=im.height, ax=anchor[0], ay=anchor[1], unitsPerGrid=U, hull=solid_hull(S, anchor))
+        OI.save_room(im, anchor, S, name, man)
         print(name, im.size, anchor, flush=True)
     json.dump(man, open("out/manifest.json", "w"), indent=1)

@@ -5,7 +5,7 @@ interiors.py: origin = zone footprint NW corner at floor level, only N and W bac
 Run: python3 office_interiors.py [zone ...] -> out/office_interior_<zone>.png + manifest
 """
 import json, math, os, sys
-from isopix import box, vcyl, hcyl, blob, face_uv, rgb, mix, hash2, render, plane_through, Solid
+from isopix import box, vcyl, hcyl, blob, face_uv, rgb, mix, hash2, render, plane_through, Solid, live, save_live
 from props import cone, flat
 from interiors import (U, WALL_T, text7, room_shell, doormat, entrance_steps, door_frame_x, door_frame_y,
                        DOOR_HALF, desk, monitor, keyboard, office_chair, bookshelf, mug, paper_stack,
@@ -15,6 +15,30 @@ WHITE, OFFWHITE = "#f4f5f2", "#e8eae6"
 INK, STEEL = "#2d3238", "#b9c1c9"
 OAK, OAK_D, OAK_L = "#c9a37a", "#9c7a55", "#dcbf98"
 CORAL, MUSTARD, MINT, SKY = "#e07a5f", "#e0b04a", "#7bc6a4", "#6fa8dc"
+
+# Screens the board animates while an agent works in the room (web/board/livescreens.js):
+# screen id -> {kind, w, h}; filled while a room is built, saved as <sprite>_live.png + manifest.
+LIVE = {}
+
+
+def liven(solids, idx, kind, facing):
+    """Tag solids[idx] (a screen facing "L" = +y or "R" = +x) as a live screen of `kind`."""
+    sol = solids[idx]
+    x0, y0, z0, x1, y1, z1 = sol.aabb
+    sid = len(LIVE) + 1
+    LIVE[sid] = dict(kind=kind, w=round((x1 - x0) if facing == "L" else (y1 - y0), 1), h=round(z1 - z0, 1))
+    live(sol, sid, facing)
+    return solids
+
+
+def save_room(im, anchor, solids, name, man):
+    """Write a room sprite (+ its live-screen map) and its manifest entry."""
+    from props import solid_hull
+    im.save(f"out/{name}.png")
+    man[name] = dict(w=im.width, h=im.height, ax=anchor[0], ay=anchor[1], unitsPerGrid=U,
+                     hull=solid_hull(solids, anchor))
+    if LIVE and save_live(f"out/{name}_live.png"):
+        man[name]["live"] = {str(k): v for k, v in LIVE.items()}
 
 
 def carpet_floor(rug=None, rug_fn=None, a="#c4c6c4", b="#bcbebc"):
@@ -255,8 +279,8 @@ def interior_specs(W, D, slab):
     S += standing_desk(8.0, T + 0.4, 36.0, T + 8.0)
     S += standing_desk(38.0, T + 0.4, 66.0, T + 8.0)
     for i, mx in enumerate((15.0, 29.0, 45.0)):
-        S += monitor(mx, T + 2.6, 11.0, "L", w=7.6, seed=i * 3, doc=(i != 1))
-    S += laptop(58.0, T + 4.4, 11.0)
+        S += liven(monitor(mx, T + 2.6, 11.0, "L", w=7.6, seed=i * 3, doc=(i != 1)), 0, "doc" if i != 1 else "code", "L")
+    S += liven(laptop(58.0, T + 4.4, 11.0), 1, "glint", "L")
     S += mug(22.0, T + 6.4, 11.0, col=CORAL)
     S += mug(52.0, T + 6.0, 11.0, col=teal)
     S += paper_stack(33.0, T + 4.6, 11.0)
@@ -272,7 +296,7 @@ def interior_specs(W, D, slab):
     S += [box(T + 1.0, 24.0, 7.0, T + 4.6, 30.0, 9.6, flat(SKY)),           # stacked notebooks
           box(T + 1.0, 24.4, 9.6, T + 4.6, 29.6, 10.6, flat(CORAL))]
     S += [s_ for s_ in potted_plant(T + 3.2, 44.0, r=2.6, h=7.0, seed=8, big=False)]
-    S += flow_tv_y(T, 60.0, 80.0, 12.0, 23.0)
+    S += liven(flow_tv_y(T, 60.0, 80.0, 12.0, 23.0), 0, "glint", "R")
     S += sofa_y(T + 0.4, 58.0, 82.0, col="#5a8aa0")
 
     # --- front: beanbags (left), mobile whiteboard (right)
@@ -466,7 +490,7 @@ def interior_plan(W, D, slab):
 
     # --- N wall: PLAN letters, roadmap screen, calendar
     S += raised_letters_x("PLAN", 6.0, T, 18.0, col=WHITE, px=0.8)
-    S += roadmap_screen_x(48.0, 92.0, T, 11.0, 26.0)
+    S += liven(roadmap_screen_x(48.0, 92.0, T, 11.0, 26.0), 0, "roadmap", "L")
     S += wall_calendar_x(96.0, 112.0, T, 12.0, 25.0)
 
     # --- long meeting table along the N wall, chairs on the near side + ends
@@ -474,8 +498,8 @@ def interior_plan(W, D, slab):
     for i, cx in enumerate((40.0, 54.0, 68.0, 82.0, 96.0)):
         S += meeting_chair(cx, T + 19.0, "N", col=(blue, "#5a8aa0")[i % 2])
     S += meeting_chair(26.0, T + 10.5, "E", col=blue)
-    S += laptop(42.0, T + 11.0, 7.6)
-    S += laptop(70.0, T + 10.6, 7.6)
+    S += liven(laptop(42.0, T + 11.0, 7.6), 1, "glint", "L")
+    S += liven(laptop(70.0, T + 10.6, 7.6), 1, "glint", "L")
     S += speakerphone(60.0, T + 10.5, 7.6)
     S += bottle(50.0, T + 9.0, 7.6)
     S += bottle(86.0, T + 9.4, 7.6)
@@ -503,9 +527,9 @@ def code_monitor_bank(cx, cy, z, n_=3, facing="L", seed=0):
     for i in range(n_):
         off = (i - (n_ - 1) / 2) * (w + 0.4)
         if facing == "L":
-            S += monitor(cx + off, cy, z, "L", w=w, h=4.8, seed=seed + i, doc=False)
+            S += liven(monitor(cx + off, cy, z, "L", w=w, h=4.8, seed=seed + i, doc=False), 0, "code", "L")
         else:
-            S += monitor(cx, cy - off, z, "R", w=w, h=4.8, seed=seed + i, doc=False)
+            S += liven(monitor(cx, cy - off, z, "R", w=w, h=4.8, seed=seed + i, doc=False), 0, "code", "R")
     return S
 
 
@@ -662,9 +686,9 @@ def interior_build(W, D, slab):
     S += keyboard(37.0, T + 5.2, 45.0, T + 7.2, 11.0)
 
     # --- N side, right of the door: CI build monitor + server racks in the NE corner
-    S += ci_monitor(dx + 18.0, T + 4.0)
-    S += server_rack(W - 20.0, T + 0.4)
-    S += server_rack(W - 11.5, T + 0.4, seed=27)
+    S += liven(ci_monitor(dx + 18.0, T + 4.0), 0, "ci", "L")
+    S += liven(server_rack(W - 20.0, T + 0.4), 0, "leds", "L")
+    S += liven(server_rack(W - 11.5, T + 0.4, seed=27), 0, "leds", "L")
     S += cable_tray_x(W - 21.0, W - 2.0, T + 1.0, 24.6)
 
     # --- W side: desk facing the partition with dual monitors, chair, plant
@@ -837,11 +861,11 @@ def interior_review(W, D, slab):
     S += entrance_steps("N", (dx, 0), slab, col="#c9ced4")
 
     # --- N side: device-testing shelves (right of the door), demo desk (left)
-    S += device_shelf_x(dx + DOOR_HALF + 2.0, W - 3.0, T + 0.4)
+    S += liven(device_shelf_x(dx + DOOR_HALF + 2.0, W - 3.0, T + 0.4), 0, "devices", "L")
     S += desk(6.0, T + 0.6, dx - DOOR_HALF - 2.0, T + 9.0, top=OAK_L)
-    S += monitor(18.0, T + 2.8, 8.0, "L", w=7.6, seed=31, doc=False)
-    S += monitor(28.0, T + 2.8, 8.0, "L", w=7.6, seed=32, doc=True)
-    S += laptop(40.0, T + 5.0, 8.0)
+    S += liven(monitor(18.0, T + 2.8, 8.0, "L", w=7.6, seed=31, doc=False), 0, "code", "L")
+    S += liven(monitor(28.0, T + 2.8, 8.0, "L", w=7.6, seed=32, doc=True), 0, "doc", "L")
+    S += liven(laptop(40.0, T + 5.0, 8.0), 1, "glint", "L")
     S += office_chair(23.0, T + 13.0, "N", col="#4a3a78")
 
     # --- W side: sign-off board over the stamp table, test devices on a cart
@@ -852,7 +876,7 @@ def interior_review(W, D, slab):
     S += device_cart(T + 4.0, D - 14.0)
 
     # --- E edge: big review display with the diff (carries the zone name)
-    S += diff_screen_y(W - 2.2, 22.0, 70.0, 9.0, 31.0)
+    S += liven(diff_screen_y(W - 2.2, 22.0, 70.0, 9.0, 31.0), 0, "diff", "R")
     S += potted_plant(W - 6.0, D - 6.5, r=3.8, h=10, seed=17)
     return S
 
@@ -1063,14 +1087,12 @@ def build(zid):
 
 
 if __name__ == "__main__":
-    from props import solid_hull
     man = json.load(open("out/manifest.json"))
     for zid in (sys.argv[1:] or OFFICE_INTERIORS):
+        LIVE.clear()
         S = build(zid)
         im, anchor = render(S, ground_shadow=0)
         name = f"office_interior_{zid}"
-        im.save(f"out/{name}.png")
-        man[name] = dict(w=im.width, h=im.height, ax=anchor[0], ay=anchor[1], unitsPerGrid=U,
-                         hull=solid_hull(S, anchor))
-        print(name, im.size, anchor)
+        save_room(im, anchor, S, name, man)
+        print(name, im.size, anchor, f"{len(LIVE)} live screens" if LIVE else "")
     json.dump(man, open("out/manifest.json", "w"), indent=1)

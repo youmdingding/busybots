@@ -219,7 +219,51 @@
   ],
   "ground": {
     "sprite": "office_ground",
-    "keepZoneTiles": true
+    "keepZoneTiles": true,
+    "fitSprite": true,
+    "windows": [
+      {
+        "from": [
+          0,
+          0.128
+        ],
+        "to": [
+          22,
+          0.128
+        ],
+        "z": [
+          6,
+          70
+        ],
+        "seed": 7
+      },
+      {
+        "from": [
+          0.128,
+          0.128
+        ],
+        "to": [
+          0.128,
+          11.7
+        ],
+        "z": [
+          6,
+          70
+        ],
+        "seed": 9
+      }
+    ],
+    "clocks": [
+      {
+        "at": [
+          0.128,
+          13.95
+        ],
+        "face": "R",
+        "z": 46,
+        "r": 9
+      }
+    ]
   },
   "interiors": {
     "specs": {
@@ -240,5 +284,40 @@
     "explore": {
       "sprite": "office_interior_explore"
     }
-  }
+  },
+  "roamers": [
+    {
+      "sprite": "office_vacuum",
+      "dock": {
+        "sprite": "office_vacuum_dock",
+        "at": [
+          6.2,
+          13.0
+        ]
+      },
+      "loop": [
+        [
+          6.2,
+          13.45
+        ],
+        [
+          12.6,
+          13.45
+        ],
+        [
+          12.6,
+          15.6
+        ],
+        [
+          6.2,
+          15.6
+        ]
+      ],
+      "speed": 0.5,
+      "turn": 0.8,
+      "laps": 2,
+      "rest": 20,
+      "firstRest": 3
+    }
+  ]
 }

@@ -294,18 +294,13 @@ export function drawBot(b, now, part) {
   ctx.textBaseline = "top";
   const fullName = String(b.name || b.id || "agent");
   let short = fullName;
-  const showOrigin =
-    (S.claudeConfig?.showOriginBadge !== false) &&
-    (b.origin === "conductor" || b.origin === "terminal");
   const maxName =
-    (b.zone === "idle" || b.zone === "waiting") ? 9 : 11;
+    (b.zone === "idle" || b.zone === "waiting") ? 11 : 13;
   if (fullName.length > maxName) short = fullName.slice(0, maxName - 1) + "…";
-  if (showOrigin) short = `${short}·${b.origin === "conductor" ? "C" : "T"}`;
   ctx.font = `600 10px ${UI_FONT}`;
   const maxPill = (b.zone === "idle" || b.zone === "waiting") ? 100 : 110;
   while (ctx.measureText(short).width > maxPill && short.length > 5) {
-    const core = short.replace(/·[CT]$/, "");
-    short = core.slice(0, Math.max(3, core.length - 2)) + "…" + (showOrigin ? `·${b.origin === "conductor" ? "C" : "T"}` : "");
+    short = short.replace(/…$/, "").slice(0, -2) + "…";
   }
   const tw = ctx.measureText(short).width;
   const padX = 6;
