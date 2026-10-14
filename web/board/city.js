@@ -13,6 +13,7 @@ import { roamerItems, stepRoamers } from "./roamers.js";
 import { drawWindowViews } from "./windows.js";
 import { drawWallClocks } from "./wallclock.js";
 import { drawLiveScreens, roomBusy } from "./livescreens.js";
+import { rigItems } from "./rigs.js";
 
 export const cityHazeCache = new Map();
 
@@ -475,9 +476,12 @@ export function drawCityScene(now, list) {
   }
   stepRoamers(now || performance.now(), agents);
   for (const it of roamerItems()) items.push(it);
+  const rigs = rigItems(now, zoneInterior); // cranes: load in depth order, head on top
+  for (const it of rigs.items) items.push(it);
   const ordered = depthSort(items);
   if (window.__sceneDebug) window.__sceneOrder = ordered.map((it) => [it.name || "car", it.box.map((v) => +v.toFixed(2))]);
   for (const it of ordered) it.draw();
+  for (const draw of rigs.after) draw();
 }
 
 /** On-island / base-slab city prop. Skipped if its silhouette would touch an agent zone. */

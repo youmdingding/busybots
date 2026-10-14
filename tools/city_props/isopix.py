@@ -204,21 +204,53 @@ def shade(col, n, shadowed=False, emissive=False):
 LAST_LIVE = None  # live-screen buffer of the last render() (None when nothing was tagged)
 
 
-def live(solid, sid, facing):
-    """Tag a screen so the board can animate it: every emissive pixel on its `facing` face
-    ("L" = toward +y, "R" = toward +x) records (sid, u, v) in face units from the screen's
-    top-left as seen. render() collects them in LAST_LIVE; save it with save_live()."""
+def live(solid, sid, facing, any_px=False, uv=None):
+    """Tag a prop part so the board can animate it. Every visible pixel of it (glowing
+    pixels only unless any_px) on its `facing` face ("L" = toward +y, "R" = toward +x,
+    "top", or "*" for every face) records (sid, u, v) in sprite units: u from the left as
+    seen, v from the top (top faces: from the back). render() collects them in LAST_LIVE."""
     m0 = solid.mat
     x0, y0, z0, x1, y1, z1 = solid.aabb
 
     def m(p, n):
         r = m0(p, n)
-        if isinstance(r, tuple) and r[1] and face_uv(p, n)[0] == facing:
-            u = p[0] - x0 if facing == "L" else y1 - p[1]
-            return (r[0], True, (sid, u, z1 - p[2]))
-        return r
+        glowing = isinstance(r, tuple) and r[1]
+        if not (glowing or any_px):
+            return r
+        f = face_uv(p, n)[0]
+        if facing != "*" and f != facing:
+            return r
+        if uv:
+            u, v = uv(p)
+        elif f == "top":
+            u, v = p[0] - x0, p[1] - y0
+        elif f == "R" or (f not in ("L",) and abs(n[0]) > abs(n[1])):
+            u, v = y1 - p[1], z1 - p[2]
+        else:
+            u, v = p[0] - x0, z1 - p[2]
+        col = r[0] if isinstance(r, tuple) else r
+        return (col, glowing, (sid, u, v))
     solid.mat = m
     return solid
+
+
+# Live parts of the sprite being built: id -> {kind, w, h}. Reset before each sprite.
+LIVE = {}
+
+
+def liven(solids, idx, kind, facing, any_px=False, uv=None, w=None, h=None, **params):
+    """Tag solids[idx] (an index or a list of them) as a live part of `kind`; see
+    web/board/livescreens.js for the kinds and their params. uv(p) -> (u, v) overrides
+    the face coordinates (e.g. the angle around a turning drum)."""
+    sid = len(LIVE) + 1
+    for i in (idx if isinstance(idx, (list, tuple)) else [idx]):
+        sol = solids[i]
+        x0, y0, z0, x1, y1, z1 = sol.aabb
+        live(sol, sid, facing, any_px, uv)
+    ww = w if w is not None else ((y1 - y0) if facing == "R" else (x1 - x0))
+    hh = h if h is not None else ((y1 - y0) if facing == "top" else (z1 - z0))
+    LIVE[sid] = dict(kind=kind, w=round(ww, 1), h=round(hh, 1), **params)
+    return solids
 
 
 def save_live(path):

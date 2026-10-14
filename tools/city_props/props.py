@@ -789,6 +789,31 @@ def mirror_x(solids):
     return out
 
 
+def rotate_z(solids, deg, cx, cy):
+    """Turn solids by `deg` degrees about the vertical axis through (cx, cy) (counter-
+    clockwise seen from above: +x toward +y). Materials see the unturned coordinates."""
+    a = math.radians(deg)
+    ca, sa = math.cos(a), math.sin(a)
+    rot = lambda v: np.array([ca * v[0] - sa * v[1], sa * v[0] + ca * v[1], v[2]])
+    unrot = lambda v: np.array([ca * v[0] + sa * v[1], -sa * v[0] + ca * v[1], v[2]])
+    C = np.array([cx, cy, 0.0])
+    out = []
+    for s in solids:
+        pl = []
+        for n, c in s.planes:
+            n2 = rot(n)
+            pl.append((tuple(n2), c - float(np.dot(n, C)) + float(np.dot(n2, C))))
+        x0, y0, z0, x1, y1, z1 = s.aabb
+        pts = [rot(np.array([x, y, 0.0]) - C) + C for x in (x0, x1) for y in (y0, y1)]
+        aabb = (min(q[0] for q in pts), min(q[1] for q in pts), z0, max(q[0] for q in pts), max(q[1] for q in pts), z1)
+        m0 = s.mat
+
+        def m(p, n, m0=m0):
+            return m0(unrot(np.array(p) - C) + C, unrot(n))
+        out.append(Solid(pl, aabb, m, cast=s.cast))
+    return out
+
+
 # ------------------------------------------------------------ build all
 def catalogue():
     cat = {}
@@ -840,6 +865,17 @@ def solid_hull(solids, anchor):
             hi.pop()
         hi.append(p)
     return [list(p) for p in lo[:-1] + hi[:-1]]
+
+
+
+def save_room(im, anchor, solids, name, man, units=23.45):
+    """Write a room sprite (+ its live-screen map) and its manifest entry."""
+    im.save(f"out/{name}.png")
+    man[name] = dict(w=im.width, h=im.height, ax=anchor[0], ay=anchor[1], unitsPerGrid=units,
+                     hull=solid_hull(solids, anchor))
+    from isopix import LIVE, save_live
+    if LIVE and save_live(f"out/{name}_live.png"):
+        man[name]["live"] = {str(k): v for k, v in LIVE.items()}
 
 
 if __name__ == "__main__":

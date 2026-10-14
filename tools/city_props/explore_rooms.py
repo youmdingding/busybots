@@ -7,8 +7,8 @@ Explore rooms (new) + resized Idle rooms for all four themes, after Idle was spl
 Run: python3 explore_rooms.py [sprite ...] -> out/<sprite>.png + manifest entries
 """
 import json, math, sys
-from isopix import box, vcyl, hcyl, blob, face_uv, rgb, mix, hash2, render, plane_through, Solid
-from props import flat, cone, planter_mat, solid_hull
+from isopix import box, vcyl, hcyl, blob, face_uv, rgb, mix, hash2, render, plane_through, Solid, LIVE, liven
+from props import flat, cone, planter_mat, solid_hull, save_room
 import interiors as CI
 from interiors import (U, WALL_T, text7, room_shell, doormat, entrance_steps, door_frame_x, door_frame_y,
                        DOOR_HALF, bookshelf, desk, monitor, keyboard, potted_plant, filing_cabinet)
@@ -141,7 +141,8 @@ def city_explore(W, D, slab):
                 return rgb("#d8aa45")
         return rgb("#8a5c3c")
     S.append(box(144.0, T + 0.4, 0, 166.0, T + 7.0, 10.0, cat))
-    S += globe_stand(W - 14.0, T + 9.0)
+    S += liven(globe_stand(W - 14.0, T + 9.0), 4, "spin", "*", any_px=True, w=20,
+                uv=lambda p, cx=W - 14.0, cy=T + 9.0: ((math.atan2(p[1] - cy, p[0] - cx) + math.pi) * 3.2, p[2]))
 
     # W wall: framed city map + a reading table with green banker's lamps
     def citymap(p, n):
@@ -161,7 +162,7 @@ def city_explore(W, D, slab):
             if abs(uu - pu) < 0.8 and abs(zz - pz) < 0.8:
                 return rgb(c)
         return rgb("#e6dccb") if hash2(int(uu // 6), int(zz // 3), 43) > 0.3 else rgb("#d9cdb6")
-    S.append(box(T, 20.0, 11.0, T + 0.8, 60.0, 25.0, citymap))
+    S += liven([box(T, 20.0, 11.0, T + 0.8, 60.0, 25.0, citymap)], 0, "glint", "R", any_px=True)
     S += desk(T + 0.4, 64.0, T + 10.0, 92.0, top="#7a5236", leg="#3b2a20", h=7.6)
     for yy in (70.0, 86.0):
         S += [vcyl(T + 3.0, yy, 0.9, 7.6, 8.0, flat("#d8aa45"), sides=8),
@@ -172,7 +173,7 @@ def city_explore(W, D, slab):
 
     # front-right: computer kiosk + plant; front-left: armchair
     S += [box(W - 22.0, D - 16.0, 0, W - 16.0, D - 12.0, 8.0, flat("#4a5058"))]
-    S += monitor(W - 19.0, D - 15.0, 8.0, "L", w=7.0, seed=41, doc=True)
+    S += liven(monitor(W - 19.0, D - 15.0, 8.0, "L", w=7.0, seed=41, doc=True), 0, "doc", "L")
     S += potted_plant(W - 6.5, D - 7.0, r=4.0, h=11, seed=45)
     S += CI.armchair(14.0, D - 14.0, col="#2f6a4a", facing="N")
     return S
@@ -304,7 +305,7 @@ def island_explore(W, D, slab):
         if hash2(int(uu * 1.4), int(vv * 1.4), 7) > 0.97:
             return (rgb("#e9fbff"), True)           # bubbles
         return (mix(rgb("#1a7f9a"), rgb("#57d3e0"), vv / h), True)
-    S.append(box(6.0, T, 6.0, 76.0, T + 2.4, 24.0, aqua))
+    S += liven([box(6.0, T, 6.0, 76.0, T + 2.4, 24.0, aqua)], 0, "aquarium", "L")
     S.append(box(5.0, T, 0, 77.0, T + 3.4, 6.0, flat(II.TEAK_D)))           # stand
     S += II.carved_sign_x(82.0, 126.0, T, 16.8, 26.0, "EXPLORE", icon="compass")
     S.append(box(130.0, T + 3.0, 20.5, 186.0, T + 3.6, 21.2, flat("#8c959e")))   # wetsuit rail
@@ -336,7 +337,7 @@ def island_explore(W, D, slab):
             if abs(uu - pu) < 0.8 and abs(zz - pz) < 0.8:
                 return rgb("#e8553f")
         return mix(rgb("#2a9db8"), rgb("#7fd3e8"), zz / 14.0)
-    S.append(box(T, 20.0, 11.0, T + 0.8, 52.0, 25.0, reef))
+    S += liven([box(T, 20.0, 11.0, T + 0.8, 52.0, 25.0, reef)], 0, "water", "R", any_px=True)
 
     def shelf(p, n):
         f, u, v = face_uv(p, n)
@@ -355,7 +356,8 @@ def island_explore(W, D, slab):
     S += [vcyl(16.0, D - 12.0, 0.4, 0, 12.0, flat("#5e3b20"), sides=6),
           hcyl("x", D - 12.0, 13.0, 1.0, 13.5, 18.5, flat("#2b3138"), sides=8),
           vcyl(16.0, D - 12.0, 2.0, 0, 0.6, flat("#5e3b20"), sides=6)]
-    S += II.floor_globe(W - 14.0, D - 12.0)
+    S += liven(II.floor_globe(W - 14.0, D - 12.0), 4, "spin", "*", any_px=True, w=22,
+                uv=lambda p, cx=W - 14.0, cy=D - 12.0: ((math.atan2(p[1] - cy, p[0] - cx) + math.pi) * 3.6, p[2]))
     return S
 
 
@@ -489,12 +491,12 @@ def office_explore(W, D, slab):
             if hash2(int(uu * 0.8), int(vv * 0.8), 52) > 0.96:
                 return (rgb(OI.SKY), True)
         return (rgb("#26313b"), True)
-    S += OI.liven([box(76.0, T, 11.0, 136.0, T + 0.9, 26.0, dash)], 0, "dash", "L")
+    S += liven([box(76.0, T, 11.0, 136.0, T + 0.9, 26.0, dash)], 0, "dash", "L")
     S += bookshelf(140.0, T + 0.2, W - 3.0, T + 6.0, 24.0, seed=61, wood=OI.OAK, along="x")
     # research table in front of the dashboard with laptops + stools
     S += OI.standing_desk(80.0, T + 6.0, 132.0, T + 13.0, h=10.0)
-    S += OI.liven(OI.laptop(90.0, T + 9.4, 10.0), 1, "glint", "L")
-    S += OI.liven(OI.laptop(116.0, T + 9.0, 10.0), 1, "glint", "L")
+    S += liven(OI.laptop(90.0, T + 9.4, 10.0), 1, "glint", "L")
+    S += liven(OI.laptop(116.0, T + 9.0, 10.0), 1, "glint", "L")
     S += [box(100.0, T + 8.0, 10.0, 108.0, T + 11.5, 10.6, flat("#fbfbf6")),
           box(101.0, T + 8.4, 10.6, 107.0, T + 11.0, 11.0, flat("#e3e3da"))]
     for sx, col in ((90.0, OI.CORAL), (106.0, gold), (122.0, OI.SKY)):
@@ -612,9 +614,9 @@ def space_explore(W, D, slab):
     S += SI.airlock_door_x(dx, D - 0.6, 22.0, acc)
     S += entrance_steps("S", (dx, D), slab, col="#6b7584")
     S += SI.raised_letters_x("EXPLORE", 6.0, T, 18.0, col=acc, px=0.8)
-    S += SI.holo_screen_x(66.0, 118.0, T, 10.5, 27.5, acc, content="starmap", seed=71)
-    S += SI.viewport_x(122.0, 160.0, T, 10.0, 27.0, planet=True, seed=72)
-    S += SI.console_x(66.0, 118.0, T + 1.0, acc, h=7.0, seed=73)
+    S += liven(SI.holo_screen_x(66.0, 118.0, T, 10.5, 27.5, acc, content="starmap", seed=71), 0, "pan", "L", speed=0.8, box=[1, 1, 51, 16])
+    S += liven(SI.viewport_x(122.0, 160.0, T, 10.0, 27.0, planet=True, seed=72), 0, "pan", "L", speed=0.4, box=[1, 1, 37, 16])
+    S += liven(SI.console_x(66.0, 118.0, T + 1.0, acc, h=7.0, seed=73), 0, "blink", "*")
     for cx in (76.0, 92.0, 108.0):
         S += SI.crew_seat(cx, T + 12.0, "N", col="#d9c98a")
     # the big telescope in the NE corner
@@ -624,16 +626,16 @@ def space_explore(W, D, slab):
           box(tx - 2.4, ty - 2.4, 12.0, tx + 2.4, ty + 2.4, 14.0, flat(SI.METAL_D))]
     for k in range(6):                                   # tilted tube pointing up at the viewport
         S.append(vcyl(tx - k * 1.6, ty - k * 1.4, 2.6 - k * 0.12, 14.0 + k * 2.4, 16.8 + k * 2.4, flat("#e9eef2" if k % 2 else "#c9d1da"), sides=10))
-    S.append(vcyl(tx - 9.6, ty - 8.4, 2.2, 28.4, 29.2, glow("#9ad8ff"), sides=10))
+    S += liven([vcyl(tx - 9.6, ty - 8.4, 2.2, 28.4, 29.2, glow("#9ad8ff"), sides=10)], 0, "pulse", "*")
     # W wall: sensor readouts + probe drones racked + crates
-    S += SI.holo_screen_y(T, 18.0, 44.0, 10.0, 22.0, acc, content="graph", seed=74)
+    S += liven(SI.holo_screen_y(T, 18.0, 44.0, 10.0, 22.0, acc, content="graph", seed=74), 0, "pan", "R", speed=2, box=[1, 1, 25, 11])
     from space_props import drone
     for i, yy in enumerate((54.0, 66.0)):
         S.append(box(T + 0.2, yy - 5.0, 0, T + 9.0, yy + 5.0, 1.2, flat(SI.METAL_D)))
         S += SI.translate(drone(), T + 5.0, yy, -8.0) if hasattr(SI, "translate") else []
     S += SI.storage_crate(T + 1.0, 78.0, w=7.0, d=8.0, col="#7a6a3c")
     S += SI.potted_alien_plant(T + 6.0, D - 8.0, seed=9)
-    S += SI.holo_table(W - 16.0, D - 14.0, r=5.0, accent=acc, kind="planet")
+    S += liven(liven(SI.holo_table(W - 16.0, D - 14.0, r=5.0, accent=acc, kind="planet"), [3, 4], "holo", "*"), 2, "pulse", "*")
     return S
 
 
@@ -707,11 +709,10 @@ ROOMS = {
 if __name__ == "__main__":
     man = json.load(open("out/manifest.json"))
     for name in (sys.argv[1:] or ROOMS):
-        import office_interiors as OI
-        OI.LIVE.clear()  # live screens (office rooms tag theirs, see office_interiors.liven)
+        LIVE.clear()  # parts the board animates (tagged with liven())
         fn, W, D, elev = ROOMS[name]
         S = fn(W, D, elev / 2.0)
         im, anchor = render(S, ground_shadow=0)
-        OI.save_room(im, anchor, S, name, man)
+        save_room(im, anchor, S, name, man, U)
         print(name, im.size, anchor, flush=True)
     json.dump(man, open("out/manifest.json", "w"), indent=1)

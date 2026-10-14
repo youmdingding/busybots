@@ -1,6 +1,6 @@
 // Room props that come alive while an agent works in the room: code scrolls on the
-// monitors, the CI board runs its pipeline, rack LEDs blink, the roadmap's "today" line
-// moves, the review diff scrolls, test devices switch screens.
+// monitors, the CI board runs its pipeline, rack LEDs blink, blueprints get drawn, belts
+// run, drums turn, fish swim, holograms shimmer, bubbles rise… (every theme).
 //
 // The art generator tags each screen it draws (tools/city_props/isopix.py live()) and saves
 // <sprite>_live.png beside the room sprite: per visible screen pixel R = screen id,
@@ -57,12 +57,27 @@ function roomData(name, meta) {
       }
     }
     if (!pixels.length) { ROOMS.set(name, { failed: true }); return null; }
+    // per part: orig colour by (u, v) for panning, and its background (commonest colour)
+    const screens = {};
+    for (const p of pixels) {
+      const sc = screens[p.sid] || (screens[p.sid] = { map: new Map(), count: new Map(), bg: p.orig });
+      if (!sc.map.has(p.u * 256 + p.v)) sc.map.set(p.u * 256 + p.v, p.orig);
+      if (inBox(p, meta[p.sid])) {
+        const k = (p.orig[0] << 16) | (p.orig[1] << 8) | p.orig[2];
+        sc.count.set(k, (sc.count.get(k) || 0) + 1);
+      }
+    }
+    for (const sc of Object.values(screens)) {
+      let best = -1;
+      for (const [k, n] of sc.count) if (n > best) { best = n; sc.bg = [k >> 16, (k >> 8) & 255, k & 255]; }
+      delete sc.count;
+    }
     const bw = x1 - x0 + 1, bh = y1 - y0 + 1;
     const canvas = document.createElement("canvas");
     canvas.width = bw;
     canvas.height = bh;
     const cg = canvas.getContext("2d");
-    r = { pixels, bx: x0, by: y0, bw, bh, canvas, cg, img: cg.createImageData(bw, bh), frame: -1 };
+    r = { pixels, screens, bx: x0, by: y0, bw, bh, canvas, cg, img: cg.createImageData(bw, bh), frame: -1 };
     ROOMS.set(name, r);
     return r;
   } catch (e) {
@@ -86,8 +101,27 @@ const C = Object.fromEntries(Object.entries({
   red: "#ff5a5a", delBg: "#3b2328", addBg: "#1f3a2c", neuBg: "#22272e", del: "#ff8a8a", add: "#7ee2a8",
   neu: "#aab4bf", gutter: "#3a414a", sel: "#3a3f6e",
   sky: "#6fa8dc", mint: "#7bc6a4", mustard: "#e0b04a", coral: "#e07a5f", gold: "#c9a227", white: "#e9eef2",
+  aquaLo: "#1a7f9a", aquaHi: "#57d3e0",
 }).map(([k, v]) => [k, hexRgb(v)]));
 const brighten = (c, f) => c.map((x) => Math.min(255, x * f + 10));
+const dim = (c, f) => c.map((x) => x * f);
+const mod = (a, n) => ((a % n) + n) % n;
+/** Inside the part's effect area (meta.box = [u0, v0, u1, v1]); the rest stays as drawn. */
+function inBox(p, m) {
+  const b = m && m.box;
+  return !b || (p.u >= b[0] && p.v >= b[1] && p.u < b[2] && p.v < b[3]);
+}
+/** Span along the effect axis: [start, length]. */
+function span(m, axis) {
+  const b = m.box;
+  if (axis === "v") return b ? [b[1], b[3] - b[1]] : [0, Math.max(1, Math.round(m.h))];
+  return b ? [b[0], b[2] - b[0]] : [0, Math.max(1, Math.round(m.w))];
+}
+const warm = (c) => c[0] > c[1] + 40 && c[0] > c[2] + 60;
+const FISH = ["#ff8c42", "#f7c548", "#ff5a7a", "#7fd1ff"].map(hexRgb);
+const REEF = ["#ff6f61", "#4fc06a", "#c86bfa"].map(hexRgb);
+const LAMPS = ["#3ddc7a", "#f2b705", "#e5484d"].map(hexRgb);
+const lerp = (a, b, k) => a.map((x, i) => x + (b[i] - x) * Math.max(0, Math.min(1, k)));
 const sameish = (a, b) => Math.abs(a[0] - b[0]) + Math.abs(a[1] - b[1]) + Math.abs(a[2] - b[2]) < 60;
 
 const KINDS = {
@@ -183,6 +217,125 @@ const KINDS = {
     const c = pick > 0.45 ? C.sky : pick > 0.2 ? C.mint : pick > 0.08 ? C.white : C.coral;
     return (p.v % 4 === 2 && hash(dev, slot, 6) > 0.5) ? brighten(c, 1.2) : c;
   },
+  // ---- effects driven by the prop's own colours (any theme) ----
+  /** Content slides along u (or v): belts, scrolling lists, drifting star maps. */
+  pan(p, m, t, sc) {
+    if (!inBox(p, m)) return p.orig;
+    const axis = m.axis || "u";
+    const [a0, len] = span(m, axis);
+    const shift = Math.floor(t * (m.speed || 3));
+    const src = a0 + mod((axis === "v" ? p.v : p.u) - a0 - shift, len);
+    const q = axis === "v" ? { u: p.u, v: src } : { u: src, v: p.v };
+    return (inBox(q, m) && sc.map.get(q.u * 256 + q.v)) || p.orig;
+  },
+  /** The drawing appears stroke by stroke from left to right (or top down), then again. */
+  reveal(p, m, t, sc) {
+    if (!inBox(p, m) || sameish(p.orig, sc.bg)) return p.orig;
+    const axis = m.axis || "u", sp = m.speed || 4;
+    const [a0, len] = span(m, axis);
+    const prog = (t * sp + p.sid * 7) % (len + sp * 3);
+    return (axis === "v" ? p.v : p.u) - a0 < prog ? p.orig : sc.bg;
+  },
+  /** Gentle breathing glow. */
+  pulse(p, m, t) {
+    return dim(p.orig, 0.72 + 0.4 * (0.5 + 0.5 * Math.sin(t * 3 + p.sid)));
+  },
+  /** On / off, like a warning light. */
+  beacon(p, m, t) {
+    return Math.floor(t * 1.6 + p.sid * 0.37) % 2 ? brighten(p.orig, 1.1) : dim(p.orig, 0.3);
+  },
+  /** Burners, torches: warm pixels flicker. */
+  flame(p, m, t) {
+    if (!warm(p.orig)) return p.orig;
+    const f = hash(p.u, p.v, Math.floor(t * 10) + p.sid * 99);
+    return f > 0.7 ? [255, 214, 96] : dim(p.orig, 0.75 + 0.45 * f);
+  },
+  /** Panel buttons and status lights blinking independently. */
+  blink(p, m, t, sc) {
+    if (Math.max(...p.orig) < 120 || sameish(p.orig, sc.bg)) return p.orig;
+    const slot = Math.floor(t * (1.5 + hash(p.u, p.v, 8) * 4) + hash(p.u, p.v, 9) * 10);
+    return hash(p.u * 31 + p.v, slot, p.sid) > 0.3 ? brighten(p.orig, 1.08) : dim(p.orig, 0.3);
+  },
+  /** Holograms: shimmer, a scan line and the odd glitch. */
+  holo(p, m, t) {
+    if (hash(Math.floor(t * 12), 3, p.sid) < 0.04) return dim(p.orig, 0.55);
+    if (p.v === Math.floor(t * 8) % (Math.round(m.h) + 6)) return brighten(p.orig, 1.35);
+    return dim(p.orig, 0.82 + 0.22 * Math.sin(t * 6 + p.v * 0.9));
+  },
+  /** Bubbles rising through liquid. */
+  bubbles(p, m, t, sc) {
+    const rise = Math.floor(p.v + t * 3 + hash(p.u, 1, p.sid) * 20);
+    if (hash(p.u, rise, p.sid) > 0.93) return [255, 255, 255];
+    return sameish(p.orig, [255, 255, 255]) ? sc.bg : p.orig;
+  },
+  /** Stack light (one part per lamp, meta.lamp 0 green, 1 amber, 2 red). */
+  stack(p, m, t) {
+    const ph = (t + 2) % 12;
+    const lit = ph < 8 ? 0 : ph < 10 ? 1 : 2;
+    const c = LAMPS[m.lamp || 0];
+    return m.lamp === lit ? brighten(c, 1.05) : dim(c, 0.4);
+  },
+  /** Water shimmering in the light. */
+  water(p, m, t) {
+    const s = Math.sin(p.u * 0.9 + p.v * 1.7 - t * 2.2) + Math.sin(p.u * 0.37 - t * 1.3);
+    if (s > 1.45) return brighten(p.orig, 1.18);
+    if (s < -1.6) return dim(p.orig, 0.9);
+    return p.orig;
+  },
+  /** Something turning (a drum, a globe, a rope through a pulley): bands move along u or v. */
+  spin(p, m, t) {
+    const c = (m.axis === "v" ? p.v : p.u) + t * (m.speed || 6);
+    return Math.floor(c / 3) % 2 ? p.orig : dim(p.orig, 0.8);
+  },
+  /** Steam rising off a pot. */
+  steam(p, m, t) {
+    return dim(p.orig, 0.72 + 0.3 * hash(p.u, Math.floor(p.v + t * 4), p.sid));
+  },
+  /** A saw going back and forth over a plank, throwing sawdust. */
+  sawdust(p, m, t) {
+    const at = m.w * (0.5 + 0.3 * Math.sin(t * 2.4));
+    if (Math.abs(p.u - at) < 2.2 && hash(p.u, p.v, Math.floor(t * 14)) > 0.55) return [246, 228, 186];
+    return p.orig;
+  },
+  /** An oscilloscope or scan trace (meta.color) moving across. */
+  wave(p, m, t, sc) {
+    if (!inBox(p, m)) return p.orig;
+    const line = hexRgb(m.color || "#5dffa8");
+    const [v0, len] = span(m, "v");
+    const y = v0 + len / 2 + Math.sin((p.u + t * 7) * 0.7) * len * 0.32 * Math.sin((p.u + t * 2) * 0.13 + 1);
+    if (Math.abs(p.v + 0.5 - y) < 0.7) return line;
+    return sameish(p.orig, line) ? sc.bg : p.orig;
+  },
+  /** Bar chart under a header (meta.top rows) rising and falling. */
+  bars(p, m, t, sc) {
+    const top = m.top || 2;
+    if (p.v < top || p.u < 1 || p.u > m.w - 2) return p.orig;
+    if ((p.u - 1) % 3 > 1) return sc.bg;
+    const k = Math.floor((p.u - 1) / 3);
+    const max = m.h - top - 1;
+    const hgt = max * (0.25 + 0.7 * (0.5 + 0.5 * Math.sin(t * 1.3 + k * 1.9)));
+    if (m.h - 1 - p.v < hgt) return hgt > max * 0.6 ? C.ok : C.run;
+    return sc.bg;
+  },
+  /** A board whose rows update now and then (flip board, chalk schedule). */
+  flip(p, m, t, sc) {
+    if (!inBox(p, m) || sameish(p.orig, sc.bg)) return p.orig;
+    const row = Math.floor(p.v / 2);
+    return hash(row, Math.floor(t * 4 + row * 0.3), p.sid) < 0.08 ? sc.bg : p.orig;
+  },
+  /** Island aquarium: the fish swim to and fro, bubbles rise. */
+  aquarium(p, m, t) {
+    const uu = p.u + 0.5, vv = m.h - p.v - 0.5;
+    if (vv < 3 || REEF.some((c) => sameish(c, p.orig))) return p.orig; // sand, coral, weed
+    for (let k = 0; k < 7; k++) {
+      const dir = k % 2 ? -1 : 1;
+      const fx = 1.2 + mod(6 + k * 9.3 + (k % 2) * 3 + dir * t * (1.5 + (k % 3)) - 1.2, m.w - 2.4);
+      const fz = 6 + (k * 5) % 9, dz = Math.abs(vv - fz);
+      if (dz < 0.9 && (Math.abs(uu - fx) < 1.6 - dz * 0.8 || Math.abs(uu - (fx - 2 * dir)) < 0.9 - dz)) return FISH[k % 4];
+    }
+    if (hash(Math.floor(uu * 1.4), Math.floor(vv * 1.4 - t * 3), 7) > 0.975) return [233, 251, 255];
+    return lerp(C.aquaLo, C.aquaHi, vv / m.h);
+  },
   /** Anything else with a picture: a soft light sweep, as if someone is scrolling. */
   glint(p, m, t) {
     const span = m.w + m.h + 10;
@@ -205,7 +358,7 @@ export function drawLiveScreens(spriteName, x, y, s, now) {
     for (const p of r.pixels) {
       const meta = m.live[p.sid];
       const fn = KINDS[meta.kind] || KINDS.glint;
-      const c = fn(p, meta, t);
+      const c = fn(p, meta, t, r.screens[p.sid]);
       const i = ((p.y - r.by) * r.bw + (p.x - r.bx)) * 4;
       d[i] = c[0]; d[i + 1] = c[1]; d[i + 2] = c[2]; d[i + 3] = 255;
     }

@@ -5,8 +5,8 @@ interiors.py: origin = zone footprint NW corner at floor level, only N and W bac
 Run: python3 office_interiors.py [zone ...] -> out/office_interior_<zone>.png + manifest
 """
 import json, math, os, sys
-from isopix import box, vcyl, hcyl, blob, face_uv, rgb, mix, hash2, render, plane_through, Solid, live, save_live
-from props import cone, flat
+from isopix import box, vcyl, hcyl, blob, face_uv, rgb, mix, hash2, render, plane_through, Solid, LIVE, liven, save_live
+from props import cone, flat, save_room
 from interiors import (U, WALL_T, text7, room_shell, doormat, entrance_steps, door_frame_x, door_frame_y,
                        DOOR_HALF, desk, monitor, keyboard, office_chair, bookshelf, mug, paper_stack,
                        potted_plant, INTERIORS as CITY_INTERIORS)
@@ -15,31 +15,6 @@ WHITE, OFFWHITE = "#f4f5f2", "#e8eae6"
 INK, STEEL = "#2d3238", "#b9c1c9"
 OAK, OAK_D, OAK_L = "#c9a37a", "#9c7a55", "#dcbf98"
 CORAL, MUSTARD, MINT, SKY = "#e07a5f", "#e0b04a", "#7bc6a4", "#6fa8dc"
-
-# Screens the board animates while an agent works in the room (web/board/livescreens.js):
-# screen id -> {kind, w, h}; filled while a room is built, saved as <sprite>_live.png + manifest.
-LIVE = {}
-
-
-def liven(solids, idx, kind, facing):
-    """Tag solids[idx] (a screen facing "L" = +y or "R" = +x) as a live screen of `kind`."""
-    sol = solids[idx]
-    x0, y0, z0, x1, y1, z1 = sol.aabb
-    sid = len(LIVE) + 1
-    LIVE[sid] = dict(kind=kind, w=round((x1 - x0) if facing == "L" else (y1 - y0), 1), h=round(z1 - z0, 1))
-    live(sol, sid, facing)
-    return solids
-
-
-def save_room(im, anchor, solids, name, man):
-    """Write a room sprite (+ its live-screen map) and its manifest entry."""
-    from props import solid_hull
-    im.save(f"out/{name}.png")
-    man[name] = dict(w=im.width, h=im.height, ax=anchor[0], ay=anchor[1], unitsPerGrid=U,
-                     hull=solid_hull(solids, anchor))
-    if LIVE and save_live(f"out/{name}_live.png"):
-        man[name]["live"] = {str(k): v for k, v in LIVE.items()}
-
 
 def carpet_floor(rug=None, rug_fn=None, a="#c4c6c4", b="#bcbebc"):
     def floor(p):
@@ -1093,6 +1068,6 @@ if __name__ == "__main__":
         S = build(zid)
         im, anchor = render(S, ground_shadow=0)
         name = f"office_interior_{zid}"
-        save_room(im, anchor, S, name, man)
+        save_room(im, anchor, S, name, man, U)
         print(name, im.size, anchor, f"{len(LIVE)} live screens" if LIVE else "")
     json.dump(man, open("out/manifest.json", "w"), indent=1)

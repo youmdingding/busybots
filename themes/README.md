@@ -61,15 +61,23 @@ a clock showing the local time on the sprite's wall: `at` = the clock centre on 
 floor level (grid), `face` = which way the wall faces (`"R"` toward +x, `"L"` toward +y),
 `z` = centre height and `r` = radius in sprite units.
 
-## Live screens
+## Live props
 
-Room sprites can come with a map of their screens (`<sprite>_live.png`, written by the art
-generator for every screen tagged with `liven()` in `tools/city_props/office_interiors.py`).
-While an agent is working in a room, those screens animate: code scrolls, documents get
-written, the CI board runs, rack LEDs blink, the roadmap's today line moves, the review
-diff scrolls, test devices switch screens, dashboards update. Kinds live in
-`web/board/livescreens.js`. Nothing to set in the theme: the manifest entry's `live` key
-turns it on.
+Room sprites can come with a map of their live parts (`<sprite>_live.png`): the art
+generators tag them with `liven()` (`tools/city_props/isopix.py`). While an agent is working
+in a room, those parts animate. Office: code scrolls, documents get written, the CI board
+runs, rack LEDs blink, the roadmap's today line moves, the diff scrolls. City: blueprints
+get drawn, the conveyor runs, the stack light cycles, the crane beacon blinks, the mixer
+turns. Island: the sea shimmers, the tour route is traced, fish swim, burners flicker,
+steam rises. Space: holo screens scroll and drift, consoles blink, the reactor flows,
+bubbles rise in the specimen tubes. The kinds live in `web/board/livescreens.js`. Nothing to
+set in the theme: the manifest entry's `live` key turns it on.
+
+A room can also have moving machinery (`rig` on its manifest entry, `web/board/rigs.js`):
+the City building site's tower crane swings, lowers its load to the floor and lifts it
+again while an agent works there, and goes back to rest when the room is quiet. The
+generator (`crane_rig()` in `tools/city_props/interiors.py`) keeps only the mast in the
+room sprite and renders the turning head and the hook load at 32 headings.
 
 ## Roamers
 

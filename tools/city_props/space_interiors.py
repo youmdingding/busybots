@@ -5,8 +5,8 @@ interiors.py: origin = zone footprint NW corner at floor level, only N and W wal
 Run: python3 space_interiors.py [zone ...] -> out/space_interior_<zone>.png + manifest
 """
 import json, math, os, sys
-from isopix import box, vcyl, hcyl, blob, face_uv, rgb, mix, hash2, render, plane_through, Solid
-from props import cone, flat
+from isopix import box, vcyl, hcyl, blob, face_uv, rgb, mix, hash2, render, plane_through, Solid, LIVE, liven
+from props import cone, flat, save_room
 from interiors import (U, WALL_T, text7, room_shell, doormat, entrance_steps, door_frame_x, door_frame_y,
                        DOOR_HALF, desk, keyboard, INTERIORS as CITY_INTERIORS)
 from office_interiors import raised_letters_x, translate
@@ -316,18 +316,18 @@ def interior_specs(W, D, slab):
     S += entrance_steps("S", (dx, D), slab, col="#6b7584")
 
     S += raised_letters_x("SPECS", 6.0, T, 18.0, col=acc, px=0.8)
-    S += holo_screen_x(58.0, 96.0, T, 11.0, 27.0, acc, content="list")
-    S += viewport_x(99.0, 113.0, T, 12.0, 26.0, planet=False)
+    S += liven(holo_screen_x(58.0, 96.0, T, 11.0, 27.0, acc, content="list"), 0, "pan", "L", axis="v", speed=1.5, box=[1, 1, 37, 15])
+    S += liven(viewport_x(99.0, 113.0, T, 12.0, 26.0, planet=False), 0, "pan", "L", speed=0.6, box=[1, 1, 13, 13])
     # mission console row with crew seats
-    S += console_x(8.0, 52.0, T + 1.0, acc)
-    S += console_x(58.0, 96.0, T + 1.0, acc, h=7.0, seed=12)
+    S += liven(console_x(8.0, 52.0, T + 1.0, acc), 0, "blink", "*")
+    S += liven(console_x(58.0, 96.0, T + 1.0, acc, h=7.0, seed=12), 0, "blink", "*")
     for cx in (18.0, 34.0, 68.0, 84.0):
         S += crew_seat(cx, T + 12.0, "N")
     # W wall: data racks + mission data panel; holo table in the front-right corner
-    S += server_bank_y(T + 0.2, 20.0, 46.0, accent=acc)
-    S += holo_screen_y(T, 52.0, 78.0, 10.0, 22.0, acc, content="graph")
+    S += liven(server_bank_y(T + 0.2, 20.0, 46.0, accent=acc), 0, "blink", "R")
+    S += liven(holo_screen_y(T, 52.0, 78.0, 10.0, 22.0, acc, content="graph"), 0, "pan", "R", speed=2, box=[1, 1, 25, 11])
     S += storage_crate(T + 1.0, D - 14.0)
-    S += holo_table(W - 14.0, D - 14.0, accent=acc, kind="ship")
+    S += liven(liven(holo_table(W - 14.0, D - 14.0, accent=acc, kind="ship"), [3, 4], "holo", "*"), 2, "pulse", "*")
     S += potted_alien_plant(W - 6.0, T + 9.0, seed=1)
     return S
 
@@ -354,14 +354,14 @@ def interior_plan(W, D, slab):
     S.append(box(0, T, 11.0, T + 0.2, D, 11.6, glow(acc)))
 
     S += raised_letters_x("PLAN", 6.0, T, 18.0, col=acc, px=0.8)
-    S += holo_screen_x(46.0, 100.0, T, 10.5, 27.5, acc, content="starmap")
-    S += viewport_x(103.0, 113.0, T, 12.0, 26.0, planet=True)
-    S += console_x(48.0, 98.0, T + 1.0, acc, h=7.0, seed=31)
+    S += liven(holo_screen_x(46.0, 100.0, T, 10.5, 27.5, acc, content="starmap"), 0, "pan", "L", speed=0.8, box=[1, 1, 53, 16])
+    S += liven(viewport_x(103.0, 113.0, T, 12.0, 26.0, planet=True), 0, "pan", "L", speed=0.4, box=[1, 1, 9, 13])
+    S += liven(console_x(48.0, 98.0, T + 1.0, acc, h=7.0, seed=31), 0, "blink", "*")
     for cx in (58.0, 74.0, 90.0):
         S += crew_seat(cx, T + 12.0, "N", col="#8fa6d9")
     # planet hologram on a projector in the NW corner, nav charts on the low partition side
-    S += holo_table(14.0, 16.0, r=5.4, accent=acc, kind="planet")
-    S += holo_screen_y(T, 40.0, 66.0, 2.0, 10.0, acc, content="list", seed=33)
+    S += liven(liven(holo_table(14.0, 16.0, r=5.4, accent=acc, kind="planet"), [3, 4], "holo", "*"), 2, "pulse", "*")
+    S += liven(holo_screen_y(T, 40.0, 66.0, 2.0, 10.0, acc, content="list", seed=33), 0, "pan", "R", axis="v", speed=1.2, box=[1, 1, 25, 7])
     S += storage_crate(T + 1.0, 72.0, w=6.0, d=8.0, h=5.0, col="#3f5a8c")
     S += potted_alien_plant(8.0, D - 8.0, seed=4)
     S += translate(_periscope(), W - 14.0, D - 12.0)
@@ -467,9 +467,9 @@ def interior_build(W, D, slab):
     S += doormat(dx - 6.5, T + 0.4, dx + 6.5, T + 7.0, col=METAL_D, edge=acc)
     S += entrance_steps("N", (dx, 0), slab, col="#6b7584")
 
-    S += console_x(6.0, dx - DOOR_HALF - 2.0, T + 1.0, acc, seed=41)
-    S += fabricator(dx + DOOR_HALF + 3.0, T + 0.6)
-    S += reactor_core(W - 12.0, 14.0)
+    S += liven(console_x(6.0, dx - DOOR_HALF - 2.0, T + 1.0, acc, seed=41), 0, "blink", "*")
+    S += liven(fabricator(dx + DOOR_HALF + 3.0, T + 0.6), [1, 2], "pulse", "*")
+    S += liven(liven(reactor_core(W - 12.0, 14.0), 2, "pan", "*", axis="v", speed=-5), -1, "pulse", "*")
     S += robot_arm(T + 8.0, 40.0)
     S += tool_rack_y(T, 52.0, 76.0)
     S += parts_bins(8.0, D - 10.0)
@@ -559,12 +559,12 @@ def interior_review(W, D, slab):
     S += entrance_steps("N", (dx, 0), slab, col="#6b7584")
 
     for i, cx in enumerate((dx + DOOR_HALF + 6.0, dx + DOOR_HALF + 13.0, dx + DOOR_HALF + 20.0, dx + DOOR_HALF + 27.0)):
-        S += specimen_tube(cx, T + 4.0, liquid=(GREEN, VIOLET, CYAN, GREEN)[i], seed=i)
+        S += liven(specimen_tube(cx, T + 4.0, liquid=(GREEN, VIOLET, CYAN, GREEN)[i], seed=i), 2, "bubbles", "*")
     S += microscope_bench(8.0, T + 0.6, w=dx - DOOR_HALF - 12.0)
     S += storage_crate(T + 1.0, 30.0, w=6.0, d=7.0, col="#4a3a78")
     S += storage_crate(T + 1.0, 38.0, w=6.0, d=6.0, h=4.0, col="#5b6573")
-    S += holo_screen_y(T, 48.0, 72.0, 2.0, 11.0, acc, content="graph", seed=63)
-    S += review_screen_y(W - 2.2, 22.0, 70.0, 9.0, 31.0, acc)
+    S += liven(holo_screen_y(T, 48.0, 72.0, 2.0, 11.0, acc, content="graph", seed=63), 0, "pan", "R", speed=2, box=[1, 1, 23, 8])
+    S += liven(review_screen_y(W - 2.2, 22.0, 70.0, 9.0, 31.0, acc), 0, "wave", "R", color=GREEN, box=[1, 10, 47, 19])
     S += potted_alien_plant(T + 6.0, D - 8.0, seed=7)
     S += _sample_cart(W - 30.0, D - 12.0)
     return S
@@ -699,14 +699,12 @@ def build(zid):
 
 
 if __name__ == "__main__":
-    from props import solid_hull
     man = json.load(open("out/manifest.json"))
     for zid in (sys.argv[1:] or SPACE_INTERIORS):
+        LIVE.clear()  # parts the board animates while an agent works here (tagged with liven())
         S = build(zid)
         im, anchor = render(S, ground_shadow=0)
         name = f"space_interior_{zid}"
-        im.save(f"out/{name}.png")
-        man[name] = dict(w=im.width, h=im.height, ax=anchor[0], ay=anchor[1], unitsPerGrid=U,
-                         hull=solid_hull(S, anchor))
+        save_room(im, anchor, S, name, man, U)
         print(name, im.size, anchor, flush=True)
     json.dump(man, open("out/manifest.json", "w"), indent=1)

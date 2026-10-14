@@ -6,8 +6,8 @@ y along gy, z up, U units per grid cell; only the N and W back walls are built.
 Run: python3 island_interiors.py [zone ...]  -> out/island_interior_<zone>.png + manifest
 """
 import json, math, os, sys
-from isopix import box, vcyl, hcyl, blob, face_uv, rgb, mix, hash2, render
-from props import cone, flat
+from isopix import box, vcyl, hcyl, blob, face_uv, rgb, mix, hash2, render, LIVE, liven
+from props import cone, flat, save_room
 from interiors import (U, WALL_T, text7, emis, room_shell, doormat, entrance_steps,
                        door_frame_x, door_frame_y, DOOR_HALF, INTERIORS as CITY_INTERIORS)
 
@@ -516,8 +516,8 @@ def interior_specs(W, D, slab):
     S += [box(54.0, 13.6, 10.5, 57.0, 15.6, 11.2, flat("#fbf7ec"))]   # note pad
 
     # --- N wall right: two sea-view windows over a flower box
-    S += ocean_window_x(79.0, 94.0, T, 11.5, 25.0)
-    S += ocean_window_x(103.0, 112.0, T, 11.5, 25.0)
+    S += liven(ocean_window_x(79.0, 94.0, T, 11.5, 25.0), 0, "water", "L")
+    S += liven(ocean_window_x(103.0, 112.0, T, 11.5, 25.0), 0, "water", "L")
     S += flower_box_x(76.0, 113.0, T + 0.2, d=5.0, h=5.0, seed=7)
 
     # --- NW corner palm
@@ -795,11 +795,11 @@ def interior_plan(W, D, slab):
     S += entrance_steps("S", (dx, D), slab, col="#e2d3b0")
 
     # --- N wall: big island map, PLAN board over the tour schedule, excursions desk
-    S += island_map_x(5.0, 51.0, T, 11.0, 25.5)
+    S += liven(island_map_x(5.0, 51.0, T, 11.0, 25.5), 0, "reveal", "L", any_px=True, box=[1.5, 1.5, 44.5, 13])
     S += carved_sign_x(56.0, 90.0, T, 17.4, 26.0, "PLAN", icon="compass")
-    S += schedule_board_x(58.0, 88.0, T, 10.6, 16.9)
+    S += liven(schedule_board_x(58.0, 88.0, T, 10.6, 16.9), 0, "flip", "L", any_px=True, box=[1, 1, 29, 5.3])
     S += tour_desk(57.0, 89.0, 11.0, 17.5)
-    S += desk_globe(61.0, 14.2, 10.0)
+    S += liven(desk_globe(61.0, 14.2, 10.0), 2, "spin", "*", any_px=True, w=10, uv=lambda p, cx=61.0, cy=14.2: ((math.atan2(p[1] - cy, p[0] - cx) + math.pi) * 1.6, p[2]))
     S += ticket_stack(68.0, 13.4, 10.0)
     S += guest_book(73.0, 13.0, 10.0)
     S += rotary_phone(86.0, 14.0, 10.0)
@@ -821,7 +821,8 @@ def interior_plan(W, D, slab):
 
     # --- front: A-frame tour sign by the door, floor globe in the right corner
     S += tour_aframe(dx + 16.0, D - 7.0)
-    S += floor_globe(W - 11.0, D - 11.0)
+    S += liven(floor_globe(W - 11.0, D - 11.0), 4, "spin", "*", any_px=True, w=22,
+                uv=lambda p, cx=W - 11.0, cy=D - 11.0: ((math.atan2(p[1] - cy, p[0] - cx) + math.pi) * 3.6, p[2]))
     return S
 
 
@@ -1131,13 +1132,14 @@ def interior_build(W, D, slab):
     S += pole_bundle_x(6.0, 40.0, T + 0.6, rows=3)
     S += leaf_bundle(72.0, T + 3.0, seed=2)
     S += leaf_bundle(72.0, T + 7.4, seed=5, n_=2)
-    S += sawhorse_x(84.0, 98.0, T + 12.0)
+    S += liven(sawhorse_x(84.0, 98.0, T + 12.0), -1, "sawdust", "top", any_px=True)
 
     # --- NE corner: carpenter's workbench
     S += workbench_x(W - 24.0, W - 3.0, T + 0.6)
 
     # --- front: rope hoist (SW), sand, barrow, tar bucket, signboard on the E edge
-    S += hoist_y(9.0, D - 20.0, D - 6.0, h=22.0)
+    S += liven(liven(hoist_y(9.0, D - 20.0, D - 6.0, h=22.0), 6, "spin", "*", any_px=True, axis="v"), 5, "spin", "*", any_px=True, w=7,
+                uv=lambda p, cx=9.0, cy=(D - 20.0 + D - 6.0) / 2: ((math.atan2(p[1] - cy, p[0] - cx) + math.pi) * 1.1, p[2]))
     S += sand_pile(36.0, D - 9.0, r=5.5, h=5.0)
     S += wheelbarrow(W - 30.0, D - 8.0)
     S += tar_bucket(W - 14.0, D - 6.0)
@@ -1366,10 +1368,10 @@ def interior_review(W, D, slab):
 
     # --- N line, left of the door: range with pots, prep counter
     S += steel_counter(T + 12.0, T + 0.4, 32.0, T + 8.0)
-    S += range_top(T + 12.4, T + 0.8, 31.6, T + 7.6, 8.0)
-    S += pot(T + 15.0, T + 3.0, 8.5, steam=True)
+    S += liven(range_top(T + 12.4, T + 0.8, 31.6, T + 7.6, 8.0), 0, "flame", "top", any_px=True)
+    S += liven(pot(T + 15.0, T + 3.0, 8.5, steam=True), [3, 4, 5], "steam", "*")
     S += pot(T + 22.0, T + 5.4, 8.5, r=1.5, h=2.0, col="#3a3f46")
-    S += pot(T + 27.0, T + 3.0, 8.5, r=2.1, h=3.2, steam=True)
+    S += liven(pot(T + 27.0, T + 3.0, 8.5, r=2.1, h=3.2, steam=True), [3, 4, 5], "steam", "*")
     S += steel_counter(32.5, T + 0.4, dx - DOOR_HALF - 1.5, T + 8.0)
     S += [box(35.0, T + 2.0, 8.0, 43.0, T + 6.4, 8.6, flat("#c9955c"))]          # chopping board
     S += [blob(37.0, T + 4.0, 9.1, 0.8, flat("#e8553f"), n=8), blob(39.5, T + 3.6, 9.0, 0.7, flat("#6cbf6a"), n=8),
@@ -1384,7 +1386,7 @@ def interior_review(W, D, slab):
     S += fish_tray(82.0, T + 1.6, 8.0)
 
     # --- NW corner fridge, W wall herb boxes, produce crates at the front-left
-    S += fridge(T + 0.4, T + 0.4, T + 9.0, T + 11.0)
+    S += liven(fridge(T + 0.4, T + 0.4, T + 9.0, T + 11.0), 0, "beacon", "*")
     S += herb_box_y(T + 0.4, 20.0, 52.0, seed=3)
     S += produce_crate(T + 1.0, 60.0, "pineapple")
     S += produce_crate(T + 1.0, 67.0, "coconut")
@@ -1409,7 +1411,7 @@ def interior_review(W, D, slab):
         S.append(box(px1 - 1.4, yy - 0.6, 10.4, px1 - 0.2, yy + 0.6, 22.0, flat(STEEL_D)))
     S.append(box(px1 - 1.6, py0, 17.6, px1, py1, 18.6, flat(STEEL)))
     for yy in (27.5, 41.5, 55.5, 66.0):
-        S += heat_lamp(px0 + 4.0, yy, 14.2)
+        S += liven(heat_lamp(px0 + 4.0, yy, 14.2), 2, "pulse", "*")
         S.append(box(px0 + 4.0 - 0.15, yy - 0.15, 17.6, px1 - 1.0, yy + 0.15, 17.8, flat("#2b2b2b")))
     S += ticket_rail_y(px1 - 0.8, py0 + 1.0, py0 + 15.0, 13.8)
     S += wood_signboard_y(px1 + 0.2, py0 + 3.0, py1 - 3.0, "REVIEW", h0=-0.2, h1=10.6, icon="magnifier")[:1]
@@ -1731,15 +1733,13 @@ def build(zid):
 
 
 if __name__ == "__main__":
-    from props import solid_hull
     os.makedirs("out", exist_ok=True)
     man = json.load(open("out/manifest.json")) if os.path.exists("out/manifest.json") else {}
     for zid in (sys.argv[1:] or ISLAND_INTERIORS):
+        LIVE.clear()  # parts the board animates while an agent works here (tagged with liven())
         S = build(zid)
         im, anchor = render(S, ground_shadow=0)
         name = f"island_interior_{zid}"
-        im.save(f"out/{name}.png")
-        man[name] = dict(w=im.width, h=im.height, ax=anchor[0], ay=anchor[1], unitsPerGrid=U,
-                         hull=solid_hull(S, anchor))
+        save_room(im, anchor, S, name, man, U)
         print(name, im.size, anchor)
     json.dump(man, open("out/manifest.json", "w"), indent=1)

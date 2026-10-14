@@ -12,8 +12,8 @@ Run: python3 interiors.py  -> out/interior_<zone>.png + manifest entries
 """
 import json, math, os, sys
 import numpy as np
-from isopix import box, vcyl, hcyl, blob, Solid, face_uv, rgb, mix, hash2, render, plane_through
-from props import cone, flat, glass_px, planter_mat
+from isopix import box, vcyl, hcyl, blob, Solid, face_uv, rgb, mix, hash2, render, plane_through, LIVE, liven
+from props import cone, flat, glass_px, planter_mat, save_room
 
 # Board camera: TILE_W * worldScale / 2 screen px per grid step; drawing at 2x
 # means one grid = 90 * 1.0421 / 4 ≈ 23.45 sprite units.
@@ -491,8 +491,8 @@ def interior_specs(W, D, slab):
     for i, (dx0, dx1) in enumerate(((24.0, 46.0), (48.0, 70.0), (72.0, 94.0))):
         S += desk(dx0, y_d0, dx1, y_d1)
         mx = (dx0 + dx1) / 2
-        S += monitor(mx - 4.4, y_d0 + 2.4, 8.0, "L", w=7.6, seed=i * 2, doc=(i != 1))
-        S += monitor(mx + 4.4, y_d0 + 2.4, 8.0, "L", w=7.6, seed=i * 2 + 1, doc=True)
+        S += liven(monitor(mx - 4.4, y_d0 + 2.4, 8.0, "L", w=7.6, seed=i * 2, doc=(i != 1)), 0, "doc" if i != 1 else "code", "L")
+        S += liven(monitor(mx + 4.4, y_d0 + 2.4, 8.0, "L", w=7.6, seed=i * 2 + 1, doc=True), 0, "doc", "L")
         S += keyboard(mx - 3.2, y_d0 + 5.6, mx + 3.2, y_d0 + 7.6, 8.0)
         S += office_chair(mx, y_d1 + 3.4, "N", col=["#4f7d95", "#5a8aa0", "#4f7d95"][i])
     S += mug(28.0, y_d0 + 6.5, 8.0)
@@ -507,8 +507,8 @@ def interior_specs(W, D, slab):
 
     # --- W wall: a desk facing the wall, corkboard above, printer, plant
     S += desk(T + 0.2, 24.0, T + 9.5, 46.0)
-    S += monitor(T + 2.6, 30.4, 8.0, "R", w=7.6, seed=7, doc=False)
-    S += monitor(T + 2.6, 39.6, 8.0, "R", w=7.6, seed=8, doc=True)
+    S += liven(monitor(T + 2.6, 30.4, 8.0, "R", w=7.6, seed=7, doc=False), 0, "code", "R")
+    S += liven(monitor(T + 2.6, 39.6, 8.0, "R", w=7.6, seed=8, doc=True), 0, "doc", "R")
     S += keyboard(T + 5.6, 31.8, T + 7.6, 38.2, 8.0)
     S += office_chair(T + 12.8, 35.0, "W", col="#5a8aa0")
 
@@ -542,7 +542,7 @@ def interior_specs(W, D, slab):
                 if uu < 20.0:
                     return rgb("#8a95a0")
         return rgb("#fbfdfd")
-    S.append(box(T, 24.0, 12.0, T + 0.8, 46.0, 24.0, whiteboard))
+    S += liven([box(T, 24.0, 12.0, T + 0.8, 46.0, 24.0, whiteboard)], 0, "reveal", "R", any_px=True, box=[1, 1, 21, 10.4])
 
     # wall clock above the corkboard edge (on W wall)
     def clock(p, n):
@@ -561,7 +561,7 @@ def interior_specs(W, D, slab):
     S.append(box(T, 48.5, 17.5, T + 0.6, 55.5, 24.5, clock))
 
     S += filing_cabinet(T + 0.2, 50.0, T + 7.0, 60.0, 7.0, col="#c3cad1", along="y")
-    S += printer(T + 0.8, 50.8, T + 6.4, 59.2, 7.0)
+    S += liven(printer(T + 0.8, 50.8, T + 6.4, 59.2, 7.0), 0, "beacon", "*")
     # lounge: sofa along the W wall + small meeting table in the front-left corner
     S += sofa_y(T + 0.4, 66.0, 88.0, col="#5a8aa0")
     S += potted_plant(T + 5.0, D - 7.5, r=4.0, h=11, seed=5)
@@ -761,8 +761,14 @@ def brick_wall_x(x0, x1, y0, y1, h, seed=4):
     return S
 
 
-def tower_crane(mx, my, H=74.0, jib=46.0, counter=14.0):
-    """Lattice tower crane: mast at (mx,my); jib along -x, counter-jib along +x."""
+CRANE = dict(H=74.0, jib=46.0, counter=14.0, trolley=0.72, frames=32)
+
+
+def tower_crane(mx, my, H=74.0, jib=46.0, counter=14.0, part="all"):
+    """Lattice tower crane: mast at (mx,my); jib along -x, counter-jib along +x.
+    part: "all", "base" (concrete base + mast: stays in the room sprite), "head" (everything
+    that slews, trolley included, beacon excluded: the board blinks it) or "load" (hook
+    block + steel beam, hook bottom at the origin)."""
     yel, dark = rgb("#f2b705"), rgb("#7a5a00")
 
     def lattice(axis_len_coord):
@@ -778,22 +784,62 @@ def tower_crane(mx, my, H=74.0, jib=46.0, counter=14.0):
                 return yel
             return dark * 0.6
         return m
-    S = [box(mx - 3.5, my - 3.5, 0, mx + 3.5, my + 3.5, 2.0, flat("#9a9c9e")),   # concrete base
-         box(mx - 1.6, my - 1.6, 2.0, mx + 1.6, my + 1.6, H, lattice(2)),      # mast
-         box(mx - 2.4, my - 2.4, H, mx + 2.4, my + 2.4, H + 2.4, flat(yel)),   # slewing unit
-         box(mx + 0.2, my - 2.2, H - 4.0, mx + 3.6, my + 2.2, H, cab_mat()),  # cab
-         box(mx - jib, my - 1.0, H + 2.4, mx - 1.6, my + 1.0, H + 4.4, lattice(0)),
-         box(mx + 1.6, my - 1.0, H + 2.4, mx + counter, my + 1.0, H + 4.0, lattice(0)),
-         box(mx + counter - 5, my - 1.8, H + 0.2, mx + counter - 0.5, my + 1.8, H + 3.6, flat("#8e9196")),  # counterweight
-         box(mx - 0.8, my - 0.8, H + 4.4, mx + 0.8, my + 0.8, H + 11.0, flat(yel)),  # apex
-         box(mx - 0.3, my - 0.3, H + 11.0, mx + 0.3, my + 0.3, H + 12.0, emis("#ff4a3d"))]
-    # trolley, cable and a steel beam load hanging over the street
-    tx = mx - jib * 0.72
-    S.append(box(tx - 1.2, my - 1.4, H + 1.6, tx + 1.2, my + 1.4, H + 2.4, flat("#4a4f57")))
+    if part == "load":
+        return [box(-0.8, -0.8, 0, 0.8, 0.8, 1.2, flat("#e2b13c")),
+                box(-6.0, -1.0, -2.2, 6.0, 1.0, 0, flat("#c0392b"))]
+    base = [box(mx - 3.5, my - 3.5, 0, mx + 3.5, my + 3.5, 2.0, flat("#9a9c9e")),   # concrete base
+            box(mx - 1.6, my - 1.6, 2.0, mx + 1.6, my + 1.6, H, lattice(2))]      # mast
+    if part == "base":
+        return base
+    tx = mx - jib * CRANE["trolley"]
+    head = [box(mx - 2.4, my - 2.4, H, mx + 2.4, my + 2.4, H + 2.4, flat(yel)),   # slewing unit
+            box(mx + 0.2, my - 2.2, H - 4.0, mx + 3.6, my + 2.2, H, cab_mat()),  # cab
+            box(mx - jib, my - 1.0, H + 2.4, mx - 1.6, my + 1.0, H + 4.4, lattice(0)),
+            box(mx + 1.6, my - 1.0, H + 2.4, mx + counter, my + 1.0, H + 4.0, lattice(0)),
+            box(mx + counter - 5, my - 1.8, H + 0.2, mx + counter - 0.5, my + 1.8, H + 3.6, flat("#8e9196")),  # counterweight
+            box(mx - 0.8, my - 0.8, H + 4.4, mx + 0.8, my + 0.8, H + 11.0, flat(yel)),  # apex
+            box(tx - 1.2, my - 1.4, H + 1.6, tx + 1.2, my + 1.4, H + 2.4, flat("#4a4f57"))]  # trolley
+    if part == "head":
+        return head
+    # all: the crane at rest, beacon, cable and the steel beam hanging over the street
+    S = base + head
+    S.append(box(mx - 0.3, my - 0.3, H + 11.0, mx + 0.3, my + 0.3, H + 12.0, emis("#ff4a3d")))
     S.append(box(tx - 0.15, my - 0.15, H - 30.0, tx + 0.15, my + 0.15, H + 1.6, flat("#2d3238")))
-    S.append(box(tx - 0.8, my - 0.8, H - 31.2, tx + 0.8, my + 0.8, H - 30.0, flat("#e2b13c")))
-    S.append(box(tx - 6.0, my - 1.0, H - 33.4, tx + 6.0, my + 1.0, H - 31.2, flat("#c0392b")))
+    S += translate_solids(tower_crane(0, 0, H, part="load"), tx, my, H - 31.2)
     return S
+
+
+def translate_solids(solids, dx, dy, dz):
+    """Copy of solids moved by (dx, dy, dz)."""
+    out = []
+    for s_ in solids:
+        x0, y0, z0, x1, y1, z1 = s_.aabb
+        pl = [(n, c + n[0] * dx + n[1] * dy + n[2] * dz) for n, c in s_.planes]
+        m0 = s_.mat
+        out.append(Solid(pl, (x0 + dx, y0 + dy, z0 + dz, x1 + dx, y1 + dy, z1 + dz),
+                         lambda p, n, m0=m0: m0((p[0] - dx, p[1] - dy, p[2] - dz), n), cast=s_.cast))
+    return out
+
+
+def crane_rig(name, mx, my, man):
+    """Render the slewing head and the hook load at CRANE['frames'] headings and record the rig
+    on the room's manifest entry, so the board can turn the crane and move the load
+    (web/board/rigs.js). Frame k = head turned k * 360/frames degrees counter-clockwise."""
+    from props import rotate_z, solid_hull
+    H, n = CRANE["H"], CRANE["frames"]
+    for k in range(n):
+        deg = k * 360.0 / n
+        for part, solids in (("head", rotate_z(tower_crane(mx, my, part="head"), deg, mx, my)),
+                             ("load", rotate_z(tower_crane(0, 0, part="load"), deg, 0, 0))):
+            im, anchor = render(solids, ground_shadow=0)
+            key = f"{name}_crane_{part}_{k:02d}"
+            im.save(f"out/{key}.png")
+            man[key] = dict(w=im.width, h=im.height, ax=anchor[0], ay=anchor[1], unitsPerGrid=U,
+                            hull=solid_hull(solids, anchor))
+    man[name]["rig"] = dict(kind="crane", mast=[mx, my], height=H, frames=n, rest=180,
+                            trolley=round(CRANE["jib"] * CRANE["trolley"], 2), stops=[0, 270],
+                            hook=dict(low=2.4, high=H - 8.0, rest=H - 31.2, load=2.2),
+                            head=f"{name}_crane_head_", load=f"{name}_crane_load_", beacon=H + 11.0)
 
 
 def cab_mat():
@@ -913,9 +959,10 @@ def interior_build(W, D, slab):
     S += rebar_bundle_y(T + 12.0, 10.0, 16.0)
 
     # SW corner: tower crane (jib swings out over the street on the left)
-    S += tower_crane(10.0, D - 14.0)
+    S += tower_crane(10.0, D - 14.0, part="base")  # the rest turns on the board (crane_rig)
     # front: mixer, sand pile, barrier + cones (all low)
-    S += cement_mixer(30.0, D - 9.0)
+    S += liven(cement_mixer(30.0, D - 9.0), 3, "spin", "*", any_px=True, w=20,
+                uv=lambda p, cy=D - 9.0: ((math.atan2(p[2] - 7.0, p[1] - cy) + math.pi) * 3.2, p[0]))
     S += sand_pile(W - 14.0, D - 12.0, r=6.0, h=6.5)
     S += wheelbarrow(W - 28.0, D - 8.0)
     S += site_signboard(W - 2.2, 26.0, 68.0, "BUILD")
@@ -1256,7 +1303,7 @@ def interior_plan(W, D, slab):
 
     # --- drafting tables along the N wall with stools + lamps
     for i, dx in enumerate((24.0, 44.0, 64.0)):
-        S += drafting_table(dx, T + 0.8, w=15.0, d=9.5, seed=i)
+        S += liven(drafting_table(dx, T + 0.8, w=15.0, d=9.5, seed=i), 0, "reveal", "*")
         S += stool(dx + 7.5, T + 14.5, col=["#2f6db5", "#e85d3a", "#2f6db5"][i])
         S += arch_lamp(dx + 13.5, T + 1.4, 10.0, reach=4.0)
     S += roll_bin(W - 8.0, T + 6.0)
@@ -1268,7 +1315,7 @@ def interior_plan(W, D, slab):
     # --- W partition: plan chest with rolled drawings, plotter at the front end
     S += plan_chest_y(T + 0.2, 12.0, 44.0)
     S += plan_rolls(T + 0.6, 14.0, 42.0, 9.0, n_=5)
-    S += plotter_y(T + 0.4, 50.0, 66.0)
+    S += liven(liven(plotter_y(T + 0.4, 50.0, 66.0), 0, "beacon", "*"), -1, "reveal", "R", axis="v")
     S += potted_plant(T + 5.0, D - 8.0, r=4.2, h=12, seed=13)
 
     # --- front-right corner: the scale model on its plinth
@@ -1390,7 +1437,7 @@ def inspection_bench(x0, y0, w=18.0, d=8.0, h=8.0):
         if f == "top":
             return rgb("#c6cbd1")
         return rgb("#4a5058")
-    S.append(box(x0 + 10.4, y0 + 1.0, h, x0 + 17.0, y0 + 5.0, h + 5.6, scope))
+    S += liven([box(x0 + 10.4, y0 + 1.0, h, x0 + 17.0, y0 + 5.0, h + 5.6, scope)], 0, "wave", "*", color="#5dffa8")
     return S
 
 
@@ -1499,8 +1546,8 @@ def interior_review(W, D, slab):
     S += entrance_steps("N", (dx, 0), slab)
 
     # --- N side, right of the door: conveyor through a scanner gate into PASS / FAIL bins
-    S += conveyor_x(dx + 10.0, 104.0, T + 2.0)
-    S += scanner_gate(84.0, T + 2.0)
+    S += liven(conveyor_x(dx + 10.0, 104.0, T + 2.0), 0, "pan", "top", any_px=True, speed=3)
+    S += liven(scanner_gate(84.0, T + 2.0), 3, "pulse", "*")
     S += parcel(dx + 12.0, T + 3.0, 6.5, mark=None)
     S += parcel(dx + 20.0, T + 3.0, 6.5, w=4.4, h=3.0, col="#b88a55")
     S += parcel(90.0, T + 3.0, 6.5, mark="ok")
@@ -1510,8 +1557,9 @@ def interior_review(W, D, slab):
     S += parcel(106.0, T + 2.8, 4.2, mark="ok", w=3.2, d=3.2, h=2.2)
     # left of the door: second inspection bench along the N partition
     S += inspection_bench(22.0, T + 0.8, w=dx - DOOR_HALF - 24.0, d=8.0)
-    S += stack_light(T + 3.0, T + 3.0)
-    S += qa_dashboard(5.0, T + 1.0)
+    S += liven(liven(liven(stack_light(T + 3.0, T + 3.0), 2, "stack", "*", any_px=True, lamp=0),
+                     3, "stack", "*", any_px=True, lamp=1), 4, "stack", "*", any_px=True, lamp=2)
+    S += liven(qa_dashboard(5.0, T + 1.0), 0, "bars", "L")
     S += tool_cabinet(T + 0.4, T + 7.0)
 
     # --- W side: inspection bench, clipboards on the partition, parts shelf
@@ -1585,7 +1633,7 @@ def inspection_bench_y(x0, y0, y1, h=8.0):
         if f == "top":
             return rgb("#c6cbd1")
         return rgb("#4a5058")
-    S.append(box(x0 + 1.0, y0 + 12.4, h, x0 + 5.0, y0 + 19.6, h + 5.8, scope))
+    S += liven([box(x0 + 1.0, y0 + 12.4, h, x0 + 5.0, y0 + 19.6, h + 5.8, scope)], 0, "wave", "*", color="#5dffa8")
     S += office_chair(x0 + 12.5, (y0 + y1) / 2, "W", col="#7d5bc4")
     return S
 
@@ -1950,15 +1998,16 @@ def build(zid):
 
 
 if __name__ == "__main__":
-    from props import solid_hull
     os.makedirs("out", exist_ok=True)
     man = json.load(open("out/manifest.json")) if os.path.exists("out/manifest.json") else {}
     for zid in (sys.argv[1:] or INTERIORS):
+        LIVE.clear()  # parts the board animates while an agent works here (tagged with liven())
         S = build(zid)
         im, anchor = render(S, ground_shadow=0)
         name = f"interior_{zid}"
-        im.save(f"out/{name}.png")
-        man[name] = dict(w=im.width, h=im.height, ax=anchor[0], ay=anchor[1], unitsPerGrid=U,
-                         hull=solid_hull(S, anchor))
+        save_room(im, anchor, S, name, man, U)
+        if zid == "build":
+            gw, gh = INTERIORS[zid][1], INTERIORS[zid][2]
+            crane_rig(name, 10.0, gh * U - 14.0, man)
         print(name, im.size, anchor)
     json.dump(man, open("out/manifest.json", "w"), indent=1)
