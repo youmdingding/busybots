@@ -1,6 +1,6 @@
 {
   "name": "busybots",
-  "version": "0.2.1",
+  "version": "0.3.0",
   "description": "Watch your coding agents (Claude Code, Codex, Gemini CLI, OpenCode, Cursor, Conductor) bustle around a little pixel-art world.",
   "homepage": "https://github.com/youmdingding/busybots#readme",
   "repository": {
