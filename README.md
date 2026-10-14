@@ -111,6 +111,8 @@ The header shows a summary pill ("2 need you · 1 done"), and each agent can car
 - **⚠** (red) — *stuck*: 3+ failing tool calls in a row while still working.
 - **orbiting dots** — *delegating*: live sub-agents.
 
+Click the agent to see the badge spelled out at the top of its panel: what it's waiting for, when it finished, or how many errors in a row.
+
 Detection is heuristic from the transcripts. For exact permission detection, add the `Notification` hook from `examples/claude-hooks.json` to your Claude Code settings (it runs `busybots hook`).
 
 ## Agent panel

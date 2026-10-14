@@ -278,6 +278,26 @@ h1 {
   border-radius: 2px;
 }
 
+.panel-attention { display: flex; flex-direction: column; gap: 6px; margin-bottom: 8px; }
+.panel-attention-row {
+  display: flex; gap: 10px; align-items: flex-start;
+  padding: 8px 10px; border-radius: 8px; font-size: 12px; line-height: 1.35;
+  border: 1px solid transparent;
+}
+.panel-attention-row strong { font-size: 13px; }
+.panel-attention-detail { overflow-wrap: anywhere; }
+.panel-attention-badge {
+  flex: none; width: 20px; height: 20px; border-radius: 50%;
+  display: inline-flex; align-items: center; justify-content: center;
+  color: #fff; font-weight: 800; font-size: 13px;
+}
+.panel-attention-row.needs { background: #fff1e5; border-color: #ffc89a; color: #7a3a00; }
+.panel-attention-row.needs .panel-attention-badge { background: #ff7a1a; }
+.panel-attention-row.done { background: #e7f8ee; border-color: #a6e3c0; color: #17603a; }
+.panel-attention-row.done .panel-attention-badge { background: #2fbf71; }
+.panel-attention-row.stuck { background: #fdecec; border-color: #f3b1b3; color: #8a1f23; }
+.panel-attention-row.stuck .panel-attention-badge { background: #e5484d; }
+
 .panel-status {
   font-size: 12px;
   margin-bottom: 8px;

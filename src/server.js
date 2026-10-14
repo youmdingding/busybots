@@ -216,7 +216,8 @@ export function createBoardServer({ port = DEFAULT_PORT, getStatus = () => null,
       Object.assign(out, { name: bot.name || out.name, cwd: bot.cwd ?? null, origin: bot.origin ?? null, state: bot.state ?? null,
         zone: bot.zone ?? null, livePid: bot.livePid ?? null, entrypoint: bot.entrypoint ?? null, bubble: bot.bubble ?? null, brand: bot.brand ?? null,
         icon: bot.icon ?? null, iconDefault: bot.iconDefault ?? bot.icon ?? null,
-        nameDefault: bot.nameDefault ?? bot.name ?? null, nameCustom: Boolean(bot.nameDefault), nameMax: MAX_NAME });
+        nameDefault: bot.nameDefault ?? bot.name ?? null, nameCustom: Boolean(bot.nameDefault), nameMax: MAX_NAME,
+        attention: bot.attention ?? null }); // the badges: needs you (+ why), done, stuck
     }
     if (out.brand in READERS) {
       const label = agentLabel(out.brand);

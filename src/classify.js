@@ -481,7 +481,10 @@ export function attentionFor(sess, act, { isIdle, livePid, now, rules, subagents
   }
   // 3) done: the last turn finished after editing files, and you haven't replied yet
   const stopTs = act.last_stop_ts;
-  if (isIdle && !out.needsYou && act.saw_stop && act.turn_edited && typeof stopTs === "number" && now - stopTs < rules.doneHours * 3600) out.done = true;
+  if (isIdle && !out.needsYou && act.saw_stop && act.turn_edited && typeof stopTs === "number" && now - stopTs < rules.doneHours * 3600) {
+    out.done = true;
+    out.doneAt = stopTs; // when the turn finished (epoch seconds), for the agent panel
+  }
   // 4) delegating
   if (!isIdle) out.subagents = Math.max(Number(subagentsLive) || 0, Number(act.pending_delegates) || 0);
   // 5) stuck

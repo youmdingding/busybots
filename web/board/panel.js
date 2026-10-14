@@ -269,6 +269,53 @@ export async function saveName(name) {
   toggleRename(false);
 }
 
+const elAttention = document.getElementById("panel-attention");
+
+/** "just now", "12 min ago", "3 h ago", or a date for anything older. */
+export function agoText(epochSeconds, now = Date.now()) {
+  const s = Math.max(0, now / 1000 - epochSeconds);
+  if (s < 60) return "just now";
+  if (s < 3600) return `${Math.floor(s / 60)} min ago`;
+  if (s < 86400) return `${Math.floor(s / 3600)} h ago`;
+  return formatWhen(epochSeconds * 1000, new Date(now));
+}
+
+/** The badges on the agent, spelled out: needs you (and why), done, stuck. */
+export function renderAttention(a, privacy = false) {
+  if (!elAttention) return;
+  elAttention.replaceChildren();
+  const rows = [];
+  if (a?.needsYou) {
+    rows.push(["needs", "!", "Needs you",
+      privacy || !a.reason || a.reason === "Needs you" ? "It's waiting for your answer in its window." : String(a.reason)]);
+  } else if (a?.done) {
+    rows.push(["done", "✓", "Done",
+      (a.doneAt ? `Finished ${agoText(a.doneAt)}` : "Finished") + " and changed files — waiting for your next message."]);
+  }
+  if (a?.stuck) {
+    const n = Number(a.errors) || 0;
+    rows.push(["stuck", "!", "Stuck", n ? `${n} errors in a row.` : "Several errors in a row."]);
+  }
+  for (const [kind, mark, title, detail] of rows) {
+    // textContent only: the reason comes from the agent's transcript
+    const row = document.createElement("div");
+    row.className = `panel-attention-row ${kind}`;
+    const badge = document.createElement("span");
+    badge.className = "panel-attention-badge";
+    badge.textContent = mark;
+    const text = document.createElement("div");
+    const strong = document.createElement("strong");
+    strong.textContent = title;
+    const p = document.createElement("div");
+    p.className = "panel-attention-detail";
+    p.textContent = detail;
+    text.append(strong, p);
+    row.append(badge, text);
+    elAttention.append(row);
+  }
+  elAttention.classList.toggle("hidden", !rows.length);
+}
+
 export function applyPanelSession(data) {
   const s = data.session || {};
   nameDefault = s.nameDefault || null;
@@ -295,6 +342,7 @@ export function applyPanelSession(data) {
     line2.textContent = s.privacy ? "Details hidden (privacy mode)" : s.cwd ? String(s.cwd) : "cwd unknown";
     elPanelMeta.append(line1, line2);
   }
+  renderAttention(s.attention || bots.get(S.panelSessionId)?.attention || null, s.privacy);
   if (elPanelStatus) {
     elPanelStatus.textContent =
       `zone ${s.zone || "—"} · state ${s.state || "—"}` +
