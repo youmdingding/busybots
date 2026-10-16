@@ -1,7 +1,7 @@
 // Records docs/busybots.gif for the README: a short story with made-up agents, played on
 // a frozen clock so every run gives the same frames.
 //
-//   PLAYWRIGHT_MODULE=/path/to/playwright/index.mjs node tools/readme-gif.mjs [theme]
+//   PLAYWRIGHT_MODULE=/path/to/playwright/index.mjs node tools/readme-gif.mjs [theme] [out.gif]
 //
 // Dev only: needs Playwright + Chromium and Python with Pillow (to assemble the GIF).
 import { spawn, spawnSync } from "node:child_process";
@@ -49,10 +49,11 @@ process.on("exit", () => { try { srv.kill(); } catch { /* gone */ } });
 await new Promise((r) => setTimeout(r, 1200));
 
 const browser = await chromium.launch(existsSync("/opt/pw-browsers/chromium") ? { executablePath: "/opt/pw-browsers/chromium" } : {});
-const page = await browser.newPage({ viewport: { width: 1700, height: 1200 } });
+// UTC + a fixed morning, so the Office windows show the same daytime sky on every machine
+const page = await browser.newPage({ viewport: { width: 1700, height: 1200 }, timezoneId: "UTC" });
 let current = 0;
-await page.clock.install({ time: new Date("2026-10-12T09:00:00+13:00") });
-await page.clock.pauseAt(new Date("2026-10-12T09:00:01+13:00"));
+await page.clock.install({ time: new Date("2026-10-12T10:10:00Z") });
+await page.clock.pauseAt(new Date("2026-10-12T10:10:01Z"));
 await page.route(/\/status\.json/, (r) => r.fulfill({ contentType: "application/json", body: JSON.stringify(story[current]) }));
 await page.goto(`http://127.0.0.1:${PORT}/?theme=${theme}`);
 await page.waitForFunction(() => /2026/.test(document.getElementById("updated-at")?.textContent || ""));
@@ -75,7 +76,7 @@ for (let b = 0; b < story.length; b++) {
 await browser.close();
 srv.kill();
 
-const out = join(ROOT, "docs", `busybots${theme === "island" ? "" : "-" + theme}.gif`);
+const out = process.argv[3] ? join(ROOT, process.argv[3]) : join(ROOT, "docs", `busybots${theme === "island" ? "" : "-" + theme}.gif`);
 mkdirSync(dirname(out), { recursive: true });
 const py = `
 import glob, sys
