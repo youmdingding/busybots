@@ -14,6 +14,7 @@ import { PACKAGE_ROOT, stateDir, settingsPath, expand } from "./paths.js";
 import * as S from "./settings.js";
 import { READERS } from "./readers/index.js";
 import { lastMessages, TRANSCRIPT_MESSAGES } from "./events.js";
+import { jumpToAgent, terminalHostCached } from "./termhost.js";
 import { jsonlPathFor, tailJsonl } from "./claude.js";
 import { pidAlive, ttyForPid } from "./proc.js";
 import { withReadOnly, sqliteAvailable, SQLITE_HINT } from "./sqlite.js";
@@ -259,7 +260,9 @@ export function createBoardServer({ port = DEFAULT_PORT, getStatus = () => null,
     const origin = String(out.origin || "").toLowerCase();
     const live = Boolean(out.livePid);
     if (live && origin === "terminal") {
-      Object.assign(out, { jump: { kind: "terminal", tty: out.tty, pid: out.livePid }, promptAllowed: false, promptDisabledReason: "Open in its window to reply" });
+      const host = terminalHostCached(out.livePid); // iTerm, Terminal, VS Code, Cursor, tmux…
+      Object.assign(out, { jump: { kind: "terminal", tty: out.tty, pid: out.livePid, app: host?.label ?? null, host: host?.id ?? null },
+        promptAllowed: false, promptDisabledReason: host ? `Reply in ${host.label}` : "Open in its window to reply" });
     } else if (origin === "conductor") {
       Object.assign(out, { jump: { kind: "conductor", workspaceId: out.conductorWorkspaceId ?? null }, promptAllowed: false,
         promptDisabledReason: "Conductor owns this session (sdk-ts / agent binary) — reply in Conductor" });
@@ -477,7 +480,7 @@ export function createBoardServer({ port = DEFAULT_PORT, getStatus = () => null,
     if (action === "jump") {
       const meta = lookupSession(sid);
       const jump = meta.jump || {};
-      if (jump.kind === "terminal") return send(res, 200, jumpTerminal(jump.tty || meta.tty, meta.livePid));
+      if (jump.kind === "terminal") return send(res, 200, jumpToAgent({ pid: meta.livePid, tty: jump.tty || meta.tty, cwd: meta.cwd }));
       if (jump.kind === "conductor") return send(res, 200, jumpConductor(jump.workspaceId));
       return send(res, 400, { ok: false, error: "No jump target for this session" });
     }
@@ -527,67 +530,6 @@ const MAC_ONLY = { ok: false, error: "Jumping to a window works on macOS only fo
 
 function openApp(app) {
   spawn("open", ["-a", app], { stdio: "ignore", detached: true }).on("error", () => {}).unref();
-}
-
-export function jumpTerminal(tty, pid) {
-  if (process.platform !== "darwin") return MAC_ONLY;
-  if (!tty && pid) tty = ttyForPid(pid);
-  if (!tty) {
-    const app = existsSync("/Applications/iTerm.app") ? "iTerm" : "Terminal";
-    openApp(app);
-    return { ok: true, method: `activate:${app}`, tty: null };
-  }
-  const short = tty.replace("/dev/", "");
-  if (!/^[A-Za-z0-9]+$/.test(short)) return { ok: false, error: "Unexpected terminal name" };
-  let host = "iTerm";
-  try {
-    const out = execFileSync("ps", ["-axo", "pid=,tty=,command="], { encoding: "utf8" });
-    for (const line of out.split("\n")) {
-      if (!line.includes(short)) continue;
-      if (line.includes("iTerm") || line.includes("ShellLauncher")) break;
-      if (line.includes("Terminal.app")) {
-        host = "Terminal";
-        break;
-      }
-    }
-  } catch { /* default to iTerm */ }
-  const script = host === "iTerm"
-    ? `tell application "iTerm"
-  activate
-  set found to false
-  repeat with w in windows
-    repeat with t in tabs of w
-      repeat with s in sessions of t
-        try
-          if (tty of s) contains "${short}" then
-            select t
-            set found to true
-            exit repeat
-          end if
-        end try
-      end repeat
-      if found then exit repeat
-    end repeat
-    if found then exit repeat
-  end repeat
-end tell`
-    : `tell application "Terminal"
-  activate
-  repeat with w in windows
-    try
-      if (tty of w) contains "${short}" then
-        set frontmost of w to true
-        exit repeat
-      end if
-    end try
-  end repeat
-end tell`;
-  const r = spawnSync("osascript", ["-e", script], { timeout: 8000, encoding: "utf8" });
-  if (r.error) {
-    openApp(host);
-    return { ok: true, method: `activate-fallback:${host}`, error: r.error.message, tty };
-  }
-  return { ok: true, method: `osascript:${host}`, tty };
 }
 
 export function jumpConductor(workspaceId) {
