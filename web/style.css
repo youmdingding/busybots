@@ -426,6 +426,32 @@ h1 {
   background: rgba(255, 255, 255, 0.6);
 }
 #settings-link:hover { background: rgba(45, 138, 122, 0.1); }
+#popout-btn {
+  font: inherit; font-size: 12px; font-weight: 700; color: var(--accent); cursor: pointer;
+  border: 2px solid rgba(58, 122, 92, 0.45); border-radius: 2px; padding: 3px 8px;
+  background: rgba(255, 255, 255, 0.6);
+}
+#popout-btn:hover { background: rgba(45, 138, 122, 0.1); }
+
+/* Pop out: the board lives in a small window; leave a note where it was */
+.popped-note { display: none; }
+body.popped .popped-note {
+  display: block; padding: 40px 24px; text-align: center; font-size: 14px; color: var(--accent);
+  border: 2px dashed rgba(58, 122, 92, 0.45); border-radius: 6px; width: min(640px, 100%);
+}
+.popped-note button {
+  font: inherit; font-weight: 700; margin-left: 8px; padding: 3px 10px; cursor: pointer;
+  color: var(--accent); background: #fff; border: 2px solid rgba(58, 122, 92, 0.45); border-radius: 2px;
+}
+
+/* ?mini=1: just the board, filling the window */
+body.mini { margin: 0; padding: 0; overflow: hidden; }
+body.mini header, body.mini footer, body.mini .agent-panel, body.mini .popped-note { display: none !important; }
+body.mini .board-row { max-width: none; height: 100vh; align-items: center; justify-content: center; gap: 0; }
+body.mini #board {
+  width: min(100vw, calc(100vh * 1600 / 1020)); height: min(100vh, calc(100vw * 1020 / 1600));
+  max-width: none; max-height: none; border: 0; box-shadow: none;
+}
 
 /* Agent panel: icon (click to pick another for this conversation) */
 .panel-head { align-items: flex-start; gap: 10px; }

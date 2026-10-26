@@ -35,11 +35,13 @@
         <span id="updated-at">—</span>
         <span id="stale-warn" class="warn hidden">STALE</span>
         <span id="poll-dot" title="polling"></span>
+        <button type="button" id="popout-btn" title="Pop out a small board you can keep in a corner of the screen">⧉ Pop out</button>
         <a id="settings-link" href="/admin" title="Settings">Settings</a>
       </div>
     </header>
     <div id="board-row" class="board-row">
     <canvas id="board" width="1600" height="1020" aria-label="Busybots: your coding agents at work"></canvas>
+    <div id="popped-note" class="popped-note">The board is in its own small window. <button type="button" id="popped-back">Bring it back</button></div>
     <aside id="agent-panel" class="agent-panel hidden" aria-hidden="true">
       <div class="panel-head">
         <button type="button" id="panel-icon" class="panel-icon" title="Pick an icon for this conversation" aria-expanded="false">

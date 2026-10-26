@@ -24,6 +24,7 @@ export function toIso(gx, gy) {
 
 /** Center island in the canvas and scale a bit larger while keeping margin. */
 export function fitIslandCamera() {
+  if (S.mini && fitRoomsCamera()) return;
   if (!S.islandTiles.length) return;
   S.worldScale = 1;
   S.ORIGIN_X = 0;
@@ -70,6 +71,31 @@ export function fitIslandCamera() {
   const cy1 = (minY + maxY) / 2;
   S.ORIGIN_X = CANVAS_W / 2 - S.worldScale * cx1;
   S.ORIGIN_Y = CANVAS_H / 2 - S.worldScale * cy1;
+}
+
+/** Mini board: hug the rooms (walls and signs included) and zoom in as far as they fit. */
+function fitRoomsCamera() {
+  const zones = Object.values(S.runtimeLayout || {});
+  if (!zones.length) return false;
+  S.worldScale = 1;
+  S.ORIGIN_X = 0;
+  S.ORIGIN_Y = 0;
+  let minX = Infinity, maxX = -Infinity, minY = Infinity, maxY = -Infinity;
+  for (const L of zones) {
+    const elev = BASE_ELEV + (L.elevOffset || 0);
+    for (const [gx, gy] of [[L.gx, L.gy], [L.gx + L.gw, L.gy], [L.gx, L.gy + L.gh], [L.gx + L.gw, L.gy + L.gh]]) {
+      const p = toIso(gx, gy);
+      minX = Math.min(minX, p.sx);
+      maxX = Math.max(maxX, p.sx);
+      minY = Math.min(minY, p.sy - elev - 70); // back walls and signs
+      maxY = Math.max(maxY, p.sy - elev + 24);
+    }
+  }
+  const fit = Math.min((CANVAS_W - 24) / Math.max(1, maxX - minX), (CANVAS_H - 24) / Math.max(1, maxY - minY));
+  S.worldScale = Math.max(0.6, Math.min(2.6, fit));
+  S.ORIGIN_X = CANVAS_W / 2 - S.worldScale * (minX + maxX) / 2;
+  S.ORIGIN_Y = CANVAS_H / 2 - S.worldScale * (minY + maxY) / 2;
+  return true;
 }
 
 export function layoutFor(zoneId) {

@@ -159,7 +159,7 @@ export function drawBot(b, now, part) {
   const drawX = b.x;
   const drawY = b.y + bob;
   const dense = zoneSlots(b.zone).length >= 8;
-  const sprMul = (S.claudeConfig?.spriteScale || 0.82) * (dense ? 0.92 : 1);
+  const sprMul = (S.claudeConfig?.spriteScale || 0.82) * (dense ? 0.92 : 1) * (S.botScale || 1);
   const size = SPRITE * SCALE * sprMul;
   const img = icons.get(b.icon);
 

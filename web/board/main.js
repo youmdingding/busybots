@@ -12,6 +12,7 @@ import { TRAFFIC, signalState, trafficSpec } from "./city.js";
 import { ROAMERS } from "./roamers.js";
 import { initBoard, poll, setAgentFilter } from "./status.js";
 import { frame } from "./render.js";
+import { focusMainBoard, initMini } from "./mini.js";
 import { apiPost, closeAgentPanel, elPanelClose, elPanelJump, elPanelNote, elPanelPrompt, elPanelSend, hitTestBot, openAgentPanel, pickCharacter, pickColour, pickOwnIcon, refreshPanel, saveIcon, saveName, toggleIconPicker, toggleRename } from "./panel.js";
 
 S.agentFilter = normalizeAgentFilter((() => {
@@ -100,8 +101,12 @@ S.panelTimer = null;
 
 canvas.addEventListener("click", (ev) => {
   const b = hitTestBot(ev.clientX, ev.clientY);
-  if (b) openAgentPanel(b);
+  if (!b) return;
+  if (S.miniOpenAgent && S.miniOpenAgent(b)) return; // separate mini window: shown in the main board
+  openAgentPanel(b);
+  focusMainBoard(); // clicked in the floating window: the panel opens in the main one
 });
+S.openAgentFromMini = (b) => openAgentPanel(b);
 canvas.style.cursor = "default";
 canvas.addEventListener("mousemove", (ev) => {
   canvas.style.cursor = hitTestBot(ev.clientX, ev.clientY) ? "pointer" : "default";
@@ -253,5 +258,4 @@ if (bootParams.has("debug")) window.__boardDebug = {
   }
 })();
 
-setInterval(poll, POLL_MS);
-requestAnimationFrame(frame);
+initMini({ draw: frame, poll, pollMs: POLL_MS, standalone: bootParams.get("mini") === "1" });

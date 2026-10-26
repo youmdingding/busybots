@@ -9,7 +9,7 @@ import { drawAttentionBadges } from "./status.js";
 import { drawAllTiles, drawCityRoadMarkings, drawSky, drawWaterBase } from "./terrain.js";
 import { drawDecor } from "./decor.js";
 import { drawZoneChips, drawZonePlateaus, drawZoneSigns } from "./zones.js";
-import { drawBot } from "./bots.js";
+import { advanceBot, drawBot } from "./bots.js";
 
 // ---- Frame --------------------------------------------------------------
 export function drawFrame(now) {
@@ -41,10 +41,12 @@ export function drawFrame(now) {
   const canvasSub = visibleCount
     ? `${place} · ${visibleCount} shown${S.agentFilter !== "all" ? ` · ${S.agentFilter}` : ""}`
     : (bots.size ? `${place} · none match “${S.agentFilter}”` : `${place} · no live sessions`);
-  ctx.fillText(canvasTitle, 28, 20);
-  ctx.font = `500 11px ${UI_FONT}`;
-  ctx.fillStyle = "rgba(42,58,70,0.45)";
-  ctx.fillText(canvasSub, 28, 40);
+  if (!S.mini) { // the mini board keeps only the picture
+    ctx.fillText(canvasTitle, 28, 20);
+    ctx.font = `500 11px ${UI_FONT}`;
+    ctx.fillStyle = "rgba(42,58,70,0.45)";
+    ctx.fillText(canvasSub, 28, 40);
+  }
   // empty-board note
   if (bots.size === 0) {
     ctx.font = `600 13px ${UI_FONT}`;
@@ -66,18 +68,32 @@ export function drawFrame(now) {
     ctx.textAlign = "left";
   }
 
-  drawZoneChips();
+  if (!S.mini) drawZoneChips();
 
-  for (const b of botList) drawBot(b, now, cityScene ? "overlay" : "all");
+  if (S.mini) { // no names or speech bubbles: just the agents (the city scene has drawn them already)
+    if (!cityScene) for (const b of botList) { advanceBot(b, now); drawBot(b, now, "sprite"); }
+  } else {
+    for (const b of botList) drawBot(b, now, cityScene ? "overlay" : "all");
+  }
   // Badges last, so another agent's bubble or name never covers a "needs you" flag
   for (const b of botList) {
     if (!b.attention) continue;
     const sz = SPRITE * SCALE * (S.claudeConfig?.spriteScale || 0.82);
     const still = b.zone === "idle" || b.zone === "waiting" || b.state === "idle";
     const bob = still ? 0 : b.state === "active" ? Math.sin(now / 280 + b.bobPhase) * 2.5 : 0;
-    drawAttentionBadges(b, b.x, b.y + bob, sz, now);
+    const k = S.botScale || 1; // mini board: bigger agents, bigger badges
+    if (k === 1) {
+      drawAttentionBadges(b, b.x, b.y + bob, sz, now);
+    } else {
+      ctx.save();
+      ctx.translate(b.x, b.y + bob * k);
+      ctx.scale(k, k);
+      drawAttentionBadges(b, 0, 0, sz, now);
+      ctx.restore();
+    }
   }
 }
+/** One frame (the loop itself lives in mini.js: it follows whichever window is showing the board). */
 export function frame(now) {
   try {
     drawFrame(now);
@@ -85,7 +101,5 @@ export function frame(now) {
     S.frameErrorCount += 1;
     if (now - S.lastFrameError > 5000) console.error("frame failed", err);
     S.lastFrameError = now;
-  } finally {
-    requestAnimationFrame(frame);
   }
 }

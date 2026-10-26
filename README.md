@@ -117,9 +117,17 @@ Detection is heuristic from the transcripts. For exact permission detection, add
 
 ## Agent panel
 
-Click an agent to open its panel: the last 15 messages between you and the agent (with the tool steps in between, each with its date and time), **Jump to it** (brings its Terminal/iTerm tab or Conductor to the front, macOS) and, for idle terminal sessions, a prompt box that runs `claude --resume <id> -p "<prompt>"`.
+Click an agent to open its panel: the last 15 messages between you and the agent (with the tool steps in between, each with its date and time), **Open in …** (finds where the agent runs and brings it to the front, macOS: its iTerm or Terminal tab, the project's window in VS Code, Cursor, Windsurf or another app, its tmux pane, or Conductor) and, for idle terminal sessions, a prompt box that runs `claude --resume <id> -p "<prompt>"`.
 
 Click ✎ next to the name to rename that conversation (it defaults to the folder name; **Use the default name** goes back). Click the agent's icon in the panel to give that conversation a different look: pick a character (its own, or a robot, cat, fox, frog, owl, octopus, mushroom, cactus, slime, alien, rocket, bunny, star, heart, crystal or bird) and one of 12 colours, then **Save**. The choice lasts for that conversation only; the agent's own icon stays visible as a small badge.
+
+## Mini board
+
+Keep an eye on your agents without giving them a whole window. **⧉ Pop out** (top right) puts the board in a small window you can park in a corner of the screen: just the rooms, bigger agents and badges, no labels. Click an agent there to open its panel in the main board, and **Bring it back** when you're done.
+
+- **Chrome and Edge:** the small window stays on top of your other windows.
+- **Safari and Firefox:** it opens as a small separate window instead.
+- `http://127.0.0.1:8765/?mini=1` shows the mini board on its own, for a spare screen or an app that puts a web page on your desktop (such as Plash on macOS).
 
 ## Local API and security
 

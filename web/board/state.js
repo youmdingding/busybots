@@ -25,6 +25,11 @@ export const S = {
   boardApiToken: undefined,
   panelSessionId: undefined,
   panelTimer: undefined,
+  mini: false,            // mini board (pop-out window or ?mini=1), see mini.js
+  botScale: 1,            // agents and badges drawn this much bigger (mini board)
+  pipWindow: null,        // the always-on-top window the board was popped out into
+  miniOpenAgent: null,
+  openAgentFromMini: null,
 };
 
 /** Per-zone room palette (a/b/c/d floor variants, floor/wall/edge/ring) — filled from config + theme. */

@@ -355,7 +355,7 @@ export function applyPanelSession(data) {
     elPanelJump.disabled = !canJump;
     elPanelJump.textContent =
       s.jump?.kind === "conductor" ? "Open Conductor" :
-      s.jump?.kind === "terminal" ? "Jump to terminal" : "Jump to it";
+      s.jump?.kind === "terminal" ? (s.jump.app ? `Open in ${s.jump.app}` : "Jump to terminal") : "Jump to it";
   }
   const allow = !!s.promptAllowed;
   const promptWrap = document.getElementById("panel-prompt-wrap");
@@ -420,7 +420,7 @@ export function hitTestBot(clientX, clientY) {
   const list = [...bots.values()]
     .filter(botPassesAgentFilter)
     .sort((a, b) => b.y - a.y || b.x - a.x);
-  const hitR = SPRITE * SCALE * 0.55;
+  const hitR = SPRITE * SCALE * 0.55 * (S.botScale || 1);
   for (const b of list) {
     const dx = x - b.x;
     const dy = y - b.y;
