@@ -41,9 +41,30 @@ Back row: **Specs → Plan → Explore** · Front row: **Build → Test & Review
 - Reading, searching and web lookups go to **Explore** — unless the current turn has already done other work, in which case reads stay with that work so implementing agents don't bounce between rooms.
 - Room layout, labels, colours and the tool → room mapping live in `config.json`.
 
+### Your rooms
+
+**Settings → Rooms** lets you name and colour the six rooms the way you work ("Ship it", "QA", "Research"…) and choose where each kind of work goes:
+
+- The name shows on the room's sign in every theme, in the legend under the board and in Today. Signs fit about 6 letters in big type; longer names use small letters or are cut at a word.
+- The colour shows in Today and on the sign's letters.
+- **Where each kind of work goes**: editing code, running tests and checks, reviewing, reading and searching, writing plans, writing specs, delegating to sub-agents and anything else, each to the room you pick (e.g. tests in Build instead of Test & Review). A skill or command with its own room still wins.
+
+Changes show on an open board within 30 seconds.
+
 ### Skill-aware rooms
 
 A turn started with a skill or slash command keeps that skill's room for the whole turn, even while its sub-agents read files and run commands — e.g. `/plan` stays in **Plan**, `/pr-review` in **Test & Review**, `/spec-kit` in **Specs**. The bubble is prefixed ("Planning · Running a command"). Add your own skills with `rules.skillAreas` (see Configuration).
+
+### Your setup
+
+Busybots also looks at what you have installed and places those skills for you:
+
+- **Plugins** that are turned on in Claude Code, and their skills, commands and sub-agents.
+- **Your own** skills, slash commands and sub-agents (`~/.claude/skills`, `commands`, `agents`), Codex prompts, and the commands in your recent projects' `.claude/commands`.
+- **Workflow frameworks** in your recent projects: Spec Kit (`.specify`), Kiro specs (`.kiro/specs`), OpenSpec (`openspec/`), BMAD (`.bmad-core`), Task Master (`.taskmaster`), and Superpowers. Each one knows its own commands and files, e.g. `/speckit.tasks` goes to **Plan** and `requirements.md` counts as a spec.
+- Anything else is placed by keywords in its name and description ("Run the smoke tests…" → **Test & Review**). Unclear ones are left alone.
+
+**Settings → Your setup** lists everything found, the room each one sends an agent to and why. Pick a room to override it, or turn the whole thing off. Your choices win over `config.json`, which wins over what's detected. The scan only reads those folders and re-runs every 10 minutes (or **Scan again**); `busybots doctor` prints a summary.
 
 ## Settings
 
@@ -91,14 +112,20 @@ Each agent has a small reader in `src/readers/<agent>.js` that translates its se
     "skillAreas":   { "brainstorming": "specs", "writing-plans": "plan", "ship": "build" },
     "skillLabels":  { "brainstorming": "Brainstorming", "ship": "Shipping" },
     "phaseFiles":   { "plan": ["research.md", "data-model.md"], "spec": ["brief.md"] },
-    "testCommands": ["just check", "make verify"]
-  }
+    "testCommands": ["just check", "make verify"],
+    "autoDetect":   true,
+    "workAreas":    { "tests": "build" }
+  },
+  "rooms": { "build": { "label": "Ship it", "tint": "#e0703a" } }
 }
 ```
 
 - `skillAreas` / `skillLabels` — extra skills or slash commands and the room / bubble prefix they get (built-in defaults cover common names like `plan`, `review`, `explore`).
 - `phaseFiles` — file names that mean an agent is writing a plan or a spec.
 - `testCommands` — extra commands that count as testing (Test & Review room).
+- `autoDetect` — place skills from what's installed (see [Your setup](#your-setup)); `false` turns it off.
+- `workAreas` — kind of work → room: `code`, `tests`, `review`, `reading`, `plans`, `specs`, `delegating`, `other`.
+- `rooms` (top level) — your name (up to 24 characters) and colour for a room, by its key in `config.json`.
 
 Both files are re-read every poll; a broken `settings.json` falls back to defaults.
 
@@ -114,6 +141,22 @@ The header shows a summary pill ("2 need you · 1 done"), and each agent can car
 Click the agent to see the badge spelled out at the top of its panel: what it's waiting for, when it finished, or how many errors in a row.
 
 Detection is heuristic from the transcripts. For exact permission detection, add the `Notification` hook from `examples/claude-hooks.json` to your Claude Code settings (it runs `busybots hook`).
+
+## Notifications
+
+Know when an agent needs you without watching the board:
+
+- **The tab** shows how many agents need you, "(2) Busybots", and a dot on its icon (orange: needs you, green: finished).
+- **🔕 Notify** (top right) turns on desktop notifications when an agent starts needing you or finishes. They only appear while you're looking at something else; clicking one opens that agent's panel.
+- **Settings → Board → Notifications** chooses which events, adds a sound, and can send them **when the board is closed** too (macOS and Linux; Busybots sends them itself if no board has been open for 15 seconds).
+
+## Today
+
+**Today** (top right) shows what each agent did today: time working in each room, time waiting for you, how often it finished, files it edited and tokens used. ‹ › goes back through the last 30 days. The agent panel shows the same for that conversation ("Today: 1h 20m working (Build 50m · Plan 20m) · 3 files · 1.2M tokens").
+
+It's recorded while Busybots runs, in `history/` in your state folder, one file per day. Turn on privacy mode to hide project and file names there too.
+
+**Tokens** are read from the agents' own transcripts: Claude Code (including its sub-agents) and Codex CLI. The panel shows the whole conversation's total, with input, cache and output in its tooltip. Busybots doesn't show a cost in dollars: prices change and many people pay a subscription.
 
 ## Agent panel
 
@@ -135,13 +178,15 @@ The server binds **127.0.0.1** only, rejects other Host/Origin headers, and only
 
 - `GET /api/settings` — current settings (merged with defaults)
 - `POST /api/settings` — save settings · `POST /api/settings/check` — test folders without saving
-- `GET /api/session/<id>` — session meta + last ~15 transcript items
+- `GET /api/session/<id>` — session meta (with today's activity and tokens) + last ~15 transcript items
+- `GET /api/recap?day=YYYY-MM-DD` — what each agent did that day (default today)
+- `GET /api/setup` — installed plugins, skills and frameworks and the room each skill gets (`?rescan=1` scans again)
 - `POST /api/session/<id>/jump` — focus the session's window
 - `POST /api/session/<id>/prompt` — resume an idle terminal session with a prompt
 - `POST /api/session/<id>/name` — rename that conversation (`{"name": "Checkout rewrite"}`, or `null` for the folder name; up to 40 characters)
 - `POST /api/session/<id>/icon` — pick an icon for that conversation (`{"icon": "icons/pick-cat-03.png"}`, or `null` for its own)
 
-The status (`/status.json`, and `status.json` in your state folder) contains local paths, session names and short snippets of agent output — don't share it.
+The status (`/status.json`, and `status.json` in your state folder) contains local paths, session names and short snippets of agent output — don't share it. The same goes for the daily files in `history/` (project and file names).
 
 ## Themes
 

@@ -54,6 +54,7 @@ export function initMini({ draw, poll, pollMs, standalone }) {
   document.getElementById("popped-back")?.addEventListener("click", () => S.pipWindow?.close());
   if (standalone) {
     document.body.classList.add("mini");
+    S.miniStandalone = true;
     setMini(true);
     // A click on an agent: show it in the main board (the window that opened us), not in here
     S.miniOpenAgent = (b) => {

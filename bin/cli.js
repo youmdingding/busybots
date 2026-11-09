@@ -21,6 +21,8 @@ import * as S from "../src/settings.js";
 import { sqliteAvailable } from "../src/sqlite.js";
 import * as service from "../src/service.js";
 import { notificationHook } from "../src/hook.js";
+import { Notifier } from "../src/notify.js";
+import { Recap } from "../src/recap.js";
 
 const USAGE = `Usage: ${APP_NAME} [start|serve|status|doctor|service install|service uninstall|hook] [--port N] [--no-open]`;
 
@@ -60,14 +62,20 @@ function writeStatus(status) {
 
 async function serve({ port, open }) {
   const watcher = new Watcher();
+  const notifier = new Notifier();
+  const recap = new Recap();
   let status = null;
   let timer = null;
+  let server = null;
   const tick = () => {
     try {
       const st = watcher.build();
       delete st._meta;
       status = st;
       writeStatus(st);
+      // desktop notifications when no board is open (Settings → Board → Notifications)
+      try { notifier.update(st, S.load().board.notify, server ? server.boardSeenAt : 0); } catch (err) { console.error(`notify error: ${err.message}`); }
+      try { recap.update(st, watcher.lastEdits, Date.now(), watcher.lastFiles); } catch (err) { console.error(`recap error: ${err.message}`); }
     } catch (err) {
       console.error(`watcher error: ${err.stack || err.message}`);
     }
@@ -77,7 +85,8 @@ async function serve({ port, open }) {
   };
   tick();
 
-  const server = createBoardServer({ port, getStatus: () => status, token: ensureToken() });
+  server = createBoardServer({ port, getStatus: () => status, token: ensureToken(), recap,
+    getSetup: (force) => watcher.detected(S.load(), force), getFiles: () => watcher.lastFiles });
   await new Promise((resolve, reject) => {
     server.once("error", reject);
     server.listen(port, "127.0.0.1", resolve);
@@ -95,6 +104,7 @@ async function serve({ port, open }) {
 
   const stop = () => {
     clearTimeout(timer);
+    recap.flush(true);
     server.close();
     process.exit(0);
   };
@@ -122,6 +132,22 @@ function doctor() {
       continue;
     }
     for (const r of res.sources[a.id] || []) row(r.ok, a.label, `${r.path} — ${r.message}`);
+  }
+  // What's installed (plugins, skills, workflow frameworks) and how much of it lands in a room
+  try {
+    const s = S.load();
+    const w = new Watcher();
+    w.build(); // one pass, so recent projects are known
+    const det = w.detected(s, true);
+    const { plugins, items, frameworks } = det.scan;
+    const fw = frameworks.map((f) => f.label + (f.projects.length ? ` (${f.projects.length} ${f.projects.length === 1 ? "project" : "projects"})` : "")).join(", ");
+    const on = plugins.filter((p) => p.enabled).length;
+    const placed = s.rules.autoDetect === false ? 0 : Object.keys(det.auto.skillAreas).length;
+    row(null, "Setup", `${items.length} skills/commands/sub-agents, ${on} ${on === 1 ? "plugin" : "plugins"} on${fw ? `; ${fw}` : ""}`);
+    row(null, "", s.rules.autoDetect === false ? "placing them from what's installed is off (Settings → Your setup)"
+      : `${placed} placed in rooms automatically (see Settings → Your setup)`);
+  } catch (err) {
+    row(null, "Setup", `couldn't scan (${err.message})`);
   }
   console.log(lines.join("\n"));
   return bad ? 1 : 0;

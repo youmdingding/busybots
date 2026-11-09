@@ -10,6 +10,7 @@ import * as claude from "./claude.js";
 import * as conductorSrc from "./conductor.js";
 import { READERS } from "./readers/index.js";
 import { SessionPrefs } from "./icons.js";
+import { scanSetup, autoRules } from "./setup.js";
 import {
   makeRules, latestActivity, classifySession, attentionFor, bubbleFromTool, phaseFor, zoneFor,
   areaForSkill, skillLabel, clip, DELEGATE_TOOLS, STRONG_KEYS,
@@ -105,6 +106,24 @@ export function poolForBrand(cfg, brand) {
   return Array.from({ length: 8 }, (_, i) => `icons/${brand}-${String(i).padStart(2, "0")}.png`);
 }
 
+/** config.json with your room names and colours (settings.rooms) applied. Each area gets
+ *  labelDefault, and renamed / recoloured when you changed it (the board repaints its sign). */
+export function applyRooms(cfg, s) {
+  const rooms = (s && s.rooms) || {};
+  if (!Array.isArray(cfg.areas)) return cfg;
+  return {
+    ...cfg,
+    areas: cfg.areas.map((a) => {
+      if (!a || !a.key) return a;
+      const r = rooms[a.key] || {};
+      const out = { ...a, labelDefault: a.label || a.key, tintDefault: a.tint || null };
+      if (r.label && r.label !== out.labelDefault) Object.assign(out, { label: r.label, renamed: true });
+      if (r.tint && r.tint !== String(a.tint || "").toLowerCase()) Object.assign(out, { tint: r.tint, recoloured: true });
+      return out;
+    }),
+  };
+}
+
 function areasAsZones(cfg) {
   if (Array.isArray(cfg.areas) && cfg.areas.length) {
     return cfg.areas.filter((a) => a && a.key).map((a) => ({ id: a.key, label: a.label || a.key }));
@@ -124,12 +143,38 @@ export class Watcher {
     this.log = log;
     this.skills = new claude.SkillTracker();
     this.prefs = prefs ?? new SessionPrefs(); // icon / name you chose per conversation
+    // Kept for the server and the daily recap, never put in the status:
+    this.lastEdits = new Map();   // session id → [[file path, ts]] edited in its transcript
+    this.lastFiles = new Map();   // session id → { kind, path } of its transcript (token counts)
+    this.knownCwds = new Set();   // recent project folders (where to look for workflow frameworks)
+    this.setupCache = null;       // { at, key, scan, auto }
+  }
+
+  /** What's installed (plugins, skills, commands, frameworks) and the rooms it implies.
+   *  Re-scanned every 10 minutes, when the folders change, or when forced (Settings → Scan again). */
+  detected(s = this.settings ?? settingsMod.load(), force = false) {
+    const claudeHomes = settingsMod.dirs(s, "claude");
+    const codexHomes = settingsMod.dirs(s, "codex");
+    const geminiHomes = settingsMod.dirs(s, "gemini");
+    const projects = [...this.knownCwds].sort();
+    const key = JSON.stringify([claudeHomes, codexHomes, geminiHomes, projects]);
+    const c = this.setupCache;
+    if (!force && c && c.key === key && Date.now() - c.at < 10 * 60_000) return c;
+    try {
+      const scan = scanSetup({ claudeHomes, projects, codexHomes, geminiHomes });
+      this.setupCache = { at: Date.now(), key, scan, auto: autoRules(scan) };
+    } catch (err) {
+      this.log(`setup scan error: ${err.message}`);
+      this.setupCache = { at: Date.now(), key, scan: { plugins: [], items: [], frameworks: [] },
+        auto: { skillAreas: {}, why: {}, planFiles: [], specFiles: [] } };
+    }
+    return this.setupCache;
   }
 
   build(now = Date.now() / 1000) {
-    const cfg = this.config ?? loadConfig();
     const s = this.settings ?? settingsMod.load();
-    const rules = makeRules(cfg, s.rules);
+    const cfg = applyRooms(this.config ?? loadConfig(), s);
+    const rules = makeRules(cfg, s.rules, s.rules.autoDetect === false ? null : this.detected(s).auto);
     const mapping = rules.activityAreas;
     const busyWindow = Number(cfg.busyWindowSeconds) || 45;
     const maxChars = Number.parseInt(cfg.maxBubbleChars, 10) || 60;
@@ -164,9 +209,10 @@ export class Watcher {
 
     const picked = this.prefs ? this.prefs.map() : {};
     const bots = [];
+    const passEdits = new Map(), passFiles = new Map();
     for (const sess of sessions) {
       try {
-        const bot = this.bot(sess, { now, cfg, s, rules, mapping, busyWindow, maxChars, firstHome });
+        const bot = this.bot(sess, { now, cfg, s, rules, mapping, busyWindow, maxChars, firstHome, passEdits, passFiles });
         if (picked[bot.id]?.icon) {
           bot.iconDefault = bot.icon; // the board draws it as a small badge so the agent type stays visible
           bot.icon = picked[bot.id].icon;
@@ -176,6 +222,8 @@ export class Watcher {
         this.log(`session ${sess.sessionId}: ${err.stack || err.message}`);
       }
     }
+    this.lastEdits = passEdits;
+    this.lastFiles = passFiles;
     dedupeNames(bots);
     for (const bot of bots) {
       // A name you typed wins over the folder name (privacy mode below still replaces it)
@@ -196,7 +244,7 @@ export class Watcher {
     };
   }
 
-  bot(sess, { now, cfg, s, rules, mapping, busyWindow, maxChars, firstHome }) {
+  bot(sess, { now, cfg, s, rules, mapping, busyWindow, maxChars, firstHome, passEdits = new Map(), passFiles = new Map() }) {
     const sid = sess.sessionId;
     const cwd = sess.cwd;
     const home = sess.claude_home || firstHome;
@@ -218,6 +266,15 @@ export class Watcher {
       if (act.last_ts === null) act.last_ts = newestM;
     }
     const parent = act;
+    if (parent.edited_files && parent.edited_files.length) passEdits.set(sid, parent.edited_files);
+    if (fromReader ? sess.source === "codex" && sess.file : jsonl) {
+      passFiles.set(sid, fromReader ? { kind: "codex", path: sess.file } : { kind: "claude", path: jsonl });
+    }
+    if (cwd && typeof cwd === "string") {
+      this.knownCwds.delete(cwd);
+      this.knownCwds.add(cwd);
+      if (this.knownCwds.size > 60) this.knownCwds.delete(this.knownCwds.values().next().value);
+    }
     if (!fromReader && home) act = claude.enrichFromSubagents(home, cwd, sid, act, maxChars, rules, now);
     if (act !== parent) {
       // Turn-level facts come from the parent; a sub-agent's own unanswered tool is still a reason to need you.

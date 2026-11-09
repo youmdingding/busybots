@@ -238,6 +238,79 @@ def live(solid, sid, facing, any_px=False, uv=None):
 LIVE = {}
 
 
+# ---- room name signs: the board can repaint them with a name you choose -------------------
+NAME_WORDS = {"SPECS", "PLAN", "BUILD", "REVIEW", "EXPLORE", "IDLE"}
+TEXT_AT = None   # (text, sign key, col, row) of the last glyph test, set by text_cell()
+RAISED = []      # raised-letter names of the room being built (raised_letters_x)
+
+
+def text_cell(text, key, col, row):
+    """Called by the glyph tests (interiors.text7): which letter cell this point fell in."""
+    global TEXT_AT
+    TEXT_AT = (text, key, col, row)
+
+
+def _raised_cell(p, n, raised):
+    for r in raised:
+        cell = r["cell"]
+        on_wall = abs(p[1] - r["y"]) < 0.05 and n[1] > 0.5
+        on_letter = r["y"] - 0.01 <= p[1] <= r["y"] + r["depth"] + 0.01
+        if not (on_wall or on_letter):
+            continue
+        # the letters' own grid: one cell per glyph dot (each dot is a little box)
+        col = math.floor((p[0] - r["x0"]) / cell)
+        row = 6 - math.floor((p[2] - r["z0"]) / cell)
+        if -6 <= col <= r["cols"] + 6 and -2 <= row <= 8:
+            return (r["text"], ("raised", r["x0"], r["y"], r["z0"]), col, row)
+    return None
+
+
+def name_signs(solids):
+    """Tag the room's name sign(s) as live parts of kind "sign": each pixel on which a glyph
+    test for a room name ran (or that lies on a raised-letter name) records its letter cell,
+    u = column + 64, v = row + 16 on the name's 6x8 grid (5x7 glyphs). The board
+    (web/board/livescreens.js drawRoomSign) redraws the letters there when you rename the room.
+    Doesn't change the sprite itself. Call after build(), before render()."""
+    raised = list(RAISED)
+    RAISED.clear()
+    ids = {}
+
+    def wrap(s):
+        m0 = s.mat
+
+        def m(p, n):
+            global TEXT_AT
+            TEXT_AT = None
+            r = m0(p, n)
+            at = TEXT_AT
+            TEXT_AT = None
+            if at is None and raised:
+                if isinstance(r, tuple) and len(r) == 3:
+                    return r  # part of an animated screen next to raised letters: leave it alone
+                at = _raised_cell(p, n, raised)
+            if at is None or at[0] not in NAME_WORDS:
+                return r
+            text, key, col, row = at
+            if not (0 <= col + 64 <= 255 and 0 <= row + 16 <= 255):
+                return r
+            sid = ids.get((text, key))
+            if sid is None:
+                sid = ids[(text, key)] = len(LIVE) + 1
+                LIVE[sid] = dict(kind="sign", text=text, w=0, h=0, **({"fill": True} if key[0] == "raised" else {}))
+            if isinstance(r, tuple):
+                col_, glow = r[0], r[1]
+                if len(r) == 3:
+                    LIVE[sid]["over"] = True  # the name is on an animated screen (e.g. a review diff header)
+            else:
+                col_, glow = r, False
+            return (col_, glow, (sid, col + 64, row + 16))
+        s.mat = m
+
+    for s in solids:
+        wrap(s)
+    return solids
+
+
 def liven(solids, idx, kind, facing, any_px=False, uv=None, w=None, h=None, **params):
     """Tag solids[idx] (an index or a list of them) as a live part of `kind`; see
     web/board/livescreens.js for the kinds and their params. uv(p) -> (u, v) overrides

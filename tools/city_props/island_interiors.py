@@ -6,7 +6,7 @@ y along gy, z up, U units per grid cell; only the N and W back walls are built.
 Run: python3 island_interiors.py [zone ...]  -> out/island_interior_<zone>.png + manifest
 """
 import json, math, os, sys
-from isopix import box, vcyl, hcyl, blob, face_uv, rgb, mix, hash2, render, LIVE, liven
+from isopix import box, vcyl, hcyl, blob, face_uv, rgb, mix, hash2, render, LIVE, liven, name_signs
 from props import cone, flat, save_room
 from interiors import (U, WALL_T, text7, emis, room_shell, doormat, entrance_steps,
                        door_frame_x, door_frame_y, DOOR_HALF, INTERIORS as CITY_INTERIORS)
@@ -1737,7 +1737,7 @@ if __name__ == "__main__":
     man = json.load(open("out/manifest.json")) if os.path.exists("out/manifest.json") else {}
     for zid in (sys.argv[1:] or ISLAND_INTERIORS):
         LIVE.clear()  # parts the board animates while an agent works here (tagged with liven())
-        S = build(zid)
+        S = name_signs(build(zid))
         im, anchor = render(S, ground_shadow=0)
         name = f"island_interior_{zid}"
         save_room(im, anchor, S, name, man, U)

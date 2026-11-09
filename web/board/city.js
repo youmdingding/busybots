@@ -12,7 +12,7 @@ import { advanceBot, drawBot } from "./bots.js";
 import { roamerItems, stepRoamers } from "./roamers.js";
 import { drawWindowViews } from "./windows.js";
 import { drawWallClocks } from "./wallclock.js";
-import { drawLiveScreens, roomBusy } from "./livescreens.js";
+import { drawLiveScreens, drawRoomSign, roomBusy } from "./livescreens.js";
 import { rigItems } from "./rigs.js";
 
 export const cityHazeCache = new Map();
@@ -154,6 +154,7 @@ export function drawZoneInterior(zid, L, spec) {
   ctx.drawImage(img, x, y, m.w * s, m.h * s);
   ctx.restore();
   if (m.live && roomBusy(zid)) drawLiveScreens(spec.sprite, x, y, s, performance.now()); // screens come alive
+  if (m.live) drawRoomSign(spec.sprite, zid, x, y, s); // your name for the room (Settings → Rooms)
   return true;
 }
 

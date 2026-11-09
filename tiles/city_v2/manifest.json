@@ -1771,6 +1771,18 @@
     "kind": "beacon",
     "w": 5.6,
     "h": 5.0
+   },
+   "11": {
+    "kind": "sign",
+    "text": "SPECS",
+    "w": 0,
+    "h": 0
+   },
+   "12": {
+    "kind": "sign",
+    "text": "SPECS",
+    "w": 0,
+    "h": 0
    }
   }
  },
@@ -1827,6 +1839,18 @@
     "kind": "spin",
     "w": 20,
     "h": 6.4
+   },
+   "2": {
+    "kind": "sign",
+    "text": "BUILD",
+    "w": 0,
+    "h": 0
+   },
+   "3": {
+    "kind": "sign",
+    "text": "BUILD",
+    "w": 0,
+    "h": 0
    }
   },
   "rig": {
@@ -1924,6 +1948,18 @@
     "w": 12.0,
     "h": 5.5,
     "axis": "v"
+   },
+   "6": {
+    "kind": "sign",
+    "text": "PLAN",
+    "w": 0,
+    "h": 0
+   },
+   "7": {
+    "kind": "sign",
+    "text": "PLAN",
+    "w": 0,
+    "h": 0
    }
   }
  },
@@ -2017,6 +2053,12 @@
     "w": 4.0,
     "h": 5.8,
     "color": "#5dffa8"
+   },
+   "9": {
+    "kind": "sign",
+    "text": "REVIEW",
+    "w": 0,
+    "h": 0
    }
   }
  },
@@ -2067,7 +2109,15 @@
     2.4,
     80.3
    ]
-  ]
+  ],
+  "live": {
+   "1": {
+    "kind": "sign",
+    "text": "IDLE",
+    "w": 0,
+    "h": 0
+   }
+  }
  },
  "city_ground": {
   "w": 903,
@@ -4461,6 +4511,18 @@
     "kind": "water",
     "w": 9.0,
     "h": 13.5
+   },
+   "3": {
+    "kind": "sign",
+    "text": "SPECS",
+    "w": 0,
+    "h": 0
+   },
+   "4": {
+    "kind": "sign",
+    "text": "SPECS",
+    "w": 0,
+    "h": 0
    }
   }
  },
@@ -4540,6 +4602,18 @@
     "kind": "spin",
     "w": 22,
     "h": 7.2
+   },
+   "5": {
+    "kind": "sign",
+    "text": "PLAN",
+    "w": 0,
+    "h": 0
+   },
+   "6": {
+    "kind": "sign",
+    "text": "PLAN",
+    "w": 0,
+    "h": 0
    }
   }
  },
@@ -4607,6 +4681,12 @@
     "kind": "spin",
     "w": 7,
     "h": 2.2
+   },
+   "4": {
+    "kind": "sign",
+    "text": "BUILD",
+    "w": 0,
+    "h": 0
    }
   }
  },
@@ -4694,6 +4774,12 @@
     "kind": "pulse",
     "w": 2.2,
     "h": 0.2
+   },
+   "9": {
+    "kind": "sign",
+    "text": "REVIEW",
+    "w": 0,
+    "h": 0
    }
   }
  },
@@ -4752,7 +4838,15 @@
     2.4,
     80.3
    ]
-  ]
+  ],
+  "live": {
+   "1": {
+    "kind": "sign",
+    "text": "IDLE",
+    "w": 0,
+    "h": 0
+   }
+  }
  },
  "boat_sail_white_x": {
   "w": 34,
@@ -7254,6 +7348,19 @@
     "kind": "glint",
     "w": 20.0,
     "h": 11.0
+   },
+   "6": {
+    "kind": "sign",
+    "text": "SPECS",
+    "w": 0,
+    "h": 0,
+    "fill": true
+   },
+   "7": {
+    "kind": "sign",
+    "text": "SPECS",
+    "w": 0,
+    "h": 0
    }
   }
  },
@@ -7316,6 +7423,19 @@
     "kind": "glint",
     "w": 4.8,
     "h": 3.0
+   },
+   "4": {
+    "kind": "sign",
+    "text": "PLAN",
+    "w": 0,
+    "h": 0,
+    "fill": true
+   },
+   "5": {
+    "kind": "sign",
+    "text": "PLAN",
+    "w": 0,
+    "h": 0
    }
   }
  },
@@ -7425,6 +7545,12 @@
     "kind": "code",
     "w": 6.4,
     "h": 4.8
+   },
+   "11": {
+    "kind": "sign",
+    "text": "BUILD",
+    "w": 0,
+    "h": 0
    }
   }
  },
@@ -7493,6 +7619,13 @@
     "kind": "diff",
     "w": 48.0,
     "h": 22.0
+   },
+   "6": {
+    "kind": "sign",
+    "text": "REVIEW",
+    "w": 0,
+    "h": 0,
+    "over": true
    }
   }
  },
@@ -7551,7 +7684,15 @@
     2.4,
     80.3
    ]
-  ]
+  ],
+  "live": {
+   "1": {
+    "kind": "sign",
+    "text": "IDLE",
+    "w": 0,
+    "h": 0
+   }
+  }
  },
  "space_ground": {
   "w": 903,
@@ -9350,6 +9491,19 @@
     "kind": "pulse",
     "w": 8.0,
     "h": 0.3
+   },
+   "9": {
+    "kind": "sign",
+    "text": "SPECS",
+    "w": 0,
+    "h": 0,
+    "fill": true
+   },
+   "10": {
+    "kind": "sign",
+    "text": "SPECS",
+    "w": 0,
+    "h": 0
    }
   }
  },
@@ -9449,6 +9603,19 @@
      25,
      7
     ]
+   },
+   "7": {
+    "kind": "sign",
+    "text": "PLAN",
+    "w": 0,
+    "h": 0,
+    "fill": true
+   },
+   "8": {
+    "kind": "sign",
+    "text": "PLAN",
+    "w": 0,
+    "h": 0
    }
   }
  },
@@ -9518,6 +9685,12 @@
     "kind": "pulse",
     "w": 4.0,
     "h": 0.6
+   },
+   "5": {
+    "kind": "sign",
+    "text": "BUILD",
+    "w": 0,
+    "h": 0
    }
   }
  },
@@ -9605,6 +9778,13 @@
      47,
      19
     ]
+   },
+   "7": {
+    "kind": "sign",
+    "text": "REVIEW",
+    "w": 0,
+    "h": 0,
+    "over": true
    }
   }
  },
@@ -9647,7 +9827,15 @@
     2.4,
     80.3
    ]
-  ]
+  ],
+  "live": {
+   "1": {
+    "kind": "sign",
+    "text": "IDLE",
+    "w": 0,
+    "h": 0
+   }
+  }
  },
  "interior_explore": {
   "w": 301,
@@ -9704,6 +9892,18 @@
     "kind": "doc",
     "w": 7.0,
     "h": 5.6
+   },
+   "4": {
+    "kind": "sign",
+    "text": "EXPLORE",
+    "w": 0,
+    "h": 0
+   },
+   "5": {
+    "kind": "sign",
+    "text": "EXPLORE",
+    "w": 0,
+    "h": 0
    }
   }
  },
@@ -9762,6 +9962,18 @@
     "kind": "spin",
     "w": 22,
     "h": 7.2
+   },
+   "4": {
+    "kind": "sign",
+    "text": "EXPLORE",
+    "w": 0,
+    "h": 0
+   },
+   "5": {
+    "kind": "sign",
+    "text": "EXPLORE",
+    "w": 0,
+    "h": 0
    }
   }
  },
@@ -9820,6 +10032,19 @@
     "kind": "glint",
     "w": 4.8,
     "h": 3.0
+   },
+   "4": {
+    "kind": "sign",
+    "text": "EXPLORE",
+    "w": 0,
+    "h": 0,
+    "fill": true
+   },
+   "5": {
+    "kind": "sign",
+    "text": "EXPLORE",
+    "w": 0,
+    "h": 0
    }
   }
  },
@@ -9919,6 +10144,19 @@
     "kind": "pulse",
     "w": 8.0,
     "h": 0.3
+   },
+   "8": {
+    "kind": "sign",
+    "text": "EXPLORE",
+    "w": 0,
+    "h": 0,
+    "fill": true
+   },
+   "9": {
+    "kind": "sign",
+    "text": "EXPLORE",
+    "w": 0,
+    "h": 0
    }
   }
  },

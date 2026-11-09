@@ -50,6 +50,8 @@
     .switch input::after { content: ""; position: absolute; top: 2px; left: 2px; width: 14px; height: 14px; background: var(--idle); transition: left 0.12s; }
     .switch input:checked { background: var(--accent); }
     .switch input:checked::after { left: 18px; background: #fff; }
+    .notify-opts { display: flex; flex-direction: column; gap: 6px; }
+    .notify-opts .note { margin: 2px 0 0; }
     .note { font-size: 12px; color: var(--muted); line-height: 1.5; }
     .note code { font-size: 11px; background: rgba(255,255,255,0.7); padding: 1px 4px; }
     .savebar { position: fixed; left: 0; right: 0; bottom: 0; display: flex; justify-content: center;
@@ -59,6 +61,34 @@
     #save-msg.ok { color: #1f7a52; } #save-msg.bad { color: #b4442c; } #save-msg.dirty { color: #a0661a; }
     .board-grid { display: grid; grid-template-columns: 200px 1fr; gap: 14px 12px; align-items: center; font-size: 13px; }
     .board-grid .filter-chips { margin-top: 0; justify-self: start; }
+    .rooms-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 10px; margin-top: 4px; }
+    .room-row { display: flex; align-items: center; gap: 8px; }
+    .room-row input[type="color"] { appearance: none; width: 34px; height: 32px; padding: 2px; border: 2px solid rgba(58, 122, 92, 0.4);
+      border-radius: 2px; background: #fff; cursor: pointer; flex: none; }
+    .room-row input[type="text"] { font-family: inherit; font-weight: 600; }
+    .room-row .link-btn { flex: none; font-size: 11px; }
+    .work-table { width: 100%; border-collapse: collapse; font-size: 13px; margin-top: 6px; }
+    .work-table td { padding: 5px 6px; border-bottom: 1px solid rgba(58, 122, 92, 0.15); }
+    .work-table td:first-child { width: 55%; }
+    .work-table select, .setup-table select { font: 600 12px system-ui, sans-serif; padding: 4px 6px; border: 2px solid rgba(58, 122, 92, 0.4);
+      border-radius: 2px; background: #fff; color: var(--text); }
+    .work-table tr.changed select { border-color: var(--accent); }
+    .card h3 { font-size: 13px; color: var(--accent); margin-top: 14px; }
+    .setup-top { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; justify-content: space-between; }
+    .setup-tags { display: flex; flex-wrap: wrap; gap: 6px; margin: 10px 0 4px; }
+    .setup-tag { font-size: 12px; padding: 3px 8px; border: 2px solid rgba(58, 122, 92, 0.35); background: #fff; border-radius: 2px; }
+    .setup-tag small { color: var(--muted); margin-left: 4px; }
+    .setup-tag.off { opacity: 0.5; text-decoration: line-through; }
+    .setup-table { width: 100%; border-collapse: collapse; font-size: 13px; margin-top: 8px; }
+    .setup-table th { text-align: left; font-size: 11px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.06em; padding: 6px 6px; border-bottom: 2px solid rgba(58, 122, 92, 0.3); }
+    .setup-table td { padding: 6px; border-bottom: 1px solid rgba(58, 122, 92, 0.15); vertical-align: top; }
+    .setup-table td.name { font: 600 12px ui-monospace, SFMono-Regular, Menlo, monospace; word-break: break-word; }
+    .setup-table td.name div { font: 400 11px system-ui, sans-serif; color: var(--muted); margin-top: 2px; }
+    .setup-table td.from { font-size: 11px; color: var(--muted); white-space: nowrap; }
+    .setup-table select { font: 600 12px system-ui, sans-serif; padding: 4px 6px; border: 2px solid rgba(58, 122, 92, 0.4); border-radius: 2px; background: #fff; color: var(--text); }
+    .setup-table tr.yours select { border-color: var(--accent); }
+    .setup-filter { display: flex; gap: 8px; align-items: center; margin-top: 10px; flex-wrap: wrap; }
+    .setup-filter input[type="text"] { width: 220px; }
     @media (max-width: 600px) { .board-grid { grid-template-columns: 1fr; } }
   </style>
 </head>
@@ -92,9 +122,40 @@
             <label class="switch"><input type="checkbox" id="idle-bubbles" /> <span>Show their last message</span></label>
             <span>Privacy mode</span>
             <label class="switch"><input type="checkbox" id="privacy" /> <span>Hide project names, file names and what agents say (for screen sharing)</span></label>
+            <span>Notifications</span>
+            <div class="notify-opts">
+              <label class="switch"><input type="checkbox" id="notify-needs" /> <span>When an agent needs you</span></label>
+              <label class="switch"><input type="checkbox" id="notify-done" /> <span>When an agent finishes</span></label>
+              <label class="switch"><input type="checkbox" id="notify-sound" /> <span>With a sound</span></label>
+              <label class="switch"><input type="checkbox" id="notify-closed" /> <span>Also when the board is closed (macOS, Linux)</span></label>
+              <p class="note">Turn them on with 🔔 on the board. They only appear when you're not looking at the board.</p>
+            </div>
             <span>Update every</span>
             <span><input type="number" id="poll" min="1" max="30" step="1" /> seconds</span>
           </div>
+        </div>
+      </section>
+
+      <section>
+        <div class="section-title">Rooms</div>
+        <div class="card" id="rooms-card" style="margin-top:8px">
+          <p class="hint" style="margin-top:0">Name and colour each room the way you work. The name shows on the room's sign, in the legend and in Today; the colour in Today and on the sign's letters. Signs fit about 6 letters in big type; longer names use small letters or are cut at a word.</p>
+          <div id="rooms-list" class="rooms-grid"><p class="note">Loading…</p></div>
+          <h3>Where each kind of work goes</h3>
+          <p class="hint">When an agent isn't using a skill or command that has its own room (see Your setup below), what it's doing decides the room.</p>
+          <table class="work-table"><tbody id="work-list"></tbody></table>
+        </div>
+      </section>
+
+      <section>
+        <div class="section-title">Your setup</div>
+        <div class="card" id="setup-card" style="margin-top:8px">
+          <div class="setup-top">
+            <label class="switch"><input type="checkbox" id="auto-detect" /> <span>Place skills in rooms from what's installed</span></label>
+            <button type="button" class="panel-btn" id="setup-rescan">Scan again</button>
+          </div>
+          <p class="hint" id="setup-hint">Busybots looks at the plugins, skills, slash commands and sub-agents you have, and at workflow files in your projects (Spec Kit, Kiro, OpenSpec, BMAD, Task Master), so an agent using them walks to the right room. Pick a room yourself to override it.</p>
+          <div id="setup-body"><p class="note">Scanning…</p></div>
         </div>
       </section>
 

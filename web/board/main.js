@@ -10,9 +10,11 @@ import { buildIsland } from "./island.js";
 import { fitIslandCamera, loadTile } from "./layout.js";
 import { TRAFFIC, signalState, trafficSpec } from "./city.js";
 import { ROAMERS } from "./roamers.js";
-import { initBoard, poll, setAgentFilter } from "./status.js";
+import { initBoard, poll, refreshRoomNames, setAgentFilter } from "./status.js";
 import { frame } from "./render.js";
 import { focusMainBoard, initMini } from "./mini.js";
+import { initNotify, setNotifyPrefs } from "./notify.js";
+import { initRecap } from "./recap.js";
 import { apiPost, closeAgentPanel, elPanelClose, elPanelJump, elPanelNote, elPanelPrompt, elPanelSend, hitTestBot, openAgentPanel, pickCharacter, pickColour, pickOwnIcon, refreshPanel, saveIcon, saveName, toggleIconPicker, toggleRename } from "./panel.js";
 
 S.agentFilter = normalizeAgentFilter((() => {
@@ -259,3 +261,16 @@ if (bootParams.has("debug")) window.__boardDebug = {
 })();
 
 initMini({ draw: frame, poll, pollMs: POLL_MS, standalone: bootParams.get("mini") === "1" });
+initNotify({ onOpenAgent: (b) => { openAgentPanel(b); focusMainBoard(); } });
+initRecap({ onOpenAgent: (b) => openAgentPanel(b) });
+
+/** Settings → Board → Notifications (which events, sound); re-read when you come back to the tab. */
+async function loadNotifyPrefs() {
+  try {
+    const r = await fetch("/api/settings", { cache: "no-store" });
+    if (r.ok) setNotifyPrefs((await r.json()).settings?.board?.notify);
+  } catch (_) { /* static hosting / older server: defaults */ }
+}
+loadNotifyPrefs();
+window.addEventListener("focus", () => { loadNotifyPrefs(); refreshRoomNames(); });
+setInterval(refreshRoomNames, 30_000); // room names / colours from Settings

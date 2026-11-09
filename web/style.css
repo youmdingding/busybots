@@ -17,6 +17,7 @@ html, body {
 }
 
 #app {
+  container-type: inline-size; /* the board sizes itself from the page width (cqw) */
   min-height: 100%;
   display: flex;
   flex-direction: column;
@@ -28,8 +29,7 @@ html, body {
 }
 
 #header {
-  width: 1600px;
-  max-width: 100%;
+  width: 100%;
   display: flex;
   flex-wrap: wrap;
   justify-content: space-between;
@@ -91,9 +91,11 @@ h1 {
   50% { opacity: 0.2; }
 }
 
-/* Canvas + agent panel: LOCKED frame size (content / open-closed never resize) */
+/* Canvas + agent panel. Panel closed: the board takes the whole width. Panel open: the
+   board makes room for it (360px + 12px gap). The panel's content never resizes anything. */
 .board-row {
-  --frame-w: min(1600px, calc(100vw - 48px - 372px), calc((100vh - 160px) * 1600 / 1020));
+  position: relative;
+  --frame-w: 100cqw;
   --frame-h: calc(var(--frame-w) * 1020 / 1600);
   display: flex;
   flex-direction: row;
@@ -101,8 +103,8 @@ h1 {
   justify-content: center;
   gap: 12px;
   width: 100%;
-  max-width: min(1984px, 100%);
 }
+.board-row.panel-open { --frame-w: calc(100cqw - 372px); }
 
 #board {
   flex: none;
@@ -126,8 +128,7 @@ h1 {
 }
 
 #footer {
-  width: 1600px;
-  max-width: 100%;
+  width: 100%;
   font-size: 12px;
   color: var(--muted);
   line-height: 1.55;
@@ -211,19 +212,18 @@ h1 {
 #app { position: relative; }
 
 .agent-panel {
-  position: relative;
-  top: auto;
-  right: auto;
   flex: none;
   box-sizing: border-box;
   width: 360px;
   min-width: 360px;
   max-width: 360px;
-  /* Exact same height as #board — content scrolls inside, never grows frame */
-  height: var(--frame-h);
-  max-height: var(--frame-h);
+  /* Same height as #board (at most the window's) — content scrolls inside, never grows frame */
+  height: min(var(--frame-h), calc(100vh - 24px));
+  max-height: min(var(--frame-h), calc(100vh - 24px));
   min-height: 0;
   align-self: flex-start;
+  position: sticky;
+  top: 12px; /* stays in view when a tall board scrolls */
   overflow: hidden;
   z-index: 5;
   background: rgba(247, 250, 248, 0.96);
@@ -426,12 +426,52 @@ h1 {
   background: rgba(255, 255, 255, 0.6);
 }
 #settings-link:hover { background: rgba(45, 138, 122, 0.1); }
-#popout-btn {
+.head-btn {
   font: inherit; font-size: 12px; font-weight: 700; color: var(--accent); cursor: pointer;
   border: 2px solid rgba(58, 122, 92, 0.45); border-radius: 2px; padding: 3px 8px;
   background: rgba(255, 255, 255, 0.6);
 }
-#popout-btn:hover { background: rgba(45, 138, 122, 0.1); }
+.head-btn:hover { background: rgba(45, 138, 122, 0.1); }
+.head-btn[aria-pressed="true"] { background: var(--accent); color: #fff; border-color: var(--accent); }
+.head-btn:disabled { opacity: 0.5; cursor: default; }
+
+/* Today: what each agent did, over the board */
+.recap {
+  position: absolute; left: 12px; top: 12px; z-index: 5;
+  width: min(560px, calc(var(--frame-w) - 24px)); max-height: calc(var(--frame-h) - 24px);
+  display: flex; flex-direction: column;
+  background: rgba(247, 250, 248, 0.97); border: 3px solid rgba(58, 122, 92, 0.55); border-radius: 2px;
+  box-shadow: 0 0 0 1px rgba(255,255,255,0.5), 5px 6px 0 rgba(40, 70, 60, 0.18);
+}
+.recap.hidden { display: none; }
+.recap-head { display: flex; align-items: center; gap: 6px; padding: 10px 12px 8px; border-bottom: 2px solid rgba(58, 122, 92, 0.25); }
+.recap-title { flex: 1; font-size: 15px; color: var(--accent); }
+.recap-nav {
+  font: 700 16px system-ui, sans-serif; width: 28px; height: 26px; cursor: pointer; color: var(--accent);
+  background: #fff; border: 2px solid rgba(58, 122, 92, 0.45); border-radius: 2px; line-height: 1;
+}
+.recap-nav:disabled { opacity: 0.35; cursor: default; }
+.recap-body { overflow-y: auto; padding: 10px 12px 12px; display: flex; flex-direction: column; gap: 10px; }
+.recap-totals { display: flex; flex-wrap: wrap; gap: 6px; }
+.recap-stat { display: flex; flex-direction: column; padding: 5px 9px; background: #fff; border: 2px solid rgba(58, 122, 92, 0.25); border-radius: 2px; }
+.recap-stat strong { font-size: 15px; color: var(--text); }
+.recap-stat span { font-size: 11px; color: var(--muted); }
+.recap-row { display: flex; flex-direction: column; gap: 4px; padding-top: 8px; border-top: 1px solid rgba(58, 122, 92, 0.18); }
+.recap-row-head { display: flex; align-items: baseline; gap: 8px; }
+.recap-name { font-size: 13px; overflow-wrap: anywhere; }
+.recap-project { font-size: 11px; color: var(--muted); flex: 1; overflow-wrap: anywhere; }
+.recap-open {
+  margin-left: auto; font: 700 11px system-ui, sans-serif; color: var(--accent); cursor: pointer;
+  background: #fff; border: 2px solid rgba(58, 122, 92, 0.4); border-radius: 2px; padding: 1px 7px;
+}
+.recap-barwrap { min-width: 8%; }
+.recap-bar { display: flex; height: 10px; border-radius: 2px; overflow: hidden; background: rgba(58, 122, 92, 0.12); }
+.recap-seg { display: block; height: 100%; }
+.recap-facts { font-size: 12px; color: var(--text); }
+.recap-files { font-size: 11px; color: var(--muted); overflow-wrap: anywhere; }
+.recap-empty { font-size: 13px; color: var(--muted); padding: 6px 0; }
+.panel-today { font-size: 12px; color: var(--muted); margin: -2px 0 8px; line-height: 1.45; }
+.panel-today.hidden { display: none; }
 
 /* Pop out: the board lives in a small window; leave a note where it was */
 .popped-note { display: none; }
@@ -446,7 +486,7 @@ body.popped .popped-note {
 
 /* ?mini=1: just the board, filling the window */
 body.mini { margin: 0; padding: 0; overflow: hidden; }
-body.mini header, body.mini footer, body.mini .agent-panel, body.mini .popped-note { display: none !important; }
+body.mini header, body.mini footer, body.mini .agent-panel, body.mini .popped-note, body.mini .recap { display: none !important; }
 body.mini .board-row { max-width: none; height: 100vh; align-items: center; justify-content: center; gap: 0; }
 body.mini #board {
   width: min(100vw, calc(100vh * 1600 / 1020)); height: min(100vh, calc(100vw * 1020 / 1600));

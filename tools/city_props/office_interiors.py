@@ -5,7 +5,7 @@ interiors.py: origin = zone footprint NW corner at floor level, only N and W bac
 Run: python3 office_interiors.py [zone ...] -> out/office_interior_<zone>.png + manifest
 """
 import json, math, os, sys
-from isopix import box, vcyl, hcyl, blob, face_uv, rgb, mix, hash2, render, plane_through, Solid, LIVE, liven, save_live
+from isopix import box, vcyl, hcyl, blob, face_uv, rgb, mix, hash2, render, plane_through, Solid, LIVE, liven, save_live, name_signs
 from props import cone, flat, save_room
 from interiors import (U, WALL_T, text7, room_shell, doormat, entrance_steps, door_frame_x, door_frame_y,
                        DOOR_HALF, desk, monitor, keyboard, office_chair, bookshelf, mug, paper_stack,
@@ -46,6 +46,8 @@ def feature_wall(accent, z_split=13.0, top=30.0):
 def raised_letters_x(text, x0, y, z0, col=WHITE, depth=1.2, px=1.0):
     """3D letters standing proud of the N wall (each 'on' glyph pixel is a small box)."""
     from interiors import FONT7
+    from isopix import RAISED
+    RAISED.append(dict(text=text, x0=x0, y=y, z0=z0, cell=px * 2, depth=depth, cols=len(text) * 6 + 24))  # name signs: room for 4 more letters where the wall is free
     S = []
     m = lambda p, n: (rgb(col), True) if face_uv(p, n)[0] in ("L", "top") else rgb(col) * 0.8
     for ci, ch in enumerate(text):
@@ -1065,7 +1067,7 @@ if __name__ == "__main__":
     man = json.load(open("out/manifest.json"))
     for zid in (sys.argv[1:] or OFFICE_INTERIORS):
         LIVE.clear()
-        S = build(zid)
+        S = name_signs(build(zid))
         im, anchor = render(S, ground_shadow=0)
         name = f"office_interior_{zid}"
         save_room(im, anchor, S, name, man, U)

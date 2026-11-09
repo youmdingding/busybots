@@ -12,6 +12,7 @@ import { CITY_DIR } from "./constants.js";
 import { ctx } from "./dom.js";
 import { loadTile } from "./layout.js";
 import { botPassesAgentFilter } from "./agents.js";
+import { FONT7, FONT5, signText, glyphOn, textCols } from "./pixelfont.js";
 
 const FPS = 12;
 const ROOMS = new Map(); // sprite name → { pixels, bx, by, bw, bh, canvas, img, frame } | { failed }
@@ -46,17 +47,23 @@ function roomData(name, meta) {
     g.clearRect(0, 0, w, h);
     g.drawImage(base, 0, 0);
     const B = g.getImageData(0, 0, w, h).data;
-    const pixels = [];
+    const pixels = [], signPixels = []; // screens the room animates / its name sign(s)
     let x0 = w, y0 = h, x1 = -1, y1 = -1;
     for (let y = 0; y < h; y++) {
       for (let x = 0; x < w; x++) {
         const i = (y * w + x) * 4;
         if (!L[i + 3] || !meta[L[i]]) continue;
-        pixels.push({ x, y, sid: L[i], u: L[i + 1], v: L[i + 2], orig: [B[i], B[i + 1], B[i + 2]] });
+        const p = { x, y, sid: L[i], u: L[i + 1], v: L[i + 2], orig: [B[i], B[i + 1], B[i + 2]] };
+        if (meta[L[i]].kind === "sign") {
+          signPixels.push(p);
+          if (!meta[L[i]].over) continue; // a name on an animated screen stays part of that screen
+        }
+        pixels.push(p);
         x0 = Math.min(x0, x); y0 = Math.min(y0, y); x1 = Math.max(x1, x); y1 = Math.max(y1, y);
       }
     }
-    if (!pixels.length) { ROOMS.set(name, { failed: true }); return null; }
+    if (!pixels.length && !signPixels.length) { ROOMS.set(name, { failed: true }); return null; }
+    if (!pixels.length) { x0 = y0 = 0; x1 = y1 = 0; } // a room with a sign and no screens
     // per part: orig colour by (u, v) for panning, and its background (commonest colour)
     const screens = {};
     for (const p of pixels) {
@@ -77,7 +84,7 @@ function roomData(name, meta) {
     canvas.width = bw;
     canvas.height = bh;
     const cg = canvas.getContext("2d");
-    r = { pixels, screens, bx: x0, by: y0, bw, bh, canvas, cg, img: cg.createImageData(bw, bh), frame: -1 };
+    r = { pixels, signPixels, screens, bx: x0, by: y0, bw, bh, canvas, cg, img: cg.createImageData(bw, bh), frame: -1 };
     ROOMS.set(name, r);
     return r;
   } catch (e) {
@@ -125,6 +132,10 @@ const lerp = (a, b, k) => a.map((x, i) => x + (b[i] - x) * Math.max(0, Math.min(
 const sameish = (a, b) => Math.abs(a[0] - b[0]) + Math.abs(a[1] - b[1]) + Math.abs(a[2] - b[2]) < 60;
 
 const KINDS = {
+  /** Room name signs aren't animated; drawRoomSign repaints them when you rename the room. */
+  sign(p) {
+    return p.orig;
+  },
   /** Code scrolling up, a blinking cursor on the newest line. */
   code(p, m, t) {
     if (p.v < 2) return p.orig;                     // title bar
@@ -344,12 +355,137 @@ const KINDS = {
   },
 };
 
+// ---- room name signs (Settings → Rooms) ----------------------------------------
+// The generator tags each pixel of a room's name sign(s) with its letter cell on the name's
+// grid (u = column + 64, v = row + 16; tools/city_props/isopix.py name_signs). To show your
+// name, cells of the new name get the sign's ink colour (or your room colour), cells of the
+// old name that are no longer lit get the plate colour, everything else stays as drawn.
+const SIGNS = new Map(); // sprite name → { key, canvas, bx, by, bw, bh } | { key, none: true }
+
+function commonest(list) {
+  const n = new Map();
+  let best = null, bestN = 0;
+  for (const c of list) {
+    const k = (c[0] << 16) | (c[1] << 8) | c[2];
+    const v = (n.get(k) || 0) + 1;
+    n.set(k, v);
+    if (v > bestN) { bestN = v; best = c; }
+  }
+  return best;
+}
+
+/** One sign: which pixels change, and to what. Raised letters (meta.fill): the grid is one
+ *  cell per glyph dot (several pixels each), so only full-size letters read; the wall behind
+ *  the old letters is painted over. */
+function repaintSign(px, meta, text, tint) {
+  const old = meta.text || "";
+  const oldOn = (col, row) => glyphOn(old, col, row);
+  const oldW = textCols(old), oldH = 7;
+  const base = 0;
+  const has = new Set(px.map((p) => p.u * 256 + p.v));
+  const cell = (col, row) => has.has((col + 64) * 256 + row + 16);
+  const inkPx = [], platePx = [];
+  for (const p of px) {
+    const col = p.u - 64, row = p.v - 16;
+    if (oldOn(col, row)) inkPx.push(p.orig);
+    else if (row >= 0 && row < oldH && col >= 0 && col < oldW) platePx.push(p.orig);
+  }
+  const ink = tint || commonest(inkPx), plate = commonest(platePx);
+  if (!ink || !plate) return [];
+  // room on the sign: columns (almost) fully on it, widening from the old name's middle
+  const full = (col) => { let k = 0; for (let r = base; r <= base + 6; r++) if (cell(col, r)) k++; return k >= 6; };
+  const mid = Math.floor((oldW - 1) / 2);
+  let lo = mid, hi = mid;
+  while (lo > mid - 200 && full(lo - 1)) lo--;
+  while (hi < mid + 200 && full(hi + 1)) hi++;
+  if (lo > 0) lo = Math.min(lo, 0);
+  if (hi < oldW - 1) hi = Math.max(hi, oldW - 1);
+  const room = hi - lo + 1;
+  // Sizes to try, biggest first: the original letter size (raised letters are bigger than a
+  // pixel per glyph dot), one pixel per dot, then the small 3x5 letters.
+  const sizes = meta.fill ? [{ font: FONT7, s: 1, top: 0 }] : [{ font: FONT7, s: 1, top: 0 }, { font: FONT5, s: 1, top: 1 }];
+  const width = (t, z) => Math.round(textCols(t, z.font) * z.s);
+  let t = text == null ? old : text;
+  let z = sizes.find((x) => width(t, x) <= room);
+  if (!z) {
+    z = sizes[sizes.length - 1];
+    const fit = Math.max(1, Math.floor((room + 1) / (z.font === FONT7 ? 6 : 4)));
+    let cut = t.slice(0, fit);
+    const sp = cut.lastIndexOf(" ");
+    if (t[fit] !== " " && sp >= fit / 2) cut = cut.slice(0, sp); // whole words when most of it fits
+    t = cut.trimEnd();
+  }
+  const w = width(t, z);
+  let start = text == null ? 0 : Math.max(lo, Math.min(hi - w + 1, Math.round(mid - (w - 1) / 2)));
+  // Wall signs step down a pixel every two columns, counted from the old name's first column:
+  // letters must start on an even column to sit on that staircase like the original ones.
+  if (start % 2 && !meta.fill) start += start + 1 + w - 1 <= hi ? 1 : -1;
+  const newOn = (col, row) => glyphOn(t, Math.floor((col - start) / z.s), Math.floor((row - z.top) / z.s), z.font);
+  const a0 = Math.min(start, 0) - 2, a1 = Math.max(start + w, oldW) + 1;
+  const out = [];
+  for (const p of px) {
+    const col = p.u - 64, row = p.v - 16;
+    if (newOn(col, row)) out.push([p, ink]);
+    else if (meta.fill && row >= -2 && row <= oldH + 1 && col >= a0 && col <= a1) out.push([p, plate]); // raised letters: plain wall behind
+    else if (oldOn(col, row)) out.push([p, plate]);
+  }
+  return out;
+}
+
+function buildSigns(r, live, area, key) {
+  const parts = new Map();
+  for (const p of r.signPixels) {
+    if (!parts.has(p.sid)) parts.set(p.sid, []);
+    parts.get(p.sid).push(p);
+  }
+  const text = (area.renamed && signText(area.label)) || null; // nothing the sign font can show (emoji only): keep the sign
+  const tint = area.recoloured && /^#[0-9a-f]{6}$/i.test(area.tint || "") ? hexRgb(area.tint) : null;
+  const all = [];
+  for (const [sid, px] of parts) all.push(...repaintSign(px, live[sid], text, tint));
+  if (!all.length) return { key, none: true };
+  let x0 = Infinity, y0 = Infinity, x1 = -1, y1 = -1;
+  for (const [p] of all) { x0 = Math.min(x0, p.x); y0 = Math.min(y0, p.y); x1 = Math.max(x1, p.x); y1 = Math.max(y1, p.y); }
+  const bw = x1 - x0 + 1, bh = y1 - y0 + 1;
+  const canvas = document.createElement("canvas");
+  canvas.width = bw;
+  canvas.height = bh;
+  const g = canvas.getContext("2d");
+  const img = g.createImageData(bw, bh);
+  for (const [p, c] of all) {
+    const i = ((p.y - y0) * bw + (p.x - x0)) * 4;
+    img.data[i] = c[0]; img.data[i + 1] = c[1]; img.data[i + 2] = c[2]; img.data[i + 3] = 255;
+  }
+  g.putImageData(img, 0, 0);
+  return { key, canvas, bx: x0, by: y0, bw, bh };
+}
+
+/** The room's name sign(s) with your name / colour (Settings → Rooms), over the sprite drawn at (x, y). */
+export function drawRoomSign(spriteName, zid, x, y, s) {
+  const area = (S.claudeConfig?.areas || []).find((a) => a && a.key === zid);
+  if (!area || (!area.renamed && !area.recoloured)) return;
+  const m = S.CITY_MANIFEST && S.CITY_MANIFEST[spriteName];
+  if (!m || !m.live) return;
+  const key = `${area.renamed ? area.label : ""}|${area.recoloured ? area.tint : ""}`;
+  let sg = SIGNS.get(spriteName);
+  if (!sg || sg.key !== key) {
+    const r = roomData(spriteName, m.live);
+    if (!r) return; // still loading
+    sg = buildSigns(r, m.live, area, key);
+    SIGNS.set(spriteName, sg);
+  }
+  if (sg.none) return;
+  ctx.save();
+  ctx.imageSmoothingEnabled = false;
+  ctx.drawImage(sg.canvas, x + sg.bx * s, y + sg.by * s, sg.bw * s, sg.bh * s);
+  ctx.restore();
+}
+
 /** Overlay the animated screens of one room sprite drawn at (x, y) with scale s. */
 export function drawLiveScreens(spriteName, x, y, s, now) {
   const m = S.CITY_MANIFEST && S.CITY_MANIFEST[spriteName];
   if (!m || !m.live) return;
   const r = roomData(spriteName, m.live);
-  if (!r) return;
+  if (!r || !r.pixels.length) return;
   const t = (now || performance.now()) / 1000;
   const frame = Math.floor(t * FPS);
   if (frame !== r.frame) {

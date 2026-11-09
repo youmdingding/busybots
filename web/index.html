@@ -35,12 +35,23 @@
         <span id="updated-at">—</span>
         <span id="stale-warn" class="warn hidden">STALE</span>
         <span id="poll-dot" title="polling"></span>
-        <button type="button" id="popout-btn" title="Pop out a small board you can keep in a corner of the screen">⧉ Pop out</button>
+        <button type="button" id="recap-btn" class="head-btn" aria-pressed="false" title="What your agents did today">Today</button>
+        <button type="button" id="notify-btn" class="head-btn" aria-pressed="false" title="Get a notification when an agent needs you or finishes">🔕 Notify</button>
+        <button type="button" id="popout-btn" class="head-btn" title="Pop out a small board you can keep in a corner of the screen">⧉ Pop out</button>
         <a id="settings-link" href="/admin" title="Settings">Settings</a>
       </div>
     </header>
     <div id="board-row" class="board-row">
     <canvas id="board" width="1600" height="1020" aria-label="Busybots: your coding agents at work"></canvas>
+    <section id="recap" class="recap hidden" aria-label="Today">
+      <div class="recap-head">
+        <button type="button" id="recap-prev" class="recap-nav" aria-label="Previous day">‹</button>
+        <h2 id="recap-title" class="recap-title">Today</h2>
+        <button type="button" id="recap-next" class="recap-nav" aria-label="Next day">›</button>
+        <button type="button" id="recap-close" class="panel-x" aria-label="Close">×</button>
+      </div>
+      <div id="recap-body" class="recap-body"></div>
+    </section>
     <div id="popped-note" class="popped-note">The board is in its own small window. <button type="button" id="popped-back">Bring it back</button></div>
     <aside id="agent-panel" class="agent-panel hidden" aria-hidden="true">
       <div class="panel-head">
@@ -81,6 +92,8 @@
       </div>
       <div id="panel-attention" class="panel-attention hidden" role="status"></div>
       <div id="panel-status" class="panel-status"></div>
+      <div id="panel-today" class="panel-today hidden"></div>
+      <div id="panel-tokens" class="panel-today hidden"></div>
       <div class="panel-actions">
         <button type="button" id="panel-jump" class="panel-btn">Jump to it</button>
       </div>

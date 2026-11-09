@@ -31,8 +31,13 @@ export function defaults() {
       },
     },
     // Personal additions to the classification rules in config.json (skills you use, etc.)
-    rules: { skillAreas: {}, skillLabels: {}, phaseFiles: { plan: [], spec: [] }, testCommands: [] },
-    board: { theme: "island", showIdleBubbles: false, pollSeconds: 2, privacy: false },
+    rules: { skillAreas: {}, skillLabels: {}, phaseFiles: { plan: [], spec: [] }, testCommands: [], autoDetect: true,
+      workAreas: {} },  // kind of work (classify.js WORK_KINDS) → room, over config.json
+    // Your names and colours for the rooms: { build: { label: "Ship it", tint: "#e0703a" } }
+    rooms: {},
+    board: { theme: "island", showIdleBubbles: false, pollSeconds: 2, privacy: false,
+      // desktop notifications: which events, a sound, and (macOS/Linux) also when no board is open
+      notify: { needsYou: true, done: true, sound: false, whenClosed: false } },
   };
 }
 
@@ -66,7 +71,37 @@ function merge(base, over) {
   return out;
 }
 // Maps whose keys are user data (skill names), not schema keys
-const isFreeMap = (k) => k === "skillAreas" || k === "skillLabels";
+const isFreeMap = (k) => k === "skillAreas" || k === "skillLabels" || k === "workAreas" || k === "rooms";
+export const MAX_ROOM_NAME = 24;
+const ROOM_KEY = /^[a-z0-9_-]{1,24}$/;
+const HEX = /^#[0-9a-fA-F]{6}$/;
+/** A room name: one line, no control characters, at most MAX_ROOM_NAME characters. */
+export function cleanRoomName(v) {
+  if (typeof v !== "string") return null;
+  const t = v.replace(/[\u0000-\u001f\u007f]/g, " ").replace(/\s+/g, " ").trim();
+  return t ? [...t].slice(0, MAX_ROOM_NAME).join("") : null;
+}
+function cleanRooms(v) {
+  const out = {};
+  if (!isObj(v)) return out;
+  for (const [k, r] of Object.entries(v).slice(0, 50)) {
+    if (!ROOM_KEY.test(k) || !isObj(r)) continue;
+    const o = {};
+    const label = cleanRoomName(r.label);
+    if (label) o.label = label;
+    if (typeof r.tint === "string" && HEX.test(r.tint)) o.tint = r.tint.toLowerCase();
+    if (Object.keys(o).length) out[k] = o;
+  }
+  return out;
+}
+function cleanWorkAreas(v) {
+  const out = {};
+  if (!isObj(v)) return out;
+  for (const [k, room] of Object.entries(v).slice(0, 50)) {
+    if (/^[a-z]{1,24}$/.test(k) && typeof room === "string" && ROOM_KEY.test(room)) out[k] = room;
+  }
+  return out;
+}
 
 const cleanStr = (v) => typeof v === "string" && v.length <= MAX_PATH_LEN && !v.includes("\0");
 const strList = (v, max = 200) => (Array.isArray(v) ? v.filter((x) => typeof x === "string" && x.trim()).map((x) => x.trim().slice(0, 200)).slice(0, max) : []);
@@ -120,11 +155,17 @@ export function validate(raw) {
     skillLabels: strMap(r.skillLabels),
     phaseFiles: { plan: strList(r.phaseFiles?.plan), spec: strList(r.phaseFiles?.spec) },
     testCommands: strList(r.testCommands),
+    autoDetect: r.autoDetect !== false, // use what's installed (plugins, skills, frameworks) to place agents
+    workAreas: cleanWorkAreas(r.workAreas),
   };
+  s.rooms = cleanRooms(s.rooms);
   const b = s.board;
   if (!THEMES.includes(b.theme)) b.theme = "island";
   b.showIdleBubbles = Boolean(b.showIdleBubbles);
   b.privacy = Boolean(b.privacy);
+  const n = isObj(b.notify) ? b.notify : {};
+  const dn = d.board.notify;
+  b.notify = Object.fromEntries(Object.keys(dn).map((k) => [k, k in n ? Boolean(n[k]) : dn[k]]));
   let ps = Number(b.pollSeconds);
   if (!Number.isFinite(ps) || ps <= 0) ps = 2;
   b.pollSeconds = Math.max(1, Math.min(ps, 30));

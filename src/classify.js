@@ -40,16 +40,39 @@ const lowerMap = (v) => Object.fromEntries(Object.entries(isObj(v) ? v : {}).map
  * Classification rules: config.json defaults merged with the user's settings.rules.
  * Pass the result around instead of using module state.
  */
-export function makeRules(config = {}, userRules = {}) {
+/** Kinds of work you can send to a room (Settings → Rooms): the activity keys of config.json's
+ *  activityAreas each one covers. A skill's room still wins over these. */
+export const WORK_KINDS = [
+  { id: "code", label: "Editing code", keys: ["Edit", "Write", "MultiEdit", "NotebookEdit", "Bash.other"] },
+  { id: "tests", label: "Running tests and checks", keys: ["Bash.test", "test", "lint", "e2e", "playwright", "cypress", "Browser.verify"] },
+  { id: "review", label: "Reviewing", keys: ["review", "Edit.review", "Read.review", "Write.review", "MultiEdit.review", "Grep.review", "Glob.review"] },
+  { id: "reading", label: "Reading and searching", keys: ["Read", "Grep", "Glob", "WebFetch", "WebSearch", "ToolSearch", "explore", "research", "Browser.read"] },
+  { id: "plans", label: "Writing plans", keys: ["Edit.plan", "Write.plan", "MultiEdit.plan", "Read.plan", "Grep.plan", "Glob.plan", "plan", "planning", "design"] },
+  { id: "specs", label: "Writing specs", keys: ["Edit.spec", "Write.spec", "MultiEdit.spec", "Read.spec", "Grep.spec", "Glob.spec", "spec", "specs", "requirements"] },
+  { id: "delegating", label: "Delegating to sub-agents", keys: ["Agent", "Task", "TaskCreate", "TaskUpdate"] },
+  { id: "other", label: "Anything else while working", keys: ["active", "busy", "working", "thinking", "assistant", "default"] },
+];
+
+/** Rules from (lowest first) the built-in defaults, what's detected on this machine (auto, from
+ *  src/setup.js autoRules: may be null), config.json and your personal rules in settings.json. */
+export function makeRules(config = {}, userRules = {}, auto = null) {
   const pf = isObj(config.phaseFiles) ? config.phaseFiles : {};
   const upf = isObj(userRules.phaseFiles) ? userRules.phaseFiles : {};
+  const a = isObj(auto) ? auto : {};
+  const activityAreas = { ...(config.activityAreas || config.activityZones || {}) };
+  const rooms = new Set(Object.values(activityAreas));
+  for (const ar of config.areas || []) if (ar && ar.key) rooms.add(ar.key);
+  for (const [kind, room] of Object.entries(isObj(userRules.workAreas) ? userRules.workAreas : {})) {
+    const wk = WORK_KINDS.find((k) => k.id === kind);
+    if (wk && rooms.has(room)) for (const key of wk.keys) activityAreas[key] = room; // only rooms that exist
+  }
   return {
-    activityAreas: { ...(config.activityAreas || config.activityZones || {}) },
-    skillAreas: { ...DEFAULT_SKILL_AREAS, ...lowerMap(config.skillAreas), ...lowerMap(userRules.skillAreas) },
+    activityAreas,
+    skillAreas: { ...DEFAULT_SKILL_AREAS, ...lowerMap(a.skillAreas), ...lowerMap(config.skillAreas), ...lowerMap(userRules.skillAreas) },
     skillLabels: { ...lowerMap(config.skillLabels), ...lowerMap(userRules.skillLabels) },
     testCommands: [...lowerList(config.testCommands), ...lowerList(userRules.testCommands)],
-    planFiles: [...lowerList(pf.plan), ...lowerList(upf.plan)],
-    specFiles: [...lowerList(pf.spec), ...lowerList(upf.spec)],
+    planFiles: [...new Set([...lowerList(a.planFiles), ...lowerList(pf.plan), ...lowerList(upf.plan)])],
+    specFiles: [...new Set([...lowerList(a.specFiles), ...lowerList(pf.spec), ...lowerList(upf.spec)])],
     doneHours: Number(config.doneHours) || 12,
   };
 }
@@ -333,6 +356,14 @@ export function latestActivity(events, maxChars, rules) {
   result.trailing_errors = trailing;
   const turnStart = lastUserPromptTs || 0;
   result.turn_edited = toolUses.some((t) => EDIT_TOOLS.has(t[1]) && (t[3] || 0) >= turnStart);
+  // Files it edited, newest time per path (for the daily recap; never sent to the board)
+  const edited = new Map();
+  for (const [, name, inp, ts] of toolUses) {
+    if (!EDIT_TOOLS.has(name) || !isObj(inp)) continue;
+    const p = inp.file_path || inp.notebook_path || inp.path;
+    if (typeof p === "string" && p) edited.set(p, Math.max(edited.get(p) || 0, ts || 0));
+  }
+  result.edited_files = [...edited].map(([p, ts]) => [p, ts || null]);
   result.last_result_ts = lastResultTs;
   // Most recent "real work" in this turn: reading while implementing stays in Build.
   let workKey = null;

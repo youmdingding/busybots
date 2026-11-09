@@ -7,7 +7,7 @@ Explore rooms (new) + resized Idle rooms for all four themes, after Idle was spl
 Run: python3 explore_rooms.py [sprite ...] -> out/<sprite>.png + manifest entries
 """
 import json, math, sys
-from isopix import box, vcyl, hcyl, blob, face_uv, rgb, mix, hash2, render, plane_through, Solid, LIVE, liven
+from isopix import box, vcyl, hcyl, blob, face_uv, rgb, mix, hash2, render, plane_through, Solid, LIVE, liven, name_signs
 from props import flat, cone, planter_mat, solid_hull, save_room
 import interiors as CI
 from interiors import (U, WALL_T, text7, room_shell, doormat, entrance_steps, door_frame_x, door_frame_y,
@@ -711,7 +711,7 @@ if __name__ == "__main__":
     for name in (sys.argv[1:] or ROOMS):
         LIVE.clear()  # parts the board animates (tagged with liven())
         fn, W, D, elev = ROOMS[name]
-        S = fn(W, D, elev / 2.0)
+        S = name_signs(fn(W, D, elev / 2.0))
         im, anchor = render(S, ground_shadow=0)
         save_room(im, anchor, S, name, man, U)
         print(name, im.size, anchor, flush=True)

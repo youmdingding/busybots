@@ -12,7 +12,7 @@ Run: python3 interiors.py  -> out/interior_<zone>.png + manifest entries
 """
 import json, math, os, sys
 import numpy as np
-from isopix import box, vcyl, hcyl, blob, Solid, face_uv, rgb, mix, hash2, render, plane_through, LIVE, liven
+from isopix import box, vcyl, hcyl, blob, Solid, face_uv, rgb, mix, hash2, render, plane_through, LIVE, liven, text_cell, name_signs
 from props import cone, flat, glass_px, planter_mat, save_room
 
 # Board camera: TILE_W * worldScale / 2 screen px per grid step; drawing at 2x
@@ -52,6 +52,7 @@ def text7(text, u, v, u0, v_top, slope=0):
     if slope:
         v = v - slope * 0.5 * (col % 2)
     row = math.floor(v_top - v)
+    text_cell(text, (round(u0, 2), round(v_top, 2), slope), col, row)  # name signs: see isopix.name_signs
     if row < 0 or row > 6 or col < 0:
         return False
     ci, cx = divmod(col, 6)
@@ -2002,7 +2003,7 @@ if __name__ == "__main__":
     man = json.load(open("out/manifest.json")) if os.path.exists("out/manifest.json") else {}
     for zid in (sys.argv[1:] or INTERIORS):
         LIVE.clear()  # parts the board animates while an agent works here (tagged with liven())
-        S = build(zid)
+        S = name_signs(build(zid))
         im, anchor = render(S, ground_shadow=0)
         name = f"interior_{zid}"
         save_room(im, anchor, S, name, man, U)

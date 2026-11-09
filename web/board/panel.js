@@ -4,11 +4,14 @@ import { bots } from "./state.js";
 import { CANVAS_H, CANVAS_W, SCALE, SPRITE } from "./constants.js";
 import { canvas } from "./dom.js";
 import { botPassesAgentFilter } from "./agents.js";
+import { todayLine, tokensText } from "./recap.js";
 
 export const elPanel = document.getElementById("agent-panel");
 export const elPanelName = document.getElementById("panel-name");
 export const elPanelMeta = document.getElementById("panel-meta");
 export const elPanelStatus = document.getElementById("panel-status");
+const elPanelToday = document.getElementById("panel-today");
+const elPanelTokens = document.getElementById("panel-tokens");
 export const elPanelTranscript = document.getElementById("panel-transcript");
 export const elPanelJump = document.getElementById("panel-jump");
 export const elPanelPrompt = document.getElementById("panel-prompt");
@@ -347,6 +350,22 @@ export function applyPanelSession(data) {
     elPanelStatus.textContent =
       `zone ${s.zone || "—"} · state ${s.state || "—"}` +
       (s.bubble ? ` · “${s.bubble}”` : "");
+  }
+  // Today's activity and token use (textContent only)
+  if (elPanelToday) {
+    const line = todayLine(s.today);
+    elPanelToday.textContent = line;
+    elPanelToday.classList.toggle("hidden", !line);
+  }
+  if (elPanelTokens) {
+    const t = s.tokens;
+    const show = !!(t && t.session);
+    elPanelTokens.textContent = show ? `This conversation: ${tokensText(t.session)} tokens` + (t.today && t.today !== t.session ? ` (${tokensText(t.today)} today)` : "") : "";
+    const d = show ? t.sessionDetail || {} : {};
+    elPanelTokens.title = show
+      ? `Input ${tokensText(d.input)} · cache write ${tokensText(d.cacheWrite)} · cache read ${tokensText(d.cacheRead)} · output ${tokensText(d.output)}`
+      : "";
+    elPanelTokens.classList.toggle("hidden", !show);
   }
   renderTranscript(data.transcript || [], s.privacy);
 

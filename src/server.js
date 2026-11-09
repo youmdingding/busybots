@@ -18,7 +18,10 @@ import { jumpToAgent, terminalHostCached } from "./termhost.js";
 import { jsonlPathFor, tailJsonl } from "./claude.js";
 import { pidAlive, ttyForPid } from "./proc.js";
 import { withReadOnly, sqliteAvailable, SQLITE_HINT } from "./sqlite.js";
-import { CONFIG_PATH } from "./watcher.js";
+import { loadConfig, applyRooms } from "./watcher.js";
+import { makeRules, areaForSkill, DEFAULT_SKILL_AREAS, WORK_KINDS } from "./classify.js";
+import { dayKey } from "./recap.js";
+import { claudeSessionUsage, fileUsage, summarize } from "./usage.js";
 import { SessionPrefs, iconSet, MAX_NAME } from "./icons.js";
 
 export const DEFAULT_PORT = 8765;
@@ -194,8 +197,11 @@ const CONDUCTOR_LOOKUP = `
 /**
  * createBoardServer({ port, getStatus, token, log })
  * getStatus() returns the watcher's latest status object (served as /status.json).
+ * recap: the daily Recap (src/recap.js); getSetup(force): the watcher's detected() setup;
+ * getFiles(): the watcher's lastFiles (session id → its transcript), for token counts.
  */
-export function createBoardServer({ port = DEFAULT_PORT, getStatus = () => null, token = ensureToken(), prefs = new SessionPrefs(), log = (m) => console.error(m) } = {}) {
+export function createBoardServer({ port = DEFAULT_PORT, getStatus = () => null, token = ensureToken(), prefs = new SessionPrefs(),
+  recap = null, getSetup = null, getFiles = null, log = (m) => console.error(m) } = {}) {
   const allowedHosts = new Set([`127.0.0.1:${port}`, `localhost:${port}`, `[::1]:${port}`]);
   const allowedOrigins = new Set([...allowedHosts].map((h) => `http://${h}`));
   const tokenBuf = Buffer.from(token);
@@ -203,6 +209,25 @@ export function createBoardServer({ port = DEFAULT_PORT, getStatus = () => null,
 
   const settings = () => S.load();
   const claudeHomes = () => S.dirs(settings(), "claude");
+
+  /** Tokens used by a session (whole conversation and today), from its transcript; null if unknown. */
+  function sessionTokens(meta, sid) {
+    try {
+      const f = getFiles ? getFiles().get(sid) : null;
+      if (f && f.kind === "codex") return summarize(fileUsage(f.path, "codex"));
+      let path = f && f.kind === "claude" ? f.path : null;
+      if (!path && meta.cwd && !(meta.brand in READERS)) {
+        for (const h of claudeHomes()) {
+          const p = jsonlPathFor(h, meta.cwd, sid);
+          if (p && existsSync(p)) { path = p; break; }
+        }
+      }
+      return path ? summarize(claudeSessionUsage(path)) : null;
+    } catch (err) {
+      log(`tokens for ${sid}: ${err.message}`);
+      return null;
+    }
+  }
 
   function statusBot(sid) {
     const st = getStatus();
@@ -407,11 +432,20 @@ export function createBoardServer({ port = DEFAULT_PORT, getStatus = () => null,
     if (path.includes("..") || !STATIC_ALLOW.test(path)) return notFound(res);
     let body;
     if (path === "/status.json") {
+      server.boardSeenAt = Date.now(); // a board is open: desktop notifications come from it
       const st = getStatus();
       if (!st) return notFound(res);
       body = Buffer.from(JSON.stringify(st));
+    } else if (path === "/config.json") {
+      // config.json with your room names and colours (Settings → Rooms)
+      try {
+        body = Buffer.from(JSON.stringify(applyRooms(loadConfig(), settings())));
+      } catch (err) {
+        log(`config.json: ${err.message}`);
+        return notFound(res);
+      }
     } else {
-      const file = path === "/config.json" ? CONFIG_PATH : fileFor(path);
+      const file = fileFor(path);
       try {
         body = readFileSync(file);
       } catch {
@@ -434,13 +468,20 @@ export function createBoardServer({ port = DEFAULT_PORT, getStatus = () => null,
     if (req.method === "GET" || req.method === "HEAD") {
       if (path === "/api/token") return send(res, 200, { token });
       if (path === "/api/settings") {
+        let workKinds = [];
+        try {
+          const aa = loadConfig().activityAreas || {};
+          workKinds = WORK_KINDS.map((k) => ({ id: k.id, label: k.label, room: aa[k.keys[0]] || null })); // room = config.json's
+        } catch (err) { log(`config.json: ${err.message}`); }
         return send(res, 200, { ok: true, settings: settings(), defaults: S.defaults(), agents: S.AGENT_TYPES,
-          file: settingsPath(), exists: S.exists() });
+          workKinds, maxRoomName: S.MAX_ROOM_NAME, file: settingsPath(), exists: S.exists() });
       }
       if (path.startsWith("/api/session/") && path.split("/").length === 4) {
         const sid = path.split("/")[3];
         if (!SID_RE.test(sid)) return send(res, 400, { ok: false, error: "Invalid session id" });
         const meta = lookupSession(sid);
+        meta.today = recap ? recap.forSession(sid) : null; // counts and rooms only, no names
+        meta.tokens = sessionTokens(meta, sid);
         if (settings().board.privacy) {
           // Privacy mode: the board already shows a generic name; don't leak paths or text here
           const bot = statusBot(sid);
@@ -451,6 +492,20 @@ export function createBoardServer({ port = DEFAULT_PORT, getStatus = () => null,
           return send(res, 200, { ok: true, session: meta, transcript: [], iconSet: iconSet() });
         }
         return send(res, 200, { ok: true, session: meta, transcript: sessionTranscript(meta, sid), iconSet: iconSet() });
+      }
+      if (path === "/api/setup") {
+        // What's installed and which room each skill / command / sub-agent sends an agent to
+        const force = new URL(req.url, "http://x").searchParams.get("rescan") === "1";
+        let det = null;
+        try { det = getSetup ? getSetup(force) : null; } catch (err) { log(`setup: ${err.message}`); }
+        return send(res, 200, { ok: true, setup: setupReport(det, settings()) });
+      }
+      if (path === "/api/recap") {
+        // What each agent did on a day (default today), from the watcher's passes
+        const day = new URL(req.url, "http://x").searchParams.get("day") || dayKey();
+        if (!/^\d{4}-\d{2}-\d{2}$/.test(day)) return send(res, 400, { ok: false, error: "Invalid day" });
+        if (!recap) return send(res, 200, { ok: true, recap: { day, days: [day], totals: { agents: 0, working: 0, waiting: 0, finished: 0, files: 0, tokens: 0 }, agents: [] } });
+        return send(res, 200, { ok: true, recap: recap.summary(day, { privacy: settings().board.privacy }) });
       }
       if (path.startsWith("/api/")) return send(res, 404, { ok: false, error: "Not found" });
       return serveStatic(res, path);
@@ -521,6 +576,7 @@ export function createBoardServer({ port = DEFAULT_PORT, getStatus = () => null,
     });
   });
   server.prompts = prompts;
+  server.boardSeenAt = 0; // last time a board fetched /status.json (src/notify.js)
   return server;
 }
 
@@ -543,4 +599,28 @@ export function jumpConductor(workspaceId) {
   openApp("Conductor");
   tried.push({ activate: "Conductor" });
   return { ok: true, method: "activate:Conductor", deepLink: "unverified", tried };
+}
+
+/** Settings → Your setup: each detected skill / command / sub-agent with its room and where that
+ *  came from: yours (settings), config (config.json), keywords or profile:<framework> (detected),
+ *  default (built-in names), name (a fragment of its name), none. */
+export function setupReport(det, s, cfg = loadConfig()) {
+  const scan = (det && det.scan) || { plugins: [], items: [], frameworks: [] };
+  const auto = (det && det.auto) || { skillAreas: {}, why: {}, planFiles: [], specFiles: [] };
+  const on = s.rules.autoDetect !== false;
+  const rules = makeRules(cfg, s.rules, on ? auto : null);
+  const low = (m) => Object.fromEntries(Object.entries(m || {}).map(([k, v]) => [String(k).toLowerCase(), v]));
+  const yours = low(s.rules.skillAreas), conf = low(cfg.skillAreas);
+  const items = scan.items.map((it) => {
+    const key = it.name.split(":").pop();
+    let from = "none";
+    if (key in yours) from = "yours";
+    else if (key in conf) from = "config";
+    else if (on && key in auto.skillAreas) from = auto.why[key] === "keywords" ? "keywords" : `profile:${auto.why[key]}`;
+    else if (key in DEFAULT_SKILL_AREAS) from = "default";
+    const area = from === "none" ? areaForSkill(key, rules) : rules.skillAreas[key] || null;
+    return { ...it, key, area, from: from === "none" && area ? "name" : from };
+  });
+  return { autoDetect: on, plugins: scan.plugins, frameworks: scan.frameworks, items,
+    files: { plan: auto.planFiles || [], spec: auto.specFiles || [] }, scannedAt: det ? det.at : null };
 }

@@ -30,6 +30,7 @@ export const S = {
   pipWindow: null,        // the always-on-top window the board was popped out into
   miniOpenAgent: null,
   openAgentFromMini: null,
+  miniStandalone: false,  // this page is the separate mini window (?mini=1): the main board notifies
 };
 
 /** Per-zone room palette (a/b/c/d floor variants, floor/wall/edge/ring) — filled from config + theme. */

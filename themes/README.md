@@ -73,6 +73,13 @@ steam rises. Space: holo screens scroll and drift, consoles blink, the reactor f
 bubbles rise in the specimen tubes. The kinds live in `web/board/livescreens.js`. Nothing to
 set in the theme: the manifest entry's `live` key turns it on.
 
+The same map marks each room's **name signs** (kind `sign`): `name_signs()` in
+`isopix.py` tags every pixel on which the generator tested a letter of the room's name
+(`text7` in `interiors.py`, or raised letters) with its letter cell. When you rename a room
+(Settings → Rooms), `drawRoomSign` in `livescreens.js` repaints only those pixels with the new
+name in the sign's own ink and plate colours. A new room sprite gets this for free when its
+generator calls `name_signs(build(...))` before `render()` and paints the name with `text7`.
+
 A room can also have moving machinery (`rig` on its manifest entry, `web/board/rigs.js`):
 the City building site's tower crane swings, lowers its load to the floor and lifts it
 again while an agent works there, and goes back to rest when the room is quiet. The

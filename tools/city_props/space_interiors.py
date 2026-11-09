@@ -5,7 +5,7 @@ interiors.py: origin = zone footprint NW corner at floor level, only N and W wal
 Run: python3 space_interiors.py [zone ...] -> out/space_interior_<zone>.png + manifest
 """
 import json, math, os, sys
-from isopix import box, vcyl, hcyl, blob, face_uv, rgb, mix, hash2, render, plane_through, Solid, LIVE, liven
+from isopix import box, vcyl, hcyl, blob, face_uv, rgb, mix, hash2, render, plane_through, Solid, LIVE, liven, name_signs
 from props import cone, flat, save_room
 from interiors import (U, WALL_T, text7, room_shell, doormat, entrance_steps, door_frame_x, door_frame_y,
                        DOOR_HALF, desk, keyboard, INTERIORS as CITY_INTERIORS)
@@ -702,7 +702,7 @@ if __name__ == "__main__":
     man = json.load(open("out/manifest.json"))
     for zid in (sys.argv[1:] or SPACE_INTERIORS):
         LIVE.clear()  # parts the board animates while an agent works here (tagged with liven())
-        S = build(zid)
+        S = name_signs(build(zid))
         im, anchor = render(S, ground_shadow=0)
         name = f"space_interior_{zid}"
         save_room(im, anchor, S, name, man, U)

@@ -9,6 +9,7 @@ import { applyThemeVisuals, loadTheme, syncThemeChips } from "./theme.js";
 import { buildIsland } from "./island.js";
 import { applyPalette, fitIslandCamera, loadIcon, targetFor } from "./layout.js";
 import { closeAgentPanel } from "./panel.js";
+import { noticeStatus } from "./notify.js";
 
 export function ensureBot(raw) {
   let b = bots.get(raw.id);
@@ -124,6 +125,27 @@ export async function ensureClaudeConfig() {
   }
 }
 
+/** Pick up room names and colours changed in Settings (no reload, no new layout). */
+export async function refreshRoomNames() {
+  if (!S.claudeConfig || !Array.isArray(S.claudeConfig.areas)) return;
+  let cfg;
+  try {
+    const res = await fetch(`config.json?t=${Date.now()}`, { cache: "no-store" });
+    if (!res.ok) return;
+    cfg = await res.json();
+  } catch (_) {
+    return; // server restarting: try again next time
+  }
+  let changed = false;
+  for (const a of S.claudeConfig.areas) {
+    const n = (cfg.areas || []).find((x) => x && x.key === a.key);
+    if (!n) continue;
+    for (const k of ["label", "tint", "renamed", "recoloured"]) {
+      if (a[k] !== n[k]) { a[k] = n[k]; changed = true; }
+    }
+  }
+  if (changed) syncChrome();
+}
 
 export function syncChrome() {
   const elTitle = document.getElementById("board-title") || document.querySelector("#header h1");
@@ -181,6 +203,7 @@ export function applyStatus(data) {
   elProject.textContent = data.project?.name || "";
   updateHeaderTime(data.project?.updatedAt);
   updateAttentionSummary(data.bots || []);
+  try { noticeStatus(data.bots || []); } catch (err) { console.warn("notify", err); } // tab badge + notifications
 
   const seen = new Set();
   for (const raw of data.bots || []) {
